@@ -1,6 +1,5 @@
 package cn.schoolwow.quickdao;
 
-import cn.schoolwow.quickdao.builder.sql.dql.*;
 import cn.schoolwow.quickdao.builder.table.*;
 import cn.schoolwow.quickdao.dao.AbstractDAO;
 import cn.schoolwow.quickdao.dao.DAO;
@@ -150,23 +149,18 @@ public class QuickDAO {
         AbstractTableBuilder tableBuilder = null;
         if(url.contains("jdbc:h2")){
             quickDAOConfig.database = new H2Database();
-            quickDAOConfig.abstractDQLSQLBuilder = new H2DQLSQLBuilder(quickDAOConfig);
             tableBuilder = new H2TableBuilder(quickDAOConfig);
         }else if(url.contains("jdbc:sqlite")){
             quickDAOConfig.database = new SQLiteDatabase();
-            quickDAOConfig.abstractDQLSQLBuilder = new SQLiteDQLSQLBuilder(quickDAOConfig);
             tableBuilder = new SQLiteTableBuilder(quickDAOConfig);
         }else if(url.contains("jdbc:mysql")){
             quickDAOConfig.database = new MySQLDatabase();
-            quickDAOConfig.abstractDQLSQLBuilder = new MySQLDQLSQLBuilder(quickDAOConfig);
             tableBuilder = new MySQLTableBuilder(quickDAOConfig);
         }else if(url.contains("jdbc:postgresql")){
             quickDAOConfig.database = new PostgreDatabase();
-            quickDAOConfig.abstractDQLSQLBuilder = new PostgreDQLSQLBuilder(quickDAOConfig);
             tableBuilder = new PostgreTableBuilder(quickDAOConfig);
         }else if(url.contains("jdbc:sqlserver:")){
             quickDAOConfig.database = new SQLServerDatabase();
-            quickDAOConfig.abstractDQLSQLBuilder = new SQLServerDQLSQLBuilder(quickDAOConfig);
             tableBuilder = new SQLServerTableBuilder(quickDAOConfig);
         }else{
             throw new IllegalArgumentException("不支持的数据库类型!");
@@ -177,7 +171,10 @@ public class QuickDAO {
         tableBuilder.connection.close();
 
         TableBuilderInvocationHandler invocationHandler = new TableBuilderInvocationHandler(tableBuilder);
-        return new AbstractDAO((TableBuilder) Proxy.newProxyInstance(Thread.currentThread()
-                .getContextClassLoader(), new Class<?>[]{TableBuilder.class},invocationHandler),quickDAOConfig);
+        TableBuilder tableBuilderProxy = (TableBuilder) Proxy.newProxyInstance(Thread.currentThread()
+                .getContextClassLoader(), new Class<?>[]{TableBuilder.class},invocationHandler);
+
+        AbstractDAO dao = new AbstractDAO(tableBuilderProxy,quickDAOConfig);
+        return dao;
     }
 }

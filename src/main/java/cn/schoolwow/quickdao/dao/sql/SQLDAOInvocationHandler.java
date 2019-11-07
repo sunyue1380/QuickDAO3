@@ -7,7 +7,7 @@ import java.sql.Connection;
 public class SQLDAOInvocationHandler implements InvocationHandler {
     private AbstractSQLDAO abstractSQLDAO;
     //保存开启事务的数据库连接
-    private Connection connection;
+    private volatile Connection connection;
 
     public SQLDAOInvocationHandler(AbstractSQLDAO abstractSQLDAO) {
         this.abstractSQLDAO = abstractSQLDAO;

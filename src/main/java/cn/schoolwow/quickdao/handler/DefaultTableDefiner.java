@@ -258,6 +258,9 @@ public class DefaultTableDefiner implements TableDefiner{
             return classList;
         }
         Stream<Class> stream = classList.stream().filter((_class) -> {
+            if(_class.isEnum()){
+                return false;
+            }
             if (_class.getAnnotation(Ignore.class) != null) {
                 logger.debug("[忽略实体类]类名:{},原因:@Ignore注解.", _class.getName());
                 return false;

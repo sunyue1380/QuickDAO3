@@ -20,7 +20,7 @@ public class H2Response extends AbstractResponse {
     public JSONArray getAggerateList() {
         JSONArray array = new JSONArray((int) count());
         try {
-            PreparedStatement ps = query.quickDAOConfig.abstractDQLSQLBuilder.getAggerateList(query);
+            PreparedStatement ps = query.dqlsqlBuilder.getAggerateList(query);
             ResultSet resultSet = ps.executeQuery();
             ResultSetMetaData metaData = resultSet.getMetaData();
             int columnCount = metaData.getColumnCount();

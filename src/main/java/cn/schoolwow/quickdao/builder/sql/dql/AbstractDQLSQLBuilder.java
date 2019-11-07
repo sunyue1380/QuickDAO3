@@ -103,6 +103,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
     @Override
     public PreparedStatement getArray(Query query) throws SQLException {
         StringBuilder builder = getArraySQL(query);
+        builder.append(" " + query.orderByBuilder.toString() + " " + query.limit);
 
         PreparedStatement ps = connection.prepareStatement(builder.toString());
         builder = new StringBuilder(builder.toString().replace("?",PLACEHOLDER));
