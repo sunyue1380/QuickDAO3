@@ -1,5 +1,6 @@
 package cn.schoolwow.quickdao.dao.sql.dql;
 
+import cn.schoolwow.quickdao.dao.condition.Condition;
 import cn.schoolwow.quickdao.dao.sql.SQLDAO;
 
 import java.util.List;
@@ -30,4 +31,8 @@ public interface DQLDAO extends SQLDAO {
      * @param value 指字段值
      */
     <T> List<T> fetchList(Class<T> clazz, String field, Object value);
+    /**
+     * 复杂查询
+     * */
+    Condition query(Class clazz);
 }

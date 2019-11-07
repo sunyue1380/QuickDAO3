@@ -48,9 +48,6 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         StringBuilder createTableBuilder = new StringBuilder("create table " + quickDAOConfig.database.escape(entity.tableName) + "(");
         Property[] properties = entity.properties;
         for (Property property : properties) {
-            if(null==property.columnType||property.columnType.isEmpty()){
-                property.columnType = fieldMapping.get(property.simpleTypeName);
-            }
             if(property.id){
                 createTableBuilder.append(getAutoIncrementSQL(property));
             }else{
@@ -95,6 +92,14 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         }
         logger.debug("[生成新表]类名:{},表名:{},执行SQL:{}", entity.className, entity.tableName, createTableBuilder.toString());
         connection.prepareStatement(createTableBuilder.toString()).executeUpdate();
+    }
+
+    @Override
+    public void alterColumn(Property property) throws SQLException{
+        StringBuilder builder = new StringBuilder("alert table " + quickDAOConfig.database.escape(property.entity.tableName));
+        builder.append(" alter column "+quickDAOConfig.database.escape(property.column)+" "+property.columnType);
+        logger.debug("[修改数据类型]:类名:{},表名:{},列名:{},执行SQL:{}", property.entity.className, property.entity.tableName, property.column, builder.toString());
+        connection.prepareStatement(builder.toString()).executeUpdate();
     }
 
     @Override
@@ -179,6 +184,11 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         List<Entity> newEntityList = new ArrayList<>();
         List<Entity> updateEntityList = new ArrayList<>();
         for (Entity entity : entityList) {
+            for(Property property:entity.properties){
+                if(null==property.columnType||property.columnType.isEmpty()){
+                    property.columnType = fieldMapping.get(property.simpleTypeName);
+                }
+            }
             for (Entity dbEntity : dbEntityList) {
                 if (entity.tableName.toLowerCase().equals(dbEntity.tableName.toLowerCase())) {
                     updateEntityList.add(entity);

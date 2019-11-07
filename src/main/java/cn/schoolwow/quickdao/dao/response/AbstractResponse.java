@@ -26,7 +26,7 @@ public class AbstractResponse<T> implements Response<T>{
         long count = 0;
         query.parameterIndex = 1;
         try {
-            PreparedStatement ps = query.quickDAOConfig.abstractDQLSQLBuilder.count(query);
+            PreparedStatement ps = query.dqlsqlBuilder.count(query);
             ResultSet resultSet = ps.executeQuery();
             if (resultSet.next()) {
                 count = resultSet.getLong(1);
@@ -44,7 +44,7 @@ public class AbstractResponse<T> implements Response<T>{
     public long update() {
         long count = 0;
         try {
-            PreparedStatement ps = query.quickDAOConfig.abstractDQLSQLBuilder.update(query);
+            PreparedStatement ps = query.dqlsqlBuilder.update(query);
             count= ps.executeUpdate();
             ps.close();
         } catch (SQLException e) {
@@ -57,7 +57,7 @@ public class AbstractResponse<T> implements Response<T>{
     public long delete() {
         long count = 0;
         try {
-            PreparedStatement ps = query.quickDAOConfig.abstractDQLSQLBuilder.delete(query);
+            PreparedStatement ps = query.dqlsqlBuilder.delete(query);
             count= ps.executeUpdate();
             ps.close();
         } catch (SQLException e) {
@@ -85,7 +85,7 @@ public class AbstractResponse<T> implements Response<T>{
     public JSONArray getArray() {
         JSONArray array = new JSONArray((int)count());
         try {
-            PreparedStatement ps = query.quickDAOConfig.abstractDQLSQLBuilder.getArray(query);
+            PreparedStatement ps = query.dqlsqlBuilder.getArray(query);
             ResultSet resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 JSONObject o = getObject(query.entity, AbstractCondition.mainTableAlias, resultSet);
@@ -106,7 +106,7 @@ public class AbstractResponse<T> implements Response<T>{
     public List getValueList(Class clazz, String column) {
         JSONArray array = new JSONArray((int) count());
         try {
-            PreparedStatement ps = query.quickDAOConfig.abstractDQLSQLBuilder.getValueList(column,query);
+            PreparedStatement ps = query.dqlsqlBuilder.getValueList(column,query);
             ResultSet resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 array.add(resultSet.getString(1));
@@ -124,7 +124,7 @@ public class AbstractResponse<T> implements Response<T>{
     public JSONArray getAggerateList() {
         JSONArray array = new JSONArray((int) count());
         try {
-            PreparedStatement ps = query.quickDAOConfig.abstractDQLSQLBuilder.getAggerateList(query);
+            PreparedStatement ps = query.dqlsqlBuilder.getAggerateList(query);
             ResultSet resultSet = ps.executeQuery();
             ResultSetMetaData metaData = resultSet.getMetaData();
             int columnCount = metaData.getColumnCount();
@@ -148,7 +148,7 @@ public class AbstractResponse<T> implements Response<T>{
     public List getPartList() {
         JSONArray array = null;
         try {
-            PreparedStatement ps = query.quickDAOConfig.abstractDQLSQLBuilder.getPartList(query);
+            PreparedStatement ps = query.dqlsqlBuilder.getPartList(query);
             ResultSet resultSet = ps.executeQuery();
             array = mappingResultSetToJSONArray(resultSet);
             resultSet.close();
@@ -163,7 +163,7 @@ public class AbstractResponse<T> implements Response<T>{
     public JSONArray getSpecialList() {
         JSONArray array = null;
         try {
-            PreparedStatement ps = query.quickDAOConfig.abstractDQLSQLBuilder.getPartList(query);
+            PreparedStatement ps = query.dqlsqlBuilder.getPartList(query);
             ResultSet resultSet = ps.executeQuery();
             array = mappingResultSetToJSONArray(resultSet);
             resultSet.close();
@@ -192,7 +192,7 @@ public class AbstractResponse<T> implements Response<T>{
     public List getUnionList() {
         JSONArray array = null;
         try {
-            PreparedStatement ps = query.quickDAOConfig.abstractDQLSQLBuilder.getUnionList(query);
+            PreparedStatement ps = query.dqlsqlBuilder.getUnionList(query);
             ResultSet resultSet = ps.executeQuery();
             array = mappingResultSetToJSONArray(resultSet);
             resultSet.close();

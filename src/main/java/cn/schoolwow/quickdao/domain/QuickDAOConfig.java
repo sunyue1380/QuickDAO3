@@ -1,6 +1,5 @@
 package cn.schoolwow.quickdao.domain;
 
-import cn.schoolwow.quickdao.builder.sql.dql.AbstractDQLSQLBuilder;
 import cn.schoolwow.quickdao.database.Database;
 import cn.schoolwow.quickdao.handler.DefaultTableDefiner;
 
@@ -56,8 +55,4 @@ public class QuickDAOConfig {
      * 数据库信息
      * */
     public Database database;
-    /**
-     * 数据库查询构建
-     * */
-    public AbstractDQLSQLBuilder abstractDQLSQLBuilder;
 }

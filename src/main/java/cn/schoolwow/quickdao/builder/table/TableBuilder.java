@@ -15,6 +15,8 @@ public interface TableBuilder{
     boolean hasTableExists(Entity entity) throws SQLException;
     /**创建新表*/
     void createTable(Entity entity) throws SQLException;
+    /**修改列*/
+    void alterColumn(Property property) throws SQLException;
     /**删除表*/
     void dropTable(Entity entity) throws SQLException;
     /**重建表*/

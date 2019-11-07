@@ -9,7 +9,7 @@ import cn.schoolwow.quickdao.annotation.Id;
 public class Person {
     @Id
     private long id;
-    @ColumnType("varchar(255)")
+    @ColumnType("varchar(1024)")
     @Constraint(notNull = true,unique = true)
     private String lastName;
     @ColumnType("varchar(255)")

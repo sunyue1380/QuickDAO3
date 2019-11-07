@@ -1,6 +1,5 @@
 package cn.schoolwow.quickdao.dao;
 
-import cn.schoolwow.quickdao.QuickDAO;
 import cn.schoolwow.quickdao.dao.condition.Condition;
 import cn.schoolwow.quickdao.dao.response.Response;
 import cn.schoolwow.quickdao.dao.response.UnionType;
@@ -9,67 +8,18 @@ import cn.schoolwow.quickdao.domain.PageVo;
 import cn.schoolwow.quickdao.entity.Order;
 import cn.schoolwow.quickdao.entity.Person;
 import com.alibaba.fastjson.JSONArray;
-import org.apache.commons.dbcp.BasicDataSource;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import javax.sql.DataSource;
-import java.io.File;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 @RunWith(Parameterized.class)
-public class DAOTest {
-    private DAO dao;
-
-    @Parameterized.Parameters
-    public static Collection prepareData() throws SQLException {
-        BasicDataSource mysqlDataSource = new BasicDataSource();
-        mysqlDataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        mysqlDataSource.setUrl("jdbc:mysql://127.0.0.1:3306/quickdao");
-        mysqlDataSource.setUsername("root");
-        mysqlDataSource.setPassword("123456");
-
-        BasicDataSource sqliteDataSource = new BasicDataSource();
-        sqliteDataSource.setDriverClassName("org.sqlite.JDBC");
-        sqliteDataSource.setUrl("jdbc:sqlite:" + new File("quickdao_sqlite.db").getAbsolutePath());
-
-        BasicDataSource h2DataSource = new BasicDataSource();
-        h2DataSource.setDriverClassName("org.h2.Driver");
-        h2DataSource.setUrl("jdbc:h2:" + new File("quickdao_h2.db").getAbsolutePath() + ";mode=MYSQL");
-
-        BasicDataSource postgreDataSource = new BasicDataSource();
-        postgreDataSource.setDriverClassName("org.postgresql.Driver");
-        postgreDataSource.setUrl("jdbc:postgresql://127.0.0.1:5432/quickdao");
-        postgreDataSource.setUsername("postgres");
-        postgreDataSource.setPassword("postgres");
-
-        BasicDataSource sqlServerDataSource = new BasicDataSource();
-        sqlServerDataSource.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        sqlServerDataSource.setUrl("jdbc:sqlserver://127.0.0.1:1433;databaseName=quickdao");
-        sqlServerDataSource.setUsername("sa");
-        sqlServerDataSource.setPassword("aa1122335");
-
-        //各种数据库产品
-        DataSource[] dataSources = {mysqlDataSource, sqliteDataSource, h2DataSource, postgreDataSource,sqliteDataSource};
-//        DataSource[] dataSources = {sqlServerDataSource};
-        Object[][] data = new Object[dataSources.length][1];
-        for (int i = 0; i < dataSources.length; i++) {
-            DAO dao = QuickDAO.newInstance().dataSource(dataSources[i])
-                    .packageName("cn.schoolwow.quickdao.entity")
-                    .autoCreateTable(true)
-                    .build();
-            data[i][0] = dao;
-        }
-        return Arrays.asList(data);
-    }
+public class DAOTest extends BaseDAOTest{
 
     public DAOTest(DAO dao) {
-        this.dao = dao;
+        super(dao);
     }
 
     @Test
@@ -269,10 +219,8 @@ public class DAOTest {
             Condition condition = dao.query(Person.class)
                     .addQuery("lastName","Gates")
                     .addUpdate("address","Xuanwumen 11")
-                    .addAggerate("count","id")
-                    .addAggerate("max","id","m(id)")
                     .groupBy("id")
-                    .orderByDesc("m(id)")
+                    .orderBy("lastName")
                     .page(1,10);
             Response response = condition.execute();
             Assert.assertEquals(1,response.count());
@@ -288,13 +236,8 @@ public class DAOTest {
                 Assert.assertEquals("Gates",personPageVo.getList().get(0).getLastName());
             }
             Assert.assertEquals(1,response.update());
-            {
-                JSONArray array = response.getAggerateList();
-                //H2数据库所有返回的列名都是全大写
-                Assert.assertEquals(1,array.getJSONObject(0).getInteger("count(id)").intValue());
-                Assert.assertEquals(1,array.getJSONObject(0).getInteger("m(id)").intValue());
-            }
         }
+        //单属性查询
         {
             Response response = dao.query(Person.class)
                     .addQuery("lastName","Gates")
@@ -302,6 +245,18 @@ public class DAOTest {
             List<Long> idList = response.getValueList(Long.class,"id");
             Assert.assertEquals(1,idList.size());
             Assert.assertEquals(1,idList.get(0).intValue());
+        }
+        //聚合查询
+        {
+            Response response = dao.query(Person.class)
+                    .addAggerate("count","id")
+                    .addAggerate("max","id","m(id)")
+                    .orderByDesc("m(id)")
+                    .execute();
+            JSONArray array = response.getAggerateList();
+            //H2数据库所有返回的列名都是全大写
+            Assert.assertEquals(1,array.getJSONObject(0).getInteger("count(id)").intValue());
+            Assert.assertEquals(1,array.getJSONObject(0).getInteger("m(id)").intValue());
         }
         //关联查询
         {

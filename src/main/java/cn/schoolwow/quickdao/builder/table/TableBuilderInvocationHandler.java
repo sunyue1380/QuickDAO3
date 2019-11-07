@@ -11,7 +11,7 @@ public class TableBuilderInvocationHandler implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public synchronized Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         abstractTableBuilder.connection = abstractTableBuilder.quickDAOConfig.dataSource.getConnection();
         Object result = method.invoke(abstractTableBuilder,args);
         abstractTableBuilder.connection.close();

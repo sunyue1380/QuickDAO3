@@ -1,6 +1,8 @@
 package cn.schoolwow.quickdao.dao.sql;
 
 import cn.schoolwow.quickdao.builder.sql.AbstractSQLBuilder;
+import cn.schoolwow.quickdao.builder.sql.SQLBuilder;
+import cn.schoolwow.quickdao.dao.AbstractDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,11 +14,14 @@ public class AbstractSQLDAO implements SQLDAO {
     protected Logger logger = LoggerFactory.getLogger(SQLDAO.class);
     //SQL语句构建
     public AbstractSQLBuilder sqlBuilder;
+    //DAO对象
+    public AbstractDAO abstractDAO;
     //是否开启事务
     public boolean transaction = false;
 
-    public AbstractSQLDAO(AbstractSQLBuilder sqlBuilder) {
-        this.sqlBuilder = sqlBuilder;
+    public AbstractSQLDAO(SQLBuilder sqlBuilder, AbstractDAO abstractDAO) {
+        this.sqlBuilder = (AbstractSQLBuilder) sqlBuilder;
+        this.abstractDAO = abstractDAO;
     }
 
     @Override
@@ -48,7 +53,7 @@ public class AbstractSQLDAO implements SQLDAO {
      * 默认主键必须存在且为long型
      */
     public boolean hasId(Object instance) throws Exception {
-        Field field = instance.getClass().getDeclaredField(sqlBuilder.quickDAOConfig.entityMap.get(instance.getClass().getName()).id.name);
+        Field field = instance.getClass().getDeclaredField(abstractDAO.quickDAOConfig.entityMap.get(instance.getClass().getName()).id.name);
         field.setAccessible(true);
         return field.getLong(instance) > 0;
     }

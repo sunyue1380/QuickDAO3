@@ -1,11 +1,14 @@
 package cn.schoolwow.quickdao.dao.sql.dql;
 
-import cn.schoolwow.quickdao.builder.sql.AbstractSQLBuilder;
+import cn.schoolwow.quickdao.builder.sql.SQLBuilder;
 import cn.schoolwow.quickdao.builder.sql.dql.DQLSQLBuilder;
-import cn.schoolwow.quickdao.dao.condition.AbstractCondition;
+import cn.schoolwow.quickdao.dao.AbstractDAO;
+import cn.schoolwow.quickdao.dao.condition.*;
 import cn.schoolwow.quickdao.dao.response.AbstractResponse;
 import cn.schoolwow.quickdao.dao.sql.AbstractSQLDAO;
+import cn.schoolwow.quickdao.database.*;
 import cn.schoolwow.quickdao.domain.Entity;
+import cn.schoolwow.quickdao.domain.Query;
 import com.alibaba.fastjson.JSONArray;
 
 import java.sql.PreparedStatement;
@@ -16,14 +19,14 @@ import java.util.List;
 public class AbstractDQLDAO extends AbstractSQLDAO implements DQLDAO {
     private DQLSQLBuilder dqlsqlBuilder;
 
-    public AbstractDQLDAO(AbstractSQLBuilder sqlBuilder) {
-        super(sqlBuilder);
+    public AbstractDQLDAO(SQLBuilder sqlBuilder, AbstractDAO abstractDAO) {
+        super(sqlBuilder,abstractDAO);
         this.dqlsqlBuilder = (DQLSQLBuilder) sqlBuilder;
     }
 
     @Override
     public <T> T fetch(Class<T> clazz, long id) {
-        return fetch(clazz,sqlBuilder.quickDAOConfig.entityMap.get(clazz.getName()).id.column,id);
+        return fetch(clazz,abstractDAO.quickDAOConfig.entityMap.get(clazz.getName()).id.column,id);
     }
 
     @Override
@@ -44,7 +47,7 @@ public class AbstractDQLDAO extends AbstractSQLDAO implements DQLDAO {
             }else{
                 ps = dqlsqlBuilder.fetch(clazz,field,value);
             }
-            Entity entity = sqlBuilder.quickDAOConfig.entityMap.get(clazz.getName());
+            Entity entity = abstractDAO.quickDAOConfig.entityMap.get(clazz.getName());
             ResultSet resultSet = ps.executeQuery();
             JSONArray array = new JSONArray();
             while(resultSet.next()){
@@ -56,6 +59,28 @@ public class AbstractDQLDAO extends AbstractSQLDAO implements DQLDAO {
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    @Override
+    public Condition query(Class clazz) {
+        Query query = new Query();
+        query.entity = abstractDAO.quickDAOConfig.entityMap.get(clazz.getName());
+        query.quickDAOConfig = abstractDAO.quickDAOConfig;
+        query.dqlsqlBuilder = this.dqlsqlBuilder;
+        query.dao = abstractDAO;
+        if(query.quickDAOConfig.database instanceof MySQLDatabase){
+            return new MySQLCondition(query);
+        }else if(query.quickDAOConfig.database instanceof H2Database){
+            return new H2Condition(query);
+        }else if(query.quickDAOConfig.database instanceof SQLiteDatabase){
+            return new SQLiteCondition(query);
+        }else if(query.quickDAOConfig.database instanceof PostgreDatabase){
+            return new PostgreCondition(query);
+        }else if(query.quickDAOConfig.database instanceof SQLServerDatabase){
+            return new SQLServerCondition(query);
+        }else{
+            throw new IllegalArgumentException("不支持的数据库类型!");
         }
     }
 }

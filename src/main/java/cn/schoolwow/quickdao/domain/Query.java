@@ -1,5 +1,6 @@
 package cn.schoolwow.quickdao.domain;
 
+import cn.schoolwow.quickdao.builder.sql.dql.DQLSQLBuilder;
 import cn.schoolwow.quickdao.dao.DAO;
 import cn.schoolwow.quickdao.dao.condition.AbstractCondition;
 import cn.schoolwow.quickdao.dao.response.UnionType;
@@ -96,4 +97,8 @@ public class Query implements Serializable {
      * 关联DAO
      * */
     public DAO dao;
+    /**
+     * DQL查询语句构建
+     * */
+    public DQLSQLBuilder dqlsqlBuilder;
 }
