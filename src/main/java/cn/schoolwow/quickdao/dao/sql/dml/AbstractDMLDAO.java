@@ -171,8 +171,8 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
                 insertList.add(instance);
             }
         }
-        effect += update(instances);
-        effect += insert(instances);
+        effect += update(updateList);
+        effect += insert(insertList);
         return effect;
     }
 
