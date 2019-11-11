@@ -10,7 +10,7 @@ public class H2TableBuilder extends MySQLTableBuilder{
 
     public H2TableBuilder(QuickDAOConfig quickDAOConfig) {
         super(quickDAOConfig);
-        fieldMapping.put("long", "INTEGER");
+        fieldMapping.put("long", "BIGINT");
         fieldMapping.put("float", "REAL");
         fieldMapping.put("double", "DOUBLE");
     }

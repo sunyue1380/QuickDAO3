@@ -58,20 +58,14 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                 if (null!=property.defaultValue&&!property.defaultValue.isEmpty()) {
                     createTableBuilder.append(" default " + property.defaultValue);
                 }
+                if (null!=property.check&&!property.check.isEmpty()) {
+                    createTableBuilder.append(" check " + property.check);
+                }
             }
             if (null != property.comment) {
                 createTableBuilder.append(" "+quickDAOConfig.database.comment(property.comment));
             }
             createTableBuilder.append(",");
-        }
-        if(null!=entity.checkProperties&&entity.checkProperties.length>0){
-            createTableBuilder.append(" constraint "+quickDAOConfig.database.escape(entity.tableName+"_check")+" check (");
-            for(Property property: entity.checkProperties){
-                property.check = property.check.replace("#{"+property.name+"}",quickDAOConfig.database.escape(property.column));
-                createTableBuilder.append(property.check +" and ");
-            }
-            createTableBuilder.delete(createTableBuilder.length()-5,createTableBuilder.length());
-            createTableBuilder.append("),");
         }
         if (quickDAOConfig.openForeignKey&&null!=entity.foreignKeyProperties&&entity.foreignKeyProperties.length>0) {
             if(this instanceof SQLiteTableBuilder){
@@ -188,6 +182,9 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                 if(null==property.columnType||property.columnType.isEmpty()){
                     property.columnType = fieldMapping.get(property.simpleTypeName);
                 }
+                if(null!=property.check&&!property.check.isEmpty()){
+                    property.check = property.check.replace("#{"+property.name+"}",quickDAOConfig.database.escape(property.column));
+                }
             }
             for (Entity dbEntity : dbEntityList) {
                 if (entity.tableName.toLowerCase().equals(dbEntity.tableName.toLowerCase())) {
@@ -277,9 +274,6 @@ public abstract class AbstractTableBuilder implements TableBuilder{
      * 表添加属性
      */
     private void addProperty(Property property) throws SQLException{
-        if(null==property.columnType||property.columnType.isEmpty()){
-            property.columnType = fieldMapping.get(property.simpleTypeName);
-        }
         StringBuilder addColumnBuilder = new StringBuilder();
         addColumnBuilder.append("alter table " + quickDAOConfig.database.escape(property.entity.tableName) + " add " + quickDAOConfig.database.escape(property.column) + " " + property.columnType);
         if (property.notNull) {
