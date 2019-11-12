@@ -184,6 +184,9 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                 }
                 if(null!=property.check&&!property.check.isEmpty()){
                     property.check = property.check.replace("#{"+property.name+"}",quickDAOConfig.database.escape(property.column));
+                    if(!property.check.contains("(")){
+                        property.check = "("+property.check+")";
+                    }
                 }
             }
             for (Entity dbEntity : dbEntityList) {

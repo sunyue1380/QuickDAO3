@@ -125,7 +125,7 @@ public class QuickDAO {
         return quickDAOConfig.defaultTableDefiner;
     }
 
-    public DAO build() throws SQLException {
+    public DAO build(){
         if (quickDAOConfig.packageNameMap.isEmpty()) {
             throw new IllegalArgumentException("请设置要扫描的实体类包名!");
         }
@@ -143,38 +143,42 @@ public class QuickDAO {
 
         quickDAOConfig.defaultTableDefiner.handleEntityMap();
         //自动建表
-        Connection connection = quickDAOConfig.dataSource.getConnection();
-        connection.setAutoCommit(false);
-        String url = connection.getMetaData().getURL();
-        AbstractTableBuilder tableBuilder = null;
-        if(url.contains("jdbc:h2")){
-            quickDAOConfig.database = new H2Database();
-            tableBuilder = new H2TableBuilder(quickDAOConfig);
-        }else if(url.contains("jdbc:sqlite")){
-            quickDAOConfig.database = new SQLiteDatabase();
-            tableBuilder = new SQLiteTableBuilder(quickDAOConfig);
-        }else if(url.contains("jdbc:mysql")){
-            quickDAOConfig.database = new MySQLDatabase();
-            tableBuilder = new MySQLTableBuilder(quickDAOConfig);
-        }else if(url.contains("jdbc:postgresql")){
-            quickDAOConfig.database = new PostgreDatabase();
-            tableBuilder = new PostgreTableBuilder(quickDAOConfig);
-        }else if(url.contains("jdbc:sqlserver:")){
-            quickDAOConfig.database = new SQLServerDatabase();
-            tableBuilder = new SQLServerTableBuilder(quickDAOConfig);
-        }else{
-            throw new IllegalArgumentException("不支持的数据库类型!");
+        try {
+            Connection connection = quickDAOConfig.dataSource.getConnection();
+            connection.setAutoCommit(false);
+            String url = connection.getMetaData().getURL();
+            AbstractTableBuilder tableBuilder = null;
+            if(url.contains("jdbc:h2")){
+                quickDAOConfig.database = new H2Database();
+                tableBuilder = new H2TableBuilder(quickDAOConfig);
+            }else if(url.contains("jdbc:sqlite")){
+                quickDAOConfig.database = new SQLiteDatabase();
+                tableBuilder = new SQLiteTableBuilder(quickDAOConfig);
+            }else if(url.contains("jdbc:mysql")){
+                quickDAOConfig.database = new MySQLDatabase();
+                tableBuilder = new MySQLTableBuilder(quickDAOConfig);
+            }else if(url.contains("jdbc:postgresql")){
+                quickDAOConfig.database = new PostgreDatabase();
+                tableBuilder = new PostgreTableBuilder(quickDAOConfig);
+            }else if(url.contains("jdbc:sqlserver:")){
+                quickDAOConfig.database = new SQLServerDatabase();
+                tableBuilder = new SQLServerTableBuilder(quickDAOConfig);
+            }else{
+                throw new IllegalArgumentException("不支持的数据库类型!");
+            }
+            tableBuilder.connection = connection;
+            tableBuilder.autoBuildDatabase();
+            tableBuilder.connection.commit();
+            tableBuilder.connection.close();
+            TableBuilderInvocationHandler invocationHandler = new TableBuilderInvocationHandler(tableBuilder);
+            TableBuilder tableBuilderProxy = (TableBuilder) Proxy.newProxyInstance(Thread.currentThread()
+                    .getContextClassLoader(), new Class<?>[]{TableBuilder.class},invocationHandler);
+
+            AbstractDAO dao = new AbstractDAO(tableBuilderProxy,quickDAOConfig);
+            return dao;
+        }catch (SQLException e){
+            e.printStackTrace();
+            return null;
         }
-        tableBuilder.connection = connection;
-        tableBuilder.autoBuildDatabase();
-        tableBuilder.connection.commit();
-        tableBuilder.connection.close();
-
-        TableBuilderInvocationHandler invocationHandler = new TableBuilderInvocationHandler(tableBuilder);
-        TableBuilder tableBuilderProxy = (TableBuilder) Proxy.newProxyInstance(Thread.currentThread()
-                .getContextClassLoader(), new Class<?>[]{TableBuilder.class},invocationHandler);
-
-        AbstractDAO dao = new AbstractDAO(tableBuilderProxy,quickDAOConfig);
-        return dao;
     }
 }

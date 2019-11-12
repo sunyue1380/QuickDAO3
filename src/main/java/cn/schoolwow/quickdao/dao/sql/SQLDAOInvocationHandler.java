@@ -1,13 +1,14 @@
 package cn.schoolwow.quickdao.dao.sql;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.sql.Connection;
 
 public class SQLDAOInvocationHandler implements InvocationHandler {
+    private Logger logger = LoggerFactory.getLogger(SQLDAOInvocationHandler.class);
     private AbstractSQLDAO abstractSQLDAO;
-    //保存开启事务的数据库连接
-    private volatile Connection connection;
 
     public SQLDAOInvocationHandler(AbstractSQLDAO abstractSQLDAO) {
         this.abstractSQLDAO = abstractSQLDAO;
@@ -15,12 +16,14 @@ public class SQLDAOInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        if(method.getDeclaringClass().getName().equals(Object.class.getName())){
+            return method.invoke(abstractSQLDAO,args);
+        }
         if(abstractSQLDAO.transaction){
-            if(null==connection||connection.isClosed()){
-                this.connection = abstractSQLDAO.sqlBuilder.quickDAOConfig.dataSource.getConnection();
-                this.connection.setAutoCommit(false);
+            if(null==abstractSQLDAO.sqlBuilder.connection||abstractSQLDAO.sqlBuilder.connection.isClosed()){
+                abstractSQLDAO.sqlBuilder.connection = abstractSQLDAO.sqlBuilder.quickDAOConfig.dataSource.getConnection();
+                abstractSQLDAO.sqlBuilder.connection.setAutoCommit(false);
             }
-            abstractSQLDAO.sqlBuilder.connection = this.connection;
         }else{
             abstractSQLDAO.sqlBuilder.connection = abstractSQLDAO.sqlBuilder.quickDAOConfig.dataSource.getConnection();
         }

@@ -75,6 +75,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
     public PreparedStatement updateById(Object[] instances) throws Exception {
         String sql = updateById(instances[0].getClass());
         PreparedStatement ps = connection.prepareStatement(sql);
+        ps.addBatch();
         for(Object instance : instances){
             StringBuilder sqlBuilder = new StringBuilder(sql.replace("?", PLACEHOLDER));
             updateById(ps,instance,sqlBuilder);
