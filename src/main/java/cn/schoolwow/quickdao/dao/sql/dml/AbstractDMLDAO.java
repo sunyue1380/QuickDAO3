@@ -125,12 +125,18 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
             }
             if(!updateByIdList.isEmpty()){
                 ps = dmlsqlBuilder.updateById(updateByIdList.toArray(new Object[0]));
-                effect += ps.executeUpdate();
+                int[] batches = ps.executeBatch();
+                for (int batch : batches) {
+                    effect += batch;
+                }
                 ps.close();
             }
             if(!updateByUniqueKeyList.isEmpty()){
                 ps = dmlsqlBuilder.updateByUniqueKey(updateByUniqueKeyList.toArray(new Object[0]));
-                effect += ps.executeUpdate();
+                int[] batches = ps.executeBatch();
+                for (int batch : batches) {
+                    effect += batch;
+                }
                 ps.close();
             }
         } catch (Exception e) {

@@ -21,7 +21,7 @@ public class AbstractSQLBuilder implements SQLBuilder{
     /**数据库信息对象*/
     public QuickDAOConfig quickDAOConfig;
     /**数据库连接对象*/
-    public Connection connection;
+    public volatile Connection connection;
 
     public AbstractSQLBuilder(QuickDAOConfig quickDAOConfig) {
         this.quickDAOConfig = quickDAOConfig;
