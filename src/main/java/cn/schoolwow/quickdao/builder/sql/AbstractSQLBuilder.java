@@ -46,6 +46,7 @@ public class AbstractSQLBuilder implements SQLBuilder{
         int parameterIndex = 1;
         for(Property property:entity.uniqueKeyProperties){
             setParameter(instance,property,ps,parameterIndex,sqlBuilder);
+            parameterIndex++;
         }
         logger.debug("[根据唯一性约束查询]执行SQL:{}",sqlBuilder.toString());
         return ps;
