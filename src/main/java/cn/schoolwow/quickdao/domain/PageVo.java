@@ -3,12 +3,19 @@ package cn.schoolwow.quickdao.domain;
 import java.io.Serializable;
 import java.util.List;
 
+/**分页对象*/
 public class PageVo<T> implements Serializable {
+    /**列表*/
     private List<T> list;
+    /**总记录数*/
     private long totalSize;
+    /**总页数*/
     private int totalPage;
+    /**每页个数*/
     private int pageSize;
+    /**当前页*/
     private int currentPage;
+    /**是否还有下一页*/
     private boolean hasMore;
 
     public List<T> getList() {

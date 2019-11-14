@@ -28,6 +28,7 @@ public class DAOTest extends BaseDAOTest{
         dao.rebuild(Order.class);
         singleInsert();
         multiInsert();
+        multiUpdate();
         updateByUniqueKey();
         updateById();
         save();
@@ -88,6 +89,22 @@ public class DAOTest extends BaseDAOTest{
 
         Person[] persons = {person1, person2};
         int effect = dao.insert(persons);
+        Assert.assertEquals(2, effect);
+    }
+
+    private void multiUpdate() {
+        Person person1 = new Person();
+        person1.setFirstName("Thomas");
+        person1.setLastName("Carter");
+        person1.setAddress("Changan Street 10");
+        person1.setCity("Beijing");
+
+        Person person2 = new Person();
+        person2.setLastName("Wilson");
+        person2.setAddress("Champs-Elysees 10");
+
+        Person[] persons = {person1, person2};
+        int effect = dao.update(persons);
         Assert.assertEquals(2, effect);
     }
 
