@@ -147,6 +147,7 @@ public class QuickDAO {
             Connection connection = quickDAOConfig.dataSource.getConnection();
             connection.setAutoCommit(false);
             String url = connection.getMetaData().getURL();
+            logger.info("[数据源地址]{}",url);
             AbstractTableBuilder tableBuilder = null;
             if(url.contains("jdbc:h2")){
                 quickDAOConfig.database = new H2Database();
