@@ -13,7 +13,7 @@ import java.util.List;
 public class SQLiteTableBuilder extends AbstractTableBuilder{
     public SQLiteTableBuilder(QuickDAOConfig quickDAOConfig) {
         super(quickDAOConfig);
-        fieldMapping.put("long", "INT8");
+        fieldMapping.put("long", "INTEGER");
     }
 
     @Override
