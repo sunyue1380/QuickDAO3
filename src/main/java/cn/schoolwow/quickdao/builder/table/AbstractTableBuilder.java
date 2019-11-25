@@ -237,6 +237,14 @@ public abstract class AbstractTableBuilder implements TableBuilder{
             for (Property dbEntityProperty : dbEntityProperties) {
                 if (dbEntityProperty.column.equals(entityProperty.column)) {
                     columnExist = true;
+                    //判断有无唯一性约束的改变
+                    if(dbEntityProperty.unique != entityProperty.unique){
+                        hasUniqueProperty = true;
+                    }
+                    //判断有无索引的改变
+                    if(dbEntityProperty.index != entityProperty.index){
+                        hasIndexProperty = true;
+                    }
                     break;
                 }
             }
