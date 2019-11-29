@@ -271,7 +271,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         //如果新增属性中有唯一约束,则重新建立联合唯一约束
         if (hasUniqueProperty) {
             if(hasIndexExists(entity,IndexType.Unique)){
-                dropIndex(entity,IndexType.Index);
+                dropIndex(entity,IndexType.Unique);
             }
             createIndex(entity,IndexType.Unique);
         }
