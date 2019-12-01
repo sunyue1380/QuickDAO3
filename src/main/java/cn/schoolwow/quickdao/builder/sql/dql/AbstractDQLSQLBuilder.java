@@ -161,8 +161,10 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
                 builder.append(Condition.mainTableAlias+"."+query.quickDAOConfig.database.escape(property.column)+" as "+query.quickDAOConfig.database.escape(Condition.mainTableAlias+"_" + property.column)+",");
             }
             builder.deleteCharAt(builder.length()-1);
-        }else{
+        }else if(!query.columnBuilder.toString().isEmpty()){
             builder.append(query.columnBuilder.toString());
+        }else{
+            builder.append(columns(query.entity,Condition.mainTableAlias));
         }
         builder.append(" from "+quickDAOConfig.database.escape(query.entity.tableName)+" as "+Condition.mainTableAlias+" ");
         addJoinTableStatement(query,builder);
