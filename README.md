@@ -45,7 +45,7 @@ public class User{
 <dependency>
   <groupId>cn.schoolwow</groupId>
   <artifactId>QuickDAO</artifactId>
-  <version>3.0</version>
+  <version>3.1</version>
 </dependency>
 ```
 
