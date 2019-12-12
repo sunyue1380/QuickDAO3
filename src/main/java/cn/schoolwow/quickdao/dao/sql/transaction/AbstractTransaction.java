@@ -3,6 +3,7 @@ package cn.schoolwow.quickdao.dao.sql.transaction;
 import cn.schoolwow.quickdao.builder.sql.SQLBuilder;
 import cn.schoolwow.quickdao.dao.AbstractDAO;
 import cn.schoolwow.quickdao.dao.sql.dml.AbstractDMLDAO;
+import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 
 import java.sql.SQLException;
 import java.sql.Savepoint;
@@ -18,9 +19,8 @@ public class AbstractTransaction extends AbstractDMLDAO implements Transaction{
         try {
             return sqlBuilder.connection.setSavepoint(name);
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
-        return null;
     }
 
     @Override
@@ -28,7 +28,7 @@ public class AbstractTransaction extends AbstractDMLDAO implements Transaction{
         try {
             sqlBuilder.connection.rollback();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
     }
 
@@ -37,7 +37,7 @@ public class AbstractTransaction extends AbstractDMLDAO implements Transaction{
         try {
             sqlBuilder.connection.rollback(savePoint);
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
     }
 
@@ -46,7 +46,7 @@ public class AbstractTransaction extends AbstractDMLDAO implements Transaction{
         try {
             sqlBuilder.connection.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
     }
 
@@ -55,7 +55,7 @@ public class AbstractTransaction extends AbstractDMLDAO implements Transaction{
         try {
             sqlBuilder.connection.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
     }
 }

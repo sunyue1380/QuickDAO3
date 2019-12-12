@@ -29,22 +29,51 @@ public class PostgreTableBuilder extends AbstractTableBuilder {
             entity.tableName = tableRs.getString(1);
 
             List<Property> propertyList = new ArrayList<>();
-            PreparedStatement propertyPs = connection.prepareStatement("select column_name,column_default,is_nullable,udt_name from information_schema.columns where table_name = '" + tableRs.getString(1) + "'");
-            ResultSet propertiesRs = propertyPs.executeQuery();
-            while (propertiesRs.next()) {
-                Property property = new Property();
-                property.column = propertiesRs.getString("column_name");
-                property.columnType = propertiesRs.getString("udt_name");
-                property.notNull = "NO".equals(propertiesRs.getString("is_nullable"));
-                if (null != propertiesRs.getString("column_default")) {
-                    property.defaultValue = propertiesRs.getString("column_default");
+            //获取列
+            {
+                ResultSet propertiesRs = connection.prepareStatement("select column_name,column_default,is_nullable,udt_name from information_schema.columns where table_name = '" + entity.tableName + "'").executeQuery();
+                while (propertiesRs.next()) {
+                    Property property = new Property();
+                    property.column = propertiesRs.getString("column_name");
+                    property.columnType = propertiesRs.getString("udt_name");
+                    property.notNull = "NO".equals(propertiesRs.getString("is_nullable"));
+                    if (null != propertiesRs.getString("column_default")) {
+                        property.defaultValue = propertiesRs.getString("column_default");
+                    }
+                    propertyList.add(property);
                 }
-                propertyList.add(property);
+            }
+            //获取索引信息
+            {
+                ResultSet resultSet = connection.prepareStatement("select indexdef from pg_indexes where tablename='"+entity.tableName+"';").executeQuery();
+                while (resultSet.next()) {
+                    //判断是普通索引还是唯一性约束
+                    String sql = resultSet.getString(1).toLowerCase();
+                    String[] columns = sql.substring(sql.indexOf("(")+1,sql.indexOf(")")).split(",");
+                    if(sql.contains("unique index")){
+                        for(String column:columns){
+                            for(Property property:propertyList){
+                                if(property.column.equals(column)){
+                                    property.unique = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }else{
+                        for(String column:columns){
+                            for(Property property:propertyList){
+                                if(property.column.equals(column)){
+                                    property.index = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                resultSet.close();
             }
             entity.properties = propertyList.toArray(new Property[0]);
             entityList.add(entity);
-            propertiesRs.close();
-            propertyPs.close();
         }
         tableRs.close();
         tablePs.close();

@@ -1,6 +1,7 @@
 package cn.schoolwow.quickdao.dao.response;
 
 import cn.schoolwow.quickdao.domain.Query;
+import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -35,9 +36,8 @@ public class H2Response extends AbstractResponse {
             ps.close();
             return array;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
-        return array;
     }
 
     @Override

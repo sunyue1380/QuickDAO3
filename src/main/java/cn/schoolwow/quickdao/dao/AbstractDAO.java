@@ -13,6 +13,7 @@ import cn.schoolwow.quickdao.dao.sql.transaction.AbstractTransaction;
 import cn.schoolwow.quickdao.dao.sql.transaction.Transaction;
 import cn.schoolwow.quickdao.database.*;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
+import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,7 +152,7 @@ public class AbstractDAO implements DAO {
         try {
             tableBuilder.createTable(this.quickDAOConfig.entityMap.get(clazz.getName()));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
     }
 
@@ -160,7 +161,7 @@ public class AbstractDAO implements DAO {
         try {
             tableBuilder.dropTable(this.quickDAOConfig.entityMap.get(clazz.getName()));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
     }
 
@@ -169,7 +170,7 @@ public class AbstractDAO implements DAO {
         try {
             tableBuilder.rebuild(this.quickDAOConfig.entityMap.get(clazz.getName()));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
     }
 

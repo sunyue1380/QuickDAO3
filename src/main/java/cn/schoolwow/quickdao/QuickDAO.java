@@ -5,6 +5,7 @@ import cn.schoolwow.quickdao.dao.AbstractDAO;
 import cn.schoolwow.quickdao.dao.DAO;
 import cn.schoolwow.quickdao.database.*;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
+import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import cn.schoolwow.quickdao.handler.DefaultTableDefiner;
 import cn.schoolwow.quickdao.handler.TableDefiner;
 import org.slf4j.Logger;
@@ -117,7 +118,6 @@ public class QuickDAO {
             try {
                 quickDAOConfig.defaultTableDefiner.getEntityMap();
             } catch (Exception e) {
-                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }
@@ -136,7 +136,6 @@ public class QuickDAO {
             try {
                 quickDAOConfig.defaultTableDefiner.getEntityMap();
             } catch (Exception e) {
-                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }
@@ -178,8 +177,7 @@ public class QuickDAO {
             AbstractDAO dao = new AbstractDAO(tableBuilderProxy,quickDAOConfig);
             return dao;
         }catch (SQLException e){
-            e.printStackTrace();
-            return null;
+            throw new SQLRuntimeException(e);
         }
     }
 }

@@ -26,22 +26,52 @@ public class SQLiteTableBuilder extends AbstractTableBuilder{
             entity.tableName = tableRs.getString(1);
 
             List<Property> propertyList = new ArrayList<>();
-            PreparedStatement propertyPs = connection.prepareStatement("PRAGMA table_info(`" + tableRs.getString(1) + "`)");
-            ResultSet propertiesRs = propertyPs.executeQuery();
-            while (propertiesRs.next()) {
-                Property property = new Property();
-                property.column = propertiesRs.getString("name");
-                property.columnType = propertiesRs.getString("type");
-                property.notNull = "1".equals(propertiesRs.getString("notnull"));
-                if (null != propertiesRs.getString("dflt_value")) {
-                    property.defaultValue = propertiesRs.getString("dflt_value");
+            //获取所有列
+            {
+                ResultSet propertiesRs = connection.prepareStatement("PRAGMA table_info(`" + entity.tableName + "`)").executeQuery();
+                while (propertiesRs.next()) {
+                    Property property = new Property();
+                    property.column = propertiesRs.getString("name");
+                    property.columnType = propertiesRs.getString("type");
+                    property.notNull = "1".equals(propertiesRs.getString("notnull"));
+                    if (null != propertiesRs.getString("dflt_value")) {
+                        property.defaultValue = propertiesRs.getString("dflt_value");
+                    }
+                    propertyList.add(property);
                 }
-                propertyList.add(property);
+                propertiesRs.close();
+            }
+            //获取索引信息
+            {
+                ResultSet resultSet = connection.prepareStatement("SELECT sql FROM sqlite_master WHERE type='index' and tbl_name = '"+entity.tableName+"';").executeQuery();
+                while (resultSet.next()) {
+                    //判断是普通索引还是唯一性约束
+                    String sql = resultSet.getString(1).toLowerCase();
+                    String[] columns = sql.substring(sql.indexOf("(")+1,sql.indexOf(")")).split(",");
+                    if(sql.contains("unique index")){
+                        for(String column:columns){
+                            for(Property property:propertyList){
+                                if(property.column.equals(column.substring(1,column.length()-1))){
+                                    property.unique = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }else{
+                        for(String column:columns){
+                            for(Property property:propertyList){
+                                if(property.column.equals(column.substring(1,column.length()-1))){
+                                    property.index = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                resultSet.close();
             }
             entity.properties = propertyList.toArray(new Property[0]);
             entityList.add(entity);
-            propertiesRs.close();
-            propertyPs.close();
         }
         tableRs.close();
         tablePs.close();

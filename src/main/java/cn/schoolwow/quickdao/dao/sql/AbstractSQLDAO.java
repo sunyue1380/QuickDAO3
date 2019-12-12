@@ -3,6 +3,7 @@ package cn.schoolwow.quickdao.dao.sql;
 import cn.schoolwow.quickdao.builder.sql.AbstractSQLBuilder;
 import cn.schoolwow.quickdao.builder.sql.SQLBuilder;
 import cn.schoolwow.quickdao.dao.AbstractDAO;
+import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +44,7 @@ public class AbstractSQLDAO implements SQLDAO {
                 ps.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
         return result;
     }

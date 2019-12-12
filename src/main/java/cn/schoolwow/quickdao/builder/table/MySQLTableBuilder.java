@@ -30,23 +30,43 @@ public class MySQLTableBuilder extends AbstractTableBuilder {
             entity.tableName = tableRs.getString(1);
 
             List<Property> propertyList = new ArrayList<>();
-            PreparedStatement propertyPs = connection.prepareStatement("show columns from " + quickDAOConfig.database.escape(tableRs.getString(1)));
-            ResultSet propertiesRs = propertyPs.executeQuery();
-            while (propertiesRs.next()) {
-                Property property = new Property();
-                property.column = propertiesRs.getString("Field");
-                property.columnType = propertiesRs.getString("Type");
-                property.notNull = "NO".equals(propertiesRs.getString("Null"));
-                property.unique = "UNI".equals(propertiesRs.getString("Key"));
-                if (null != propertiesRs.getString("Default")) {
-                    property.defaultValue = propertiesRs.getString("Default");
+            //获取所有列
+            {
+                ResultSet propertiesRs = connection.prepareStatement("show columns from " + quickDAOConfig.database.escape(entity.tableName)).executeQuery();
+                while (propertiesRs.next()) {
+                    Property property = new Property();
+                    property.column = propertiesRs.getString("Field");
+                    property.columnType = propertiesRs.getString("Type");
+                    property.notNull = "NO".equals(propertiesRs.getString("Null"));
+                    property.unique = "UNI".equals(propertiesRs.getString("Key"));
+                    if (null != propertiesRs.getString("Default")) {
+                        property.defaultValue = propertiesRs.getString("Default");
+                    }
+                    propertyList.add(property);
                 }
-                propertyList.add(property);
+                propertiesRs.close();
+            }
+            //处理索引
+            {
+                ResultSet resultSet = connection.prepareStatement("show index from " + quickDAOConfig.database.escape(entity.tableName)).executeQuery();
+                while (resultSet.next()) {
+                    String columnName = resultSet.getString("Column_name");
+                    for(Property property:propertyList){
+                        if(property.column.equals(columnName)){
+                            int nonUnique = resultSet.getInt("Non_unique");
+                            if(nonUnique==0){
+                                property.unique = true;
+                            }else{
+                                property.index = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+                resultSet.close();
             }
             entity.properties = propertyList.toArray(new Property[0]);
             entityList.add(entity);
-            propertiesRs.close();
-            propertyPs.close();
         }
         tableRs.close();
         return entityList.toArray(new Entity[0]);
