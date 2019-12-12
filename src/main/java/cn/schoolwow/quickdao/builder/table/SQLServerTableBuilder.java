@@ -39,6 +39,7 @@ public class SQLServerTableBuilder extends AbstractTableBuilder{
                 property.notNull = "NO".equals(propertiesRs.getString("is_nullable"));
                 propertyList.add(property);
             }
+            //TODO 获取SQLServer的索引情况
             entity.properties = propertyList.toArray(new Property[0]);
             entityList.add(entity);
             propertiesRs.close();

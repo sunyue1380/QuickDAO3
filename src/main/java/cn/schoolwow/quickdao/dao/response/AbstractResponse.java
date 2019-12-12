@@ -3,6 +3,7 @@ package cn.schoolwow.quickdao.dao.response;
 import cn.schoolwow.quickdao.dao.condition.AbstractCondition;
 import cn.schoolwow.quickdao.dao.condition.Condition;
 import cn.schoolwow.quickdao.domain.*;
+import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import cn.schoolwow.quickdao.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -34,7 +35,7 @@ public class AbstractResponse<T> implements Response<T>{
             resultSet.close();
             ps.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
         query.parameterIndex = 1;
         return count;
@@ -48,7 +49,7 @@ public class AbstractResponse<T> implements Response<T>{
             count= ps.executeUpdate();
             ps.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
         return count;
     }
@@ -61,7 +62,7 @@ public class AbstractResponse<T> implements Response<T>{
             count= ps.executeUpdate();
             ps.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
         return count;
     }
@@ -97,7 +98,7 @@ public class AbstractResponse<T> implements Response<T>{
             resultSet.close();
             ps.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
         return array;
     }
@@ -115,9 +116,8 @@ public class AbstractResponse<T> implements Response<T>{
             ps.close();
             return array.toJavaList(clazz);
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
-        return array;
     }
 
     @Override
@@ -139,9 +139,8 @@ public class AbstractResponse<T> implements Response<T>{
             ps.close();
             return array;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
-        return array;
     }
 
     @Override
@@ -154,7 +153,7 @@ public class AbstractResponse<T> implements Response<T>{
             resultSet.close();
             ps.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
         return array.toJavaList(query.entity.clazz);
     }
@@ -169,7 +168,7 @@ public class AbstractResponse<T> implements Response<T>{
             resultSet.close();
             ps.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
         return array;
     }
@@ -198,7 +197,7 @@ public class AbstractResponse<T> implements Response<T>{
             resultSet.close();
             ps.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
         return array.toJavaList(query.entity.clazz);
     }

@@ -9,6 +9,7 @@ import cn.schoolwow.quickdao.dao.sql.AbstractSQLDAO;
 import cn.schoolwow.quickdao.database.*;
 import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.Query;
+import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import com.alibaba.fastjson.JSONArray;
 
 import java.sql.PreparedStatement;
@@ -57,8 +58,7 @@ public class AbstractDQLDAO extends AbstractSQLDAO implements DQLDAO {
             ps.close();
             return array.toJavaList(clazz);
         } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
+            throw new SQLRuntimeException(e);
         }
     }
 

@@ -58,12 +58,12 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                 if (null!=property.defaultValue&&!property.defaultValue.isEmpty()) {
                     createTableBuilder.append(" default " + property.defaultValue);
                 }
+                if (null != property.comment) {
+                    createTableBuilder.append(" "+quickDAOConfig.database.comment(property.comment));
+                }
                 if (null!=property.check&&!property.check.isEmpty()) {
                     createTableBuilder.append(" check " + property.check);
                 }
-            }
-            if (null != property.comment) {
-                createTableBuilder.append(" "+quickDAOConfig.database.comment(property.comment));
             }
             createTableBuilder.append(",");
         }
@@ -109,6 +109,8 @@ public abstract class AbstractTableBuilder implements TableBuilder{
             dropTable(entity);
         }
         createTable(entity);
+        createIndex(entity,IndexType.Index);
+        createIndex(entity,IndexType.Unique);
     }
 
     @Override
@@ -236,6 +238,9 @@ public abstract class AbstractTableBuilder implements TableBuilder{
             boolean columnExist = false;
             for (Property dbEntityProperty : dbEntityProperties) {
                 if (dbEntityProperty.column.equals(entityProperty.column)) {
+                    if(entityProperty.id){
+                        break;
+                    }
                     columnExist = true;
                     //判断有无唯一性约束的改变
                     if(dbEntityProperty.unique != entityProperty.unique){

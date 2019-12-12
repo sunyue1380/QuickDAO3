@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class SQLDAOInvocationHandler implements InvocationHandler {
@@ -27,10 +28,14 @@ public class SQLDAOInvocationHandler implements InvocationHandler {
         }else{
             abstractSQLDAO.sqlBuilder.connection = abstractSQLDAO.sqlBuilder.quickDAOConfig.dataSource.getConnection();
         }
-        Object result = method.invoke(abstractSQLDAO,args);
-        if(!abstractSQLDAO.transaction&&!abstractSQLDAO.sqlBuilder.connection.isClosed()){
-            abstractSQLDAO.sqlBuilder.connection.close();
+        try {
+            Object result = method.invoke(abstractSQLDAO,args);
+            if(!abstractSQLDAO.transaction&&!abstractSQLDAO.sqlBuilder.connection.isClosed()){
+                abstractSQLDAO.sqlBuilder.connection.close();
+            }
+            return result;
+        } catch (InvocationTargetException e){
+            throw e.getTargetException();
         }
-        return result;
     }
 }

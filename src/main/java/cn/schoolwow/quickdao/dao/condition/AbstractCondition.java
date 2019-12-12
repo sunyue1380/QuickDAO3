@@ -7,6 +7,7 @@ import cn.schoolwow.quickdao.dao.response.*;
 import cn.schoolwow.quickdao.database.H2Database;
 import cn.schoolwow.quickdao.database.SQLiteDatabase;
 import cn.schoolwow.quickdao.domain.*;
+import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import cn.schoolwow.quickdao.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -237,7 +238,7 @@ public class AbstractCondition<T> implements Condition<T>{
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new SQLRuntimeException(e);
             }
         }
         return this;

@@ -174,7 +174,9 @@ public class DefaultTableDefiner implements TableDefiner{
                 }
                 if(property.unique){
                     property.notNull = true;
-                    property.index = true;
+                    if(!property.id){
+                        property.index = true;
+                    }
                 }
                 if(property.index){
                     indexPropertyList.add(property);

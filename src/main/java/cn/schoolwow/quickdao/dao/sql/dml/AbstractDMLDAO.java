@@ -6,6 +6,7 @@ import cn.schoolwow.quickdao.dao.AbstractDAO;
 import cn.schoolwow.quickdao.dao.sql.AbstractSQLDAO;
 import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.Property;
+import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
@@ -49,7 +50,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
             }
             ps.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
         return effect;
     }
@@ -68,7 +69,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
             }
             ps.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
         return effect;
     }
@@ -100,7 +101,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
                 ps.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
         return effect;
     }
@@ -140,7 +141,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
                 ps.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
         return effect;
     }
@@ -195,7 +196,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
             effect = ps.executeUpdate();
             ps.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
         return effect;
     }
@@ -208,7 +209,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
             effect = ps.executeUpdate();
             ps.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
         return effect;
     }
@@ -221,7 +222,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
             effect = ps.executeUpdate();
             ps.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLRuntimeException(e);
         }
         return effect;
     }
