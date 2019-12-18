@@ -238,10 +238,10 @@ public abstract class AbstractTableBuilder implements TableBuilder{
             boolean columnExist = false;
             for (Property dbEntityProperty : dbEntityProperties) {
                 if (dbEntityProperty.column.equals(entityProperty.column)) {
+                    columnExist = true;
                     if(entityProperty.id){
                         break;
                     }
-                    columnExist = true;
                     //判断有无唯一性约束的改变
                     if(dbEntityProperty.unique != entityProperty.unique){
                         hasUniqueProperty = true;
