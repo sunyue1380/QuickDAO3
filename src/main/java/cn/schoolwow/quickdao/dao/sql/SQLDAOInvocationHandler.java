@@ -23,6 +23,9 @@ public class SQLDAOInvocationHandler implements InvocationHandler {
         if(abstractSQLDAO.transaction){
             if(null==abstractSQLDAO.sqlBuilder.connection||abstractSQLDAO.sqlBuilder.connection.isClosed()){
                 abstractSQLDAO.sqlBuilder.connection = abstractSQLDAO.sqlBuilder.quickDAOConfig.dataSource.getConnection();
+                if(abstractSQLDAO.transactionIsolation>0){
+                    abstractSQLDAO.sqlBuilder.connection.setTransactionIsolation(abstractSQLDAO.transactionIsolation);
+                }
                 abstractSQLDAO.sqlBuilder.connection.setAutoCommit(false);
             }
         }else{

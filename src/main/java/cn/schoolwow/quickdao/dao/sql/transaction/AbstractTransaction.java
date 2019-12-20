@@ -15,6 +15,11 @@ public class AbstractTransaction extends AbstractDMLDAO implements Transaction{
     }
 
     @Override
+    public void setTransactionIsolation(int transactionIsolation) {
+        this.transactionIsolation = transactionIsolation;
+    }
+
+    @Override
     public Savepoint setSavePoint(String name) {
         try {
             return sqlBuilder.connection.setSavepoint(name);

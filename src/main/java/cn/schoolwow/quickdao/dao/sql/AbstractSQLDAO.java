@@ -19,6 +19,8 @@ public class AbstractSQLDAO implements SQLDAO {
     public AbstractDAO abstractDAO;
     //是否开启事务
     public boolean transaction = false;
+    //事务隔离级别
+    public int transactionIsolation;
 
     public AbstractSQLDAO(SQLBuilder sqlBuilder, AbstractDAO abstractDAO) {
         this.sqlBuilder = (AbstractSQLBuilder) sqlBuilder;
