@@ -516,6 +516,9 @@ public class AbstractCondition<T> implements Condition<T>{
             if (_joinTable.containsKey(property.name + "IN")) {
                 subCondition.addInQuery(property.name, _joinTable.getJSONArray(property.name + "IN"));
             }
+            if (_joinTable.containsKey(property.name + "LIKE")) {
+                subCondition.addLikeQuery(property.name, _joinTable.get(property.name+"LIKE"));
+            }
             if (_joinTable.containsKey(property.name + "NOTNULL")) {
                 subCondition.addNotNullQuery(property.name);
             }
