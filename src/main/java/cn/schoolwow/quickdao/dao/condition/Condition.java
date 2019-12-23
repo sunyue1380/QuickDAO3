@@ -119,7 +119,7 @@ public interface Condition<T> {
      * {field}:{value},字段查询<br/>
      * {field}Start:{value},添加大于等于查询<br/>
      * {field}End:{value},添加小于等于查询<br/>
-     * {field}LIKE:[array],添加Like查询<br/>
+     * {field}LIKE:{value},添加Like查询<br/>
      * {field}IN:[array],添加IN查询<br/>
      * {field}NOTNULL:{value},添加not null查询<br/>
      * {field}NULL:{value},添加null查询<br/>
@@ -136,6 +136,7 @@ public interface Condition<T> {
      * {field}:{value},字段查询<br/>
      * {field}Start:{value},添加大于等于查询<br/>
      * {field}End:{value},添加小于等于查询<br/>
+     * {field}LIKE:{value},添加like查询<br/>
      * {field}IN:[array],添加IN查询<br/>
      * {field}NOTNULL:{value},添加not null查询<br/>
      * {field}NULL:{value},添加null查询<br/>

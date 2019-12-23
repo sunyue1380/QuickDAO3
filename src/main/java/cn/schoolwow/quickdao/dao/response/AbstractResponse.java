@@ -84,9 +84,10 @@ public class AbstractResponse<T> implements Response<T>{
 
     @Override
     public JSONArray getArray() {
-        JSONArray array = new JSONArray((int)count());
+        JSONArray array = null;
         try {
             PreparedStatement ps = query.dqlsqlBuilder.getArray(query);
+            array = new JSONArray(count(query));
             ResultSet resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 JSONObject o = getObject(query.entity, AbstractCondition.mainTableAlias, resultSet);
@@ -105,9 +106,9 @@ public class AbstractResponse<T> implements Response<T>{
 
     @Override
     public List getValueList(Class clazz, String column) {
-        JSONArray array = new JSONArray((int) count());
         try {
             PreparedStatement ps = query.dqlsqlBuilder.getValueList(column,query);
+            JSONArray array = new JSONArray(count(query));
             ResultSet resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 array.add(resultSet.getString(1));
@@ -122,9 +123,9 @@ public class AbstractResponse<T> implements Response<T>{
 
     @Override
     public JSONArray getAggerateList() {
-        JSONArray array = new JSONArray((int) count());
         try {
             PreparedStatement ps = query.dqlsqlBuilder.getAggerateList(query);
+            JSONArray array = new JSONArray(count(query));
             ResultSet resultSet = ps.executeQuery();
             ResultSetMetaData metaData = resultSet.getMetaData();
             int columnCount = metaData.getColumnCount();
@@ -141,6 +142,20 @@ public class AbstractResponse<T> implements Response<T>{
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
+    }
+
+    @Override
+    public PageVo getAggeratePagingList() {
+        query.pageVo.setList(getAggerateList());
+        setPageVo();
+        return query.pageVo;
+    }
+
+    @Override
+    public <E> PageVo<E> getAggeratePagingList(Class<E> clazz) {
+        query.pageVo.setList(getAggerateList().toJavaList(clazz));
+        setPageVo();
+        return query.pageVo;
     }
 
     @Override
@@ -174,16 +189,16 @@ public class AbstractResponse<T> implements Response<T>{
     }
 
     @Override
-    public PageVo getPagingList() {
-        setPageVo();
+    public PageVo<T> getPagingList() {
         query.pageVo.setList(getList());
+        setPageVo();
         return query.pageVo;
     }
 
     @Override
-    public PageVo getPartPagingList() {
-        setPageVo();
+    public PageVo<T> getPartPagingList() {
         query.pageVo.setList(getPartList());
+        setPageVo();
         return query.pageVo;
     }
 
@@ -203,10 +218,22 @@ public class AbstractResponse<T> implements Response<T>{
     }
 
     @Override
-    public PageVo getUnionPagingList() {
-        setPageVo();
+    public PageVo<T> getUnionPagingList() {
         query.pageVo.setList(getUnionList());
+        setPageVo();
         return query.pageVo;
+    }
+
+    private int count(Query query) throws SQLException {
+        query.sql = query.sql.replace(" " + query.orderByBuilder.toString() + " " + query.limit,"");
+        PreparedStatement ps = connection.prepareStatement("select count(1) from ("+query.sql+")");
+        ResultSet resultSet = ps.executeQuery();
+        int count = 0;
+        if(resultSet.next()){
+            count = resultSet.getInt(1);
+        }
+        resultSet.close();
+        return count;
     }
 
     /**设置分页对象*/
@@ -214,7 +241,11 @@ public class AbstractResponse<T> implements Response<T>{
         if (query.pageVo == null) {
             throw new IllegalArgumentException("请先调用page()函数!");
         }
-        query.pageVo.setTotalSize(count());
+        try {
+            query.pageVo.setTotalSize(count(query));
+        } catch (SQLException e) {
+            throw new SQLRuntimeException(e);
+        }
         query.pageVo.setTotalPage((int)(query.pageVo.getTotalSize() / query.pageVo.getPageSize() + (query.pageVo.getTotalSize() % query.pageVo.getPageSize() > 0 ? 1 : 0)));
         query.pageVo.setHasMore(query.pageVo.getCurrentPage() < query.pageVo.getTotalPage());
     }

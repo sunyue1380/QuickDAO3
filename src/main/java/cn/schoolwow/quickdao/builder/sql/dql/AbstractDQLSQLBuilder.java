@@ -21,7 +21,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         if (!sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder("select ");
             builder.append(columns(entity,"t"));
-            builder.append(" from " + quickDAOConfig.database.escape(entity.tableName)+" as t where "+ StringUtil.Camel2Underline(field) +" is null");
+            builder.append(" from " + quickDAOConfig.database.escape(entity.tableName)+" as t where t."+ StringUtil.Camel2Underline(field) +" is null");
             sqlCache.put(key, builder.toString());
         }
         String sql = sqlCache.get(key);
@@ -43,13 +43,13 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         if (!sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder("select ");
             builder.append(columns(entity,"t"));
-            builder.append(" from " + quickDAOConfig.database.escape(entity.tableName)+" as t where "+ StringUtil.Camel2Underline(field) +" = ?");
+            builder.append(" from " + quickDAOConfig.database.escape(entity.tableName)+" as t where t."+ StringUtil.Camel2Underline(field) +" = ?");
             sqlCache.put(key, builder.toString());
         }
         String sql = sqlCache.get(key);
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setObject(1,value);
-        logger.debug("[根据字段查询]执行SQL:{}",sql.replace("?",value.toString()));
+        logger.debug("[根据字段查询]执行SQL:{}",sql.replace("?",(value instanceof String)?"'"+value.toString()+"'":value.toString()));
         return ps;
     }
 
@@ -109,6 +109,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         builder = new StringBuilder(builder.toString().replace("?",PLACEHOLDER));
         addMainTableParameters(ps,query,builder);
         addJoinTableParameters(ps,query,builder);
+        query.sql = builder.toString();
         logger.debug("[获取列表]执行SQL:{}", builder.toString());
         return ps;
     }
@@ -122,12 +123,14 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         builder.append(query.aggregateColumnBuilder.toString() + " from " + quickDAOConfig.database.escape(query.entity.tableName) + " as "+Condition.mainTableAlias);
         addJoinTableStatement(query,builder);
         addWhereStatement(query,builder);
-        builder.append(" " + query.groupByBuilder.toString() + " " + query.orderByBuilder.toString().replace(Condition.mainTableAlias+".","") + " " + query.limit);
+        query.orderByBuilder = new StringBuilder(query.orderByBuilder.toString().replace(Condition.mainTableAlias+".",""));
+        builder.append(" " + query.groupByBuilder.toString() + " " + query.orderByBuilder.toString() + " " + query.limit);
 
         PreparedStatement ps = connection.prepareStatement(builder.toString());
         builder = new StringBuilder(builder.toString().replace("?",PLACEHOLDER));
         addMainTableParameters(ps,query,builder);
         addJoinTableParameters(ps,query,builder);
+        query.sql = builder.toString();
         logger.debug("[获取聚合列表]执行SQL:{}", builder.toString());
         return ps;
     }
@@ -146,6 +149,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         builder = new StringBuilder(builder.toString().replace("?",PLACEHOLDER));
         addMainTableParameters(ps,query,builder);
         addJoinTableParameters(ps,query,builder);
+        query.sql = builder.toString();
         logger.debug("[获取单列列表]执行SQL:{}", builder.toString());
         return ps;
     }

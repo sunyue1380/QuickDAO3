@@ -103,7 +103,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
         String sql = sqlCache.get(key);
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setObject(1, value);
-        logger.debug("[根据字段值删除]执行SQL:{}", sql.replace("?",value.toString()));
+        logger.debug("[根据字段值删除]执行SQL:{}", sql.replace("?",(value instanceof String)?"'"+value.toString()+"'":value.toString()));
         return ps;
     }
 

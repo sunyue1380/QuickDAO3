@@ -101,4 +101,8 @@ public class Query implements Serializable {
      * DQL查询语句构建
      * */
     public DQLSQLBuilder dqlsqlBuilder;
+    /**
+     * sql语句
+     * */
+    public String sql;
 }

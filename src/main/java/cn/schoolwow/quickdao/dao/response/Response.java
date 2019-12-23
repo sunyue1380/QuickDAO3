@@ -49,6 +49,20 @@ public interface Response<T> {
     JSONArray getAggerateList();
 
     /**
+     * 返回聚合字段分页数据库记录.
+     * <p><b>注意:</b>调用此方法时必须调用分页方法</p>
+     * @see {@link cn.schoolwow.quickdao.dao.condition.Condition#addAggerate(String, String)}
+     */
+    PageVo getAggeratePagingList();
+
+    /**
+     * 返回聚合字段分页数据库记录.
+     * <p><b>注意:</b>调用此方法时必须调用分页方法</p>
+     * @see {@link cn.schoolwow.quickdao.dao.condition.Condition#addAggerate(String, String)}
+     */
+    <E> PageVo<E> getAggeratePagingList(Class<E> clazz);
+
+    /**
      * 返回指定单个字段的集合
      *
      * @param clazz 返回字段类型
