@@ -7,12 +7,15 @@ import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import cn.schoolwow.quickdao.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AbstractResponse<T> implements Response<T>{
+    private Logger logger = LoggerFactory.getLogger(AbstractResponse.class);
     //查询对象参数
     public Query query;
     //数据库连接
@@ -225,8 +228,13 @@ public class AbstractResponse<T> implements Response<T>{
     }
 
     private int count(Query query) throws SQLException {
-        query.sql = query.sql.replace(" " + query.orderByBuilder.toString() + " " + query.limit,"");
-        PreparedStatement ps = connection.prepareStatement("select count(1) from ("+query.sql+")");
+        String replaceString = " " + query.orderByBuilder.toString() + " " + query.limit;
+        if(!replaceString.trim().isEmpty()){
+            query.sql = query.sql.replace(replaceString,"");
+        }
+        String countSQL = "select count(1) from ("+query.sql+")";
+        logger.trace("[获取总数]执行SQL:{}",countSQL);
+        PreparedStatement ps = connection.prepareStatement(countSQL);
         ResultSet resultSet = ps.executeQuery();
         int count = 0;
         if(resultSet.next()){
