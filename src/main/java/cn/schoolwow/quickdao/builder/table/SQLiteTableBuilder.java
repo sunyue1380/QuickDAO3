@@ -18,7 +18,7 @@ public class SQLiteTableBuilder extends AbstractTableBuilder{
 
     @Override
     public Entity[] getDatabaseEntity() throws SQLException {
-        PreparedStatement tablePs = connection.prepareStatement("select name from sqlite_master where type='table';");
+        PreparedStatement tablePs = connection.prepareStatement("select name from sqlite_master where type='table' and name != 'sqlite_sequence';");
         ResultSet tableRs = tablePs.executeQuery();
         List<Entity> entityList = new ArrayList<>();
         while (tableRs.next()) {

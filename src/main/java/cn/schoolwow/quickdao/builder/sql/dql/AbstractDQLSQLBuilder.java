@@ -63,7 +63,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         builder = new StringBuilder(builder.toString().replace("?",PLACEHOLDER));
         addMainTableParameters(ps,query,builder);
         addJoinTableParameters(ps,query,builder);
-        logger.trace("[获取总数]执行SQL:{}", builder.toString());
+        logger.debug("[获取总数]执行SQL:{}", builder.toString());
         return ps;
     }
 

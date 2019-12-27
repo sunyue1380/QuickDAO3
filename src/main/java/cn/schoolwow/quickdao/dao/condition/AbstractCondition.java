@@ -25,6 +25,8 @@ public class AbstractCondition<T> implements Condition<T>{
     public Query query;
     //关联表计数
     private int joinTableIndex = 1;
+    //主Condition
+    private Condition<T> mainCondition;
 
     public AbstractCondition(Query query) {
         this.query = query;
@@ -260,6 +262,7 @@ public class AbstractCondition<T> implements Condition<T>{
     @Override
     public Condition<T> or() {
         AbstractCondition orCondition = (AbstractCondition) query.dao.query(query.entity.clazz);
+        orCondition.mainCondition = this;
         query.orList.add(orCondition);
         return orCondition;
     }
@@ -407,6 +410,11 @@ public class AbstractCondition<T> implements Condition<T>{
     public Condition<T> compositField() {
         query.compositField = true;
         return this;
+    }
+
+    @Override
+    public Condition<T> done() {
+        return mainCondition==null?this:mainCondition;
     }
 
     @Override

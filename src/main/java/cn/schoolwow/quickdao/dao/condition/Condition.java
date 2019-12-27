@@ -351,6 +351,11 @@ public interface Condition<T> {
     Condition<T> compositField();
 
     /**
+     * 调用or()方法后返回主Condition
+     */
+    Condition<T> done();
+
+    /**
      * 执行并返回Response实例
      */
     Response<T> execute();
