@@ -8,8 +8,8 @@ import cn.schoolwow.quickdao.annotation.Id;
 @Comment("订单")
 public class Order {
     @Comment("自增id")
-    @Id
-    private long id;
+    @Id(autoIncrement = false)
+    private String id;
 
     @Comment("订单id")
     @Constraint(notNull = true,check = "#{orderNo} > 0")
@@ -22,11 +22,11 @@ public class Order {
 
     private Person person;
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

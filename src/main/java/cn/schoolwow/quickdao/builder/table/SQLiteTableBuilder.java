@@ -80,7 +80,11 @@ public class SQLiteTableBuilder extends AbstractTableBuilder{
 
     @Override
     public String getAutoIncrementSQL(Property property){
-        return property.column + " " + property.columnType + " primary key autoincrement";
+        if(property.autoIncrement){
+            return property.column + " " + property.columnType + " primary key autoincrement";
+        }else{
+            return property.column + " " + property.columnType;
+        }
     }
 
     @Override

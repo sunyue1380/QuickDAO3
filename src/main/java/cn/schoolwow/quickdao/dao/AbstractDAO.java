@@ -125,6 +125,12 @@ public class AbstractDAO implements DAO {
     }
 
     @Override
+    public int delete(Class delete, String id) {
+        DMLDAO dmldao = createDMLDAO();
+        return dmldao.delete(delete,id);
+    }
+
+    @Override
     public int delete(Class clazz, String field, Object value) {
         DMLDAO dmldao = createDMLDAO();
         return dmldao.delete(clazz,field,value);

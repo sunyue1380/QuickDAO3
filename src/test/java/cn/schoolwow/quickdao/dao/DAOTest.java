@@ -8,12 +8,14 @@ import cn.schoolwow.quickdao.domain.PageVo;
 import cn.schoolwow.quickdao.entity.Order;
 import cn.schoolwow.quickdao.entity.Person;
 import com.alibaba.fastjson.JSONArray;
+import org.h2.engine.User;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.List;
+import java.util.UUID;
 
 @RunWith(Parameterized.class)
 public class DAOTest extends BaseDAOTest{
@@ -118,6 +120,7 @@ public class DAOTest extends BaseDAOTest{
 
     private void updateById() {
         Order order = new Order();
+        order.setId(UUID.randomUUID().toString());
         order.setPersonId(1);
         order.setOrderNo(1);
         dao.insert(order);
@@ -226,6 +229,7 @@ public class DAOTest extends BaseDAOTest{
         }
         {
             Order order = new Order();
+            order.setId(UUID.randomUUID().toString());
             order.setPersonId(1);
             order.setOrderNo(1);
             int effect = dao.insert(order);

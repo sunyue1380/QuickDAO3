@@ -139,7 +139,15 @@ public class DefaultTableDefiner implements TableDefiner{
                             property.check = constraint.check();
                             property.defaultValue = constraint.defaultValue();
                         }
-                        property.id = field.getDeclaredAnnotation(Id.class) != null || "id".equals(property.column);
+                        if("id".equals(property.column)){
+                            property.id = true;
+                            property.autoIncrement = true;
+                        }
+                        Id id = field.getDeclaredAnnotation(Id.class);
+                        if(null!=id){
+                            property.id = true;
+                            property.autoIncrement = id.autoIncrement();
+                        }
                         property.index = field.getDeclaredAnnotation(Index.class) != null;
                         if(null!=field.getDeclaredAnnotation(Comment.class)){
                             property.comment = field.getDeclaredAnnotation(Comment.class).value();
@@ -171,6 +179,7 @@ public class DefaultTableDefiner implements TableDefiner{
             for(Property property : entity.properties){
                 if(property.id){
                     property.notNull = true;
+                    property.unique = true;
                 }
                 if(property.unique){
                     property.notNull = true;
@@ -181,7 +190,7 @@ public class DefaultTableDefiner implements TableDefiner{
                 if(property.index){
                     indexPropertyList.add(property);
                 }
-                if(property.unique){
+                if(property.unique&&!property.id){
                     uniquePropertyList.add(property);
                 }
                 if(null!=property.check&&!property.check.isEmpty()){
