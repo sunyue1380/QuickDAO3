@@ -232,8 +232,8 @@ public class AbstractResponse<T> implements Response<T>{
         if(!replaceString.trim().isEmpty()){
             query.sql = query.sql.replace(replaceString,"");
         }
-        String countSQL = "select count(1) from ("+query.sql+")";
-        logger.trace("[获取总数]执行SQL:{}",countSQL);
+        String countSQL = "select count(1) from ("+query.sql+") as foo";
+        logger.debug("[分页总数]执行SQL:{}",countSQL);
         PreparedStatement ps = connection.prepareStatement(countSQL);
         ResultSet resultSet = ps.executeQuery();
         int count = 0;

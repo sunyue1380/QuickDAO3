@@ -86,12 +86,6 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
     }
 
     @Override
-    public PreparedStatement deleteById(Class clazz, long id) throws SQLException {
-        Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
-        return deleteByProperty(clazz,entity.id.column,id);
-    }
-
-    @Override
     public PreparedStatement deleteByProperty(Class clazz, String property, Object value) throws SQLException {
         String key = "deleteByProperty_" + clazz.getName()+"_"+property+"_"+quickDAOConfig.database.getClass().getName();
         Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
@@ -129,7 +123,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
             builder.append("insert into " + quickDAOConfig.database.escape(entity.tableName) + "(");
             for (Property property : entity.properties) {
-                if (property.id) {
+                if (property.id&&property.autoIncrement) {
                     continue;
                 }
                 builder.append(quickDAOConfig.database.escape(property.column) + ",");
@@ -137,7 +131,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             builder.deleteCharAt(builder.length() - 1);
             builder.append(") values(");
             for (Property property : entity.properties) {
-                if (property.id) {
+                if (property.id&&property.autoIncrement) {
                     continue;
                 }
                 builder.append("?,");
@@ -159,7 +153,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
         int parameterIndex = 1;
         Entity entity = quickDAOConfig.entityMap.get(instance.getClass().getName());
         for (Property property : entity.properties) {
-            if (property.id) {
+            if (property.id&&property.autoIncrement) {
                 continue;
             }
             setParameter(instance, property, preparedStatement, parameterIndex,sqlBuilder);
@@ -186,7 +180,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             builder.deleteCharAt(builder.length() - 1);
             builder.append(" where ");
             for (Property property : entity.properties) {
-                if (property.unique) {
+                if (property.unique&&!property.id) {
                     builder.append(quickDAOConfig.database.escape(property.column) + "=? and ");
                 }
             }
@@ -213,7 +207,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             parameterIndex++;
         }
         for (Property property : entity.properties) {
-            if (property.unique) {
+            if (property.unique&&!property.id) {
                 setParameter(instance, property, preparedStatement, parameterIndex,sqlBuilder);
                 parameterIndex++;
             }

@@ -51,7 +51,11 @@ public class SQLServerTableBuilder extends AbstractTableBuilder{
 
     @Override
     public String getAutoIncrementSQL(Property property) {
-        return property.column + " " + property.columnType + " identity(1,1) unique ";
+        if(property.autoIncrement){
+            return property.column + " " + property.columnType + " identity(1,1) unique ";
+        }else{
+            return property.column + " " + property.columnType + " ";
+        }
     }
 
     @Override

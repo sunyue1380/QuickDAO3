@@ -34,19 +34,21 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
             PreparedStatement ps = dmlsqlBuilder.insert(instance);
             effect = ps.executeUpdate();
             if (effect > 0) {
-                ResultSet rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    long id = rs.getLong(1);
-                    Property property = dmlsqlBuilder.quickDAOConfig.entityMap.get(instance.getClass().getName()).id;
-                    Field idField = instance.getClass().getDeclaredField(property.name);
-                    idField.setAccessible(true);
-                    if (idField.getType().isPrimitive()) {
-                        idField.setLong(instance, id);
-                    } else {
-                        idField.set(instance, Long.valueOf(id));
+                Property property = dmlsqlBuilder.quickDAOConfig.entityMap.get(instance.getClass().getName()).id;
+                if(property.autoIncrement){
+                    ResultSet rs = ps.getGeneratedKeys();
+                    if (rs.next()) {
+                        long id = rs.getLong(1);
+                        Field idField = instance.getClass().getDeclaredField(property.name);
+                        idField.setAccessible(true);
+                        if (idField.getType().isPrimitive()) {
+                            idField.setLong(instance, id);
+                        } else {
+                            idField.set(instance, Long.valueOf(id));
+                        }
                     }
+                    rs.close();
                 }
-                rs.close();
             }
             ps.close();
         } catch (Exception e) {
@@ -190,15 +192,14 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
 
     @Override
     public int delete(Class clazz, long id) {
-        int effect = 0;
-        try {
-            PreparedStatement ps = dmlsqlBuilder.deleteById(clazz,id);
-            effect = ps.executeUpdate();
-            ps.close();
-        } catch (SQLException e) {
-            throw new SQLRuntimeException(e);
-        }
-        return effect;
+        Entity entity = dmlsqlBuilder.quickDAOConfig.entityMap.get(clazz.getName());
+        return delete(clazz,entity.id.column,id);
+    }
+
+    @Override
+    public int delete(Class clazz, String id) {
+        Entity entity = dmlsqlBuilder.quickDAOConfig.entityMap.get(clazz.getName());
+        return delete(clazz,entity.id.column,id);
     }
 
     @Override

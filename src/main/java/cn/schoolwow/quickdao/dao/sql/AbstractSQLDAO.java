@@ -58,6 +58,14 @@ public class AbstractSQLDAO implements SQLDAO {
     public boolean hasId(Object instance) throws Exception {
         Field field = instance.getClass().getDeclaredField(abstractDAO.quickDAOConfig.entityMap.get(instance.getClass().getName()).id.name);
         field.setAccessible(true);
-        return field.getLong(instance) > 0;
+        switch(field.getType().getSimpleName().toLowerCase()){
+            case "long":{
+                return field.getLong(instance)>0;
+            }
+            case "string":{
+                return field.get(instance)!=null;
+            }
+        }
+        throw new IllegalArgumentException("不支持的主键类型!当前主键类型:"+field.getType().getName());
     }
 }

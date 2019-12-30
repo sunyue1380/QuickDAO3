@@ -11,6 +11,10 @@ public class Property {
      */
     public boolean id;
     /**
+     * 是否自增
+     */
+    public boolean autoIncrement;
+    /**
      * 列名
      */
     public String column;

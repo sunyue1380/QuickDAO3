@@ -16,8 +16,6 @@ public interface DMLSQLBuilder {
     PreparedStatement updateById(Object instance) throws Exception;
     /**根据id更新*/
     PreparedStatement updateById(Object[] instances) throws Exception;
-    /**根据id删除*/
-    PreparedStatement deleteById(Class clazz,long id) throws SQLException;
     /**根据字段值删除*/
     PreparedStatement deleteByProperty(Class clazz, String property, Object value) throws SQLException;
     /**清空表*/
