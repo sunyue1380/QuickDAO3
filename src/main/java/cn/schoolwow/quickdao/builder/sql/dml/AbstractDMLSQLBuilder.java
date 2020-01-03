@@ -28,6 +28,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
     @Override
     public PreparedStatement insert(Object[] instances) throws Exception {
         String sql = insert(instances[0].getClass());
+        connection.setAutoCommit(false);
         PreparedStatement ps = connection.prepareStatement(sql);
         for(Object instance : instances){
             StringBuilder sqlBuilder = new StringBuilder(sql.replace("?", PLACEHOLDER));
@@ -51,6 +52,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
     @Override
     public PreparedStatement updateByUniqueKey(Object[] instances) throws Exception {
         String sql = updateByUniqueKey(instances[0].getClass());
+        connection.setAutoCommit(false);
         PreparedStatement ps = connection.prepareStatement(sql);
         for(Object instance : instances){
             StringBuilder sqlBuilder = new StringBuilder(sql.replace("?", PLACEHOLDER));
@@ -74,6 +76,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
     @Override
     public PreparedStatement updateById(Object[] instances) throws Exception {
         String sql = updateById(instances[0].getClass());
+        connection.setAutoCommit(false);
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.addBatch();
         for(Object instance : instances){

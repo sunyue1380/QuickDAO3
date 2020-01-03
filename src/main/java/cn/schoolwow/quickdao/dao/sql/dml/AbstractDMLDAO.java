@@ -70,6 +70,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
                 effect += batch;
             }
             ps.close();
+            dmlsqlBuilder.connection.commit();
         } catch (Exception e) {
             throw new SQLRuntimeException(e);
         }
@@ -142,6 +143,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
                 }
                 ps.close();
             }
+            dmlsqlBuilder.connection.commit();
         } catch (Exception e) {
             throw new SQLRuntimeException(e);
         }
