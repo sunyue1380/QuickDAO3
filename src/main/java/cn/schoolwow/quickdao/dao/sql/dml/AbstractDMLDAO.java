@@ -121,7 +121,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
             List updateByUniqueKeyList = new ArrayList<>();
             Entity entity = dmlsqlBuilder.quickDAOConfig.entityMap.get(instances[0].getClass().getName());
             for(Object instance:instances){
-                if (null!=entity.uniqueKeyProperties&&entity.uniqueKeyProperties.length + 1 != entity.properties.length) {
+                if (null!=entity.uniqueKeyProperties&&entity.uniqueKeyProperties.length>0&&entity.uniqueKeyProperties.length + 1 != entity.properties.length) {
                     updateByUniqueKeyList.add(instance);
                 }else if(hasId(instance)){
                     updateByIdList.add(instance);
