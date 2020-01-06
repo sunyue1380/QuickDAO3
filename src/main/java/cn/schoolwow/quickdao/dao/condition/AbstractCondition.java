@@ -27,6 +27,8 @@ public class AbstractCondition<T> implements Condition<T>{
     private int joinTableIndex = 1;
     //主Condition
     private Condition<T> mainCondition;
+    //是否已经执行过
+    private boolean hasExecute = false;
 
     public AbstractCondition(Query query) {
         this.query = query;
@@ -419,42 +421,45 @@ public class AbstractCondition<T> implements Condition<T>{
 
     @Override
     public Response<T> execute() {
-        if (query.columnBuilder.length() > 0) {
-            query.columnBuilder.deleteCharAt(query.columnBuilder.length() - 1);
-        }
-        if (query.aggregateColumnBuilder.length() > 0) {
-            query.aggregateColumnBuilder.deleteCharAt(query.aggregateColumnBuilder.length() - 1);
-        }
-        if (query.setBuilder.length() > 0) {
-            query.setBuilder.deleteCharAt(query.setBuilder.length() - 1);
-            query.setBuilder.insert(0, "set ");
-        }
-        if (query.whereBuilder.length() > 0) {
-            query.whereBuilder.delete(query.whereBuilder.length() - 5, query.whereBuilder.length());
-            query.whereBuilder.insert(0, "where ");
-        }
-        if ("group by ".equals(query.groupByBuilder.toString())) {
-            query.groupByBuilder.setLength(0);
-        } else {
-            query.groupByBuilder.deleteCharAt(query.groupByBuilder.length() - 1);
-        }
-        if (query.orderByBuilder.length() > 0) {
-            query.orderByBuilder.deleteCharAt(query.orderByBuilder.length() - 1);
-            query.orderByBuilder.insert(0, "order by ");
-        }
-        //处理所有子查询的where语句
-        for (SubQuery subQuery : query.subQueryList) {
-            if (subQuery.whereBuilder.length() > 0) {
-                subQuery.whereBuilder.delete(subQuery.whereBuilder.length() - 5, subQuery.whereBuilder.length());
+        if(!hasExecute){
+            if (query.columnBuilder.length() > 0) {
+                query.columnBuilder.deleteCharAt(query.columnBuilder.length() - 1);
             }
-        }
-        //处理所有union
-        for(AbstractCondition condition:query.unionList){
-            condition.execute();
-        }
-        for(AbstractCondition condition:query.orList){
-            condition.execute();
-            condition.query.whereBuilder.delete(0,5);
+            if (query.aggregateColumnBuilder.length() > 0) {
+                query.aggregateColumnBuilder.deleteCharAt(query.aggregateColumnBuilder.length() - 1);
+            }
+            if (query.setBuilder.length() > 0) {
+                query.setBuilder.deleteCharAt(query.setBuilder.length() - 1);
+                query.setBuilder.insert(0, "set ");
+            }
+            if (query.whereBuilder.length() > 0) {
+                query.whereBuilder.delete(query.whereBuilder.length() - 5, query.whereBuilder.length());
+                query.whereBuilder.insert(0, "where ");
+            }
+            if ("group by ".equals(query.groupByBuilder.toString())) {
+                query.groupByBuilder.setLength(0);
+            } else {
+                query.groupByBuilder.deleteCharAt(query.groupByBuilder.length() - 1);
+            }
+            if (query.orderByBuilder.length() > 0) {
+                query.orderByBuilder.deleteCharAt(query.orderByBuilder.length() - 1);
+                query.orderByBuilder.insert(0, "order by ");
+            }
+            //处理所有子查询的where语句
+            for (SubQuery subQuery : query.subQueryList) {
+                if (subQuery.whereBuilder.length() > 0) {
+                    subQuery.whereBuilder.delete(subQuery.whereBuilder.length() - 5, subQuery.whereBuilder.length());
+                }
+            }
+            //处理所有union
+            for(AbstractCondition condition:query.unionList){
+                condition.execute();
+            }
+            for(AbstractCondition condition:query.orList){
+                condition.execute();
+                condition.query.whereBuilder.delete(0,5);
+            }
+            hasExecute = true;
         }
 
         AbstractResponse abstractResponse = null;
