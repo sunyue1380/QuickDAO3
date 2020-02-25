@@ -4,7 +4,7 @@ QuickDAO is a Java ORM Framework which is quick and easy to use.
 
 # document
 
-[En](http://quickdao.schoolwow.cn/en) | [中文](http://quickdao.schoolwow.cn/zh-hans)
+[En](https://sunyue1380.github.io) | [中文](https://sunyue1380.github.io)
 
 # feature
 
