@@ -15,6 +15,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.JarURLConnection;
 import java.net.URL;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -215,9 +220,10 @@ public class DefaultTableDefiner implements TableDefiner{
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         URL url = classLoader.getResource(packageNamePath);
         if (url == null) {
-            throw new IllegalArgumentException("无法识别的包路径:" + packageNamePath);
+            logger.warn("[实体类路径不存在]{}",packageNamePath);
+            return new ArrayList<>();
         }
-        List<Class> classList = new ArrayList<>();
+        final List<Class> classList = new ArrayList<>();
         switch (url.getProtocol()) {
             case "file": {
                 File file = new File(url.getFile());
@@ -226,23 +232,25 @@ public class DefaultTableDefiner implements TableDefiner{
                 if (!file.isDirectory()) {
                     throw new IllegalArgumentException("包名不是合法的文件夹!" + url.getFile());
                 }
-                Stack<File> stack = new Stack<>();
-                stack.push(file);
-
                 String indexOfString = packageName.replace(".", "/");
-                while (!stack.isEmpty()) {
-                    file = stack.pop();
-                    for (File f : file.listFiles()) {
-                        if (f.isDirectory()) {
-                            stack.push(f);
-                        } else if (f.isFile() && f.getName().endsWith(".class")) {
+                Files.walkFileTree(file.toPath(),new SimpleFileVisitor<Path>(){
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                            throws IOException
+                    {
+                        File f = file.toFile();
+                        if(f.getName().endsWith(".class")){
                             String path = f.getAbsolutePath().replace("\\", "/");
                             int startIndex = path.indexOf(indexOfString);
                             String className = path.substring(startIndex, path.length() - 6).replace("/", ".");
-                            classList.add(Class.forName(className));
+                            try {
+                                classList.add(Class.forName(className));
+                            } catch (ClassNotFoundException e) {
+                                logger.warn("[实体类不存在]{}",className);
+                            }
                         }
+                        return FileVisitResult.CONTINUE;
                     }
-                }
+                });
             }
             break;
             case "jar": {
@@ -299,8 +307,7 @@ public class DefaultTableDefiner implements TableDefiner{
             }
             return result;
         });
-        classList = stream.collect(Collectors.toList());
-        return classList;
+        return stream.collect(Collectors.toList());
     }
 
     /**
