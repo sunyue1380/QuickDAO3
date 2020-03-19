@@ -55,6 +55,14 @@ public class Property {
      */
     public String comment;
     /**
+     * 是否填充插入时间
+     */
+    public boolean createdAt;
+    /**
+     * 是否填充更新时间
+     */
+    public boolean updateAt;
+    /**
      * 外键关联
      */
     public ForeignKey foreignKey;

@@ -69,13 +69,22 @@ public class DAOTest extends BaseDAOTest{
     }
 
     private void singleInsert() {
-        Person person = new Person();
-        person.setFirstName("Bill");
-        person.setLastName("Gates");
-        person.setAddress("Xuanwumen 10");
-        person.setCity("Beijing");
-        int effect = dao.insert(person);
-        Assert.assertEquals(1, effect);
+        {
+            Person person = new Person();
+            person.setFirstName("Bill");
+            person.setLastName("Gates");
+            person.setAddress("Xuanwumen 10");
+            person.setCity("Beijing");
+            int effect = dao.insert(person);
+            Assert.assertEquals(1, effect);
+        }
+        {
+            Person person = dao.fetch(Person.class,1);
+            Assert.assertNotNull(person.getCreatedAt());
+            Assert.assertNotNull(person.getUpdatedAt());
+            Assert.assertEquals(true,person.getCreatedAt().getTime()-System.currentTimeMillis()<1000);
+            Assert.assertEquals(true,person.getUpdatedAt().getTime()-System.currentTimeMillis()<1000);
+        }
     }
 
     private void multiInsert() {
@@ -111,11 +120,18 @@ public class DAOTest extends BaseDAOTest{
     }
 
     private void updateByUniqueKey() {
-        Person person = new Person();
-        person.setLastName("Gates");
-        person.setAddress("Xuanwumen 11");
-        int effect = dao.update(person);
-        Assert.assertEquals(1, effect);
+        {
+            Person person = new Person();
+            person.setLastName("Gates");
+            person.setAddress("Xuanwumen 11");
+            int effect = dao.update(person);
+            Assert.assertEquals(1, effect);
+        }
+        {
+            Person person = dao.fetch(Person.class,"lastName","Gates");
+            Assert.assertEquals(true,System.currentTimeMillis()-person.getCreatedAt().getTime()<1000);
+            Assert.assertEquals(true,System.currentTimeMillis()-person.getUpdatedAt().getTime()<1000);
+        }
     }
 
     private void updateById() {

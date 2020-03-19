@@ -1,9 +1,10 @@
 package cn.schoolwow.quickdao.entity;
 
-import cn.schoolwow.quickdao.annotation.ColumnType;
-import cn.schoolwow.quickdao.annotation.Comment;
-import cn.schoolwow.quickdao.annotation.Constraint;
-import cn.schoolwow.quickdao.annotation.Id;
+import cn.schoolwow.quickdao.annotation.*;
+
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Comment("人")
 public class Person {
@@ -18,6 +19,12 @@ public class Person {
     private String address;
     @ColumnType("varchar(255)")
     private String city;
+
+    @TableField(createdAt = true)
+    private Timestamp createdAt;
+
+    @TableField(updatedAt = true)
+    private Timestamp updatedAt;
 
     private Order order;
 
@@ -67,5 +74,21 @@ public class Person {
 
     public void setOrder(Order order) {
         this.order = order;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Timestamp getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Timestamp updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

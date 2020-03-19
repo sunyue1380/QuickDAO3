@@ -15,6 +15,9 @@ public class PostgreTableBuilder extends AbstractTableBuilder {
         super(quickDAOConfig);
         fieldMapping.put("byte", "smallint");
         fieldMapping.put("date", "timestamp");
+        fieldMapping.put("calendar", "timestamp");
+        fieldMapping.put("localdate", "timestamp");
+        fieldMapping.put("localdatetime", "timestamp");
         fieldMapping.put("float", "real");
         fieldMapping.put("double", "double precision");
     }
