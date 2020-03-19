@@ -6,8 +6,14 @@ import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
 import cn.schoolwow.quickdao.util.StringUtil;
 
+import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
 
 public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLBuilder{
 
@@ -158,6 +164,9 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             if (property.id&&property.autoIncrement) {
                 continue;
             }
+            if(property.createdAt||property.updateAt){
+                setCurrentDateTime(property,instance);
+            }
             setParameter(instance, property, preparedStatement, parameterIndex,sqlBuilder);
             parameterIndex++;
         }
@@ -175,6 +184,9 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             builder.append("update " + quickDAOConfig.database.escape(entity.tableName) + " set ");
             for (Property property : entity.properties) {
                 if (property.id || property.unique) {
+                    continue;
+                }
+                if(property.createdAt){
                     continue;
                 }
                 builder.append(quickDAOConfig.database.escape(property.column) + " = ?,");
@@ -205,6 +217,12 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             if (property.id || property.unique) {
                 continue;
             }
+            if(property.createdAt){
+                continue;
+            }
+            if(property.updateAt){
+                setCurrentDateTime(property,instance);
+            }
             setParameter(instance, property, preparedStatement, parameterIndex,sqlBuilder);
             parameterIndex++;
         }
@@ -230,6 +248,9 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
                 if (property.id) {
                     continue;
                 }
+                if(property.createdAt){
+                    continue;
+                }
                 builder.append(quickDAOConfig.database.escape(property.column) + "=?,");
             }
             builder.deleteCharAt(builder.length() - 1);
@@ -252,10 +273,36 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             if (property.id) {
                 continue;
             }
+            if(property.createdAt){
+                continue;
+            }
+            if(property.updateAt){
+                setCurrentDateTime(property,instance);
+            }
             setParameter(instance, property, preparedStatement, parameterIndex,sqlBuilder);
             parameterIndex++;
         }
         //再设置id属性
         setParameter(instance, entity.id , preparedStatement, parameterIndex,sqlBuilder);
+    }
+
+    /**
+     * 设置字段值为当前日期
+     * @param property 字段属性
+     * @param instance 实例
+     * */
+    private void setCurrentDateTime(Property property, Object instance) throws Exception {
+        Field field = property.entity.clazz.getDeclaredField(property.name);
+        field.setAccessible(true);
+        switch(property.simpleTypeName){
+            case "date":{field.set(instance,field.getType().getConstructor(long.class).newInstance(System.currentTimeMillis()));}break;
+            case "timestamp":{field.set(instance,new Timestamp(System.currentTimeMillis()));}break;
+            case "calendar":{field.set(instance, Calendar.getInstance());}break;
+            case "localdate":{field.set(instance, LocalDate.now());}break;
+            case "localdatetime":{field.set(instance, LocalDateTime.now());}break;
+            default:{
+                logger.warn("[不支持的日期类型]{},目前支持的类型为Date,Calendar,LocalDate,LocalDateTime!",property.simpleTypeName);
+            };break;
+        }
     }
 }
