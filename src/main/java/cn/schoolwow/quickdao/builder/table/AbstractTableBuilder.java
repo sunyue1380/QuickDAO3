@@ -34,6 +34,9 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         fieldMapping.put("double", "double");
         fieldMapping.put("date", "datetime");
         fieldMapping.put("time", "time");
+        fieldMapping.put("calendar", "datetime");
+        fieldMapping.put("localdate", "datetime");
+        fieldMapping.put("localdatetime", "datetime");
         fieldMapping.put("timestamp", "timestamp");
     }
 

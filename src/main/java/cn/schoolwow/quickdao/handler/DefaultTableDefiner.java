@@ -153,6 +153,11 @@ public class DefaultTableDefiner implements TableDefiner{
                             property.id = true;
                             property.autoIncrement = id.autoIncrement();
                         }
+                        TableField tableField = field.getDeclaredAnnotation(TableField.class);
+                        if(null!=tableField){
+                            property.createdAt = tableField.createdAt();
+                            property.updateAt = tableField.updatedAt();
+                        }
                         property.index = field.getDeclaredAnnotation(Index.class) != null;
                         if(null!=field.getDeclaredAnnotation(Comment.class)){
                             property.comment = field.getDeclaredAnnotation(Comment.class).value();
