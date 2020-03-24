@@ -58,7 +58,10 @@ public class AbstractSQLBuilder implements SQLBuilder{
     protected static void setParameter(Object parameter, PreparedStatement ps, int parameterIndex, StringBuilder sqlBuilder) throws SQLException {
         ps.setObject(parameterIndex, parameter);
         switch (parameter.getClass().getSimpleName().toLowerCase()) {
-            case "boolean": {}
+            case "boolean": {
+                Boolean bool = Boolean.parseBoolean(parameter.toString());
+                replaceFirst(sqlBuilder,bool?"1":"0");
+            }break;
             case "int": {}
             case "integer":{}
             case "float":{}

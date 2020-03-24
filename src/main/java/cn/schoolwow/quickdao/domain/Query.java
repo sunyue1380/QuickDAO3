@@ -44,7 +44,11 @@ public class Query implements Serializable {
     /**
      * 分组查询
      */
-    public StringBuilder groupByBuilder = new StringBuilder("group by ");
+    public StringBuilder groupByBuilder = new StringBuilder();
+    /**
+     * having查询
+     */
+    public StringBuilder havingBuilder = new StringBuilder();
     /**
      * 排序
      */
@@ -81,6 +85,10 @@ public class Query implements Serializable {
      * 更新参数
      */
     public List updateParameterList = new ArrayList();
+    /**
+     * having参数
+     */
+    public List havingParameterList = new ArrayList();
     /**
      * 分页对象
      * */
