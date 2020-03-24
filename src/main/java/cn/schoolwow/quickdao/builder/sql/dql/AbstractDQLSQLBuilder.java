@@ -120,16 +120,24 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         if (query.columnBuilder.length() > 0) {
             builder.append(" "+query.columnBuilder.toString() + ",");
         }
-        builder.append(query.aggregateColumnBuilder.toString() + " from " + quickDAOConfig.database.escape(query.entity.tableName) + " as "+Condition.mainTableAlias);
+        if(query.aggregateColumnBuilder.length()>0){
+            builder.append(query.aggregateColumnBuilder.toString());
+        }else{
+            builder.deleteCharAt(builder.length()-1);
+        }
+        builder.append(" from " + quickDAOConfig.database.escape(query.entity.tableName) + " as "+Condition.mainTableAlias);
         addJoinTableStatement(query,builder);
         addWhereStatement(query,builder);
         query.orderByBuilder = new StringBuilder(query.orderByBuilder.toString().replace(Condition.mainTableAlias+".",""));
-        builder.append(" " + query.groupByBuilder.toString() + " " + query.orderByBuilder.toString() + " " + query.limit);
+        builder.append(" " + query.groupByBuilder.toString() + " " + query.havingBuilder.toString() + " " + query.orderByBuilder.toString() + " " + query.limit);
 
         PreparedStatement ps = connection.prepareStatement(builder.toString());
         builder = new StringBuilder(builder.toString().replace("?",PLACEHOLDER));
         addMainTableParameters(ps,query,builder);
         addJoinTableParameters(ps,query,builder);
+        for (Object parameter : query.havingParameterList) {
+            setParameter(parameter,ps,query.parameterIndex++,builder);
+        }
         query.sql = builder.toString();
         logger.debug("[获取聚合列表]执行SQL:{}", builder.toString());
         return ps;

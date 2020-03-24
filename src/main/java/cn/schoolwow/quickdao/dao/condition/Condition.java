@@ -90,12 +90,13 @@ public interface Condition<T> {
      *     <li>实体类字段使用驼峰式命名映射到数据库中.例如字段<b>firstName</b>映射到数据库后字段名为<b>first_name</b></li>
      *     <li>对于所有的查询语句,主表别名为t,使用join方法添加的表按照添加顺序依次为t1,t2,t3......</li>
      *     <li>返回字段名称均为<b>表别名_字段名</b>.例如主表中的firstName字段,则对应数据库返回列名为<b>t_first_name</b></li>
-     *     <li>本方法的query参数将直接拼接到sql字符上,不会做任何转义操作,请注入SQL注入安全相关问题</li>
+     *     <li>本方法的query参数将直接拼接到sql字符上,不会做任何转义操作,请注意SQL注入等安全问题</li>
      * </ol>
      * </p>
-     * @param query 子查询条件
+     * @param query 子查询条件,可使用?占位符
+     * @param parameterList 占位符参数列表
      */
-    Condition<T> addQuery(String query);
+    Condition<T> addQuery(String query, List parameterList);
 
     /**
      * 添加字段查询
@@ -181,19 +182,19 @@ public interface Condition<T> {
     /**
      * <p>添加聚合字段,用于{@link cn.schoolwow.quickdao.dao.response.Response#getAggerateList()}</p>
      * <p>默认返回字段名为<b>aggerate(field)</b></p>
-     * @param aggerate 聚合函数,例如COUNT,SUM,MAX,MIN,AVG
+     * @param aggregate 聚合函数,例如COUNT,SUM,MAX,MIN,AVG
      * @param field    字段名
      */
-    Condition<T> addAggerate(String aggerate, String field);
+    Condition<T> addAggregate(String aggregate, String field);
 
     /**
      * <p>添加聚合字段,用于{@link cn.schoolwow.quickdao.dao.response.Response#getAggerateList()}</p>
      *
-     * @param aggerate COUNT,SUM,MAX,MIN,AVG
+     * @param aggregate COUNT,SUM,MAX,MIN,AVG
      * @param field    字段名
      * @param alias    聚合字段别名
      */
-    Condition<T> addAggerate(String aggerate, String field, String alias);
+    Condition<T> addAggregate(String aggregate, String field, String alias);
 
     /**
      * 添加分组查询
@@ -206,6 +207,57 @@ public interface Condition<T> {
      * @param fields 分组字段
      */
     Condition<T> groupBy(String[] fields);
+
+    /**
+     * 添加having查询,最终拼接为 {{aggregate}}({{field}}) = {{value}}
+     * @param aggregate 聚合函数
+     * @param field 字段名
+     * @param value 字段值
+     */
+    Condition<T> having(String aggregate, String field, Object value);
+
+    /**
+     * 添加having查询,最终拼接为 {{field}} {{operator}} {{aggregate}}({{targetField}})
+     * @param sourceAggregate 聚合函数
+     * @param sourceField 字段名
+     * @param operator 操作符,可为<b>></b>,<b>>=</b>,<b>=</b>,<b><</b><b><=</b>
+     * @param value 字段值
+     */
+    Condition<T> having(String sourceAggregate, String sourceField, String operator, Object value);
+
+    /**
+     * 添加having查询,最终拼接为 {{sourceAggregate}}({{sourceField}}) = {{targetAggregate}}({{targetField}})
+     * @param sourceAggregate 源字段聚合函数,可为null或者空字符串
+     * @param sourceField 源字段
+     * @param targetAggregate 目标字段聚合函数,可为null或者空字符串
+     * @param targetField 目标字段
+     */
+    Condition<T> having(String sourceAggregate, String sourceField, String targetAggregate, String targetField);
+
+    /**
+     * 添加having查询,最终拼接为 {{sourceAggregate}}({{sourceField}}) {{operator}} {{targetAggregate}}({{targetField}})
+     * @param sourceAggregate 源字段聚合函数,可为null或者空字符串
+     * @param sourceField 源字段
+     * @param operator 操作符,可为<b>></b>,<b>>=</b>,<b>=</b>,<b><</b><b><=</b>
+     * @param targetAggregate 目标字段聚合函数,可为null或者空字符串
+     * @param targetField 目标字段
+     */
+    Condition<T> having(String sourceAggregate, String sourceField, String operator, String targetAggregate, String targetField);
+
+    /**
+     * 添加having查询
+     * <p>调用此方法您需要知道以下几点
+     * <ol>
+     *     <li>实体类字段使用驼峰式命名映射到数据库中.例如字段<b>firstName</b>映射到数据库后字段名为<b>first_name</b></li>
+     *     <li>对于所有的查询语句,主表别名为t,使用join方法添加的表按照添加顺序依次为t1,t2,t3......</li>
+     *     <li>返回字段名称均为<b>表别名_字段名</b>.例如主表中的firstName字段,则对应数据库返回列名为<b>t_first_name</b></li>
+     *     <li>本方法的having参数将直接拼接到sql字符上,不会做任何转义操作,请注意SQL注入等安全问题</li>
+     * </ol>
+     * </p>
+     * @param having having查询子句,可使用?占位符
+     * @param parameterList  占位符参数值
+     */
+    Condition<T> addHaving(String having, List parameterList);
 
     /**
      * 关联表查询

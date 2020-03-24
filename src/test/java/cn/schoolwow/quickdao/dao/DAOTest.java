@@ -8,7 +8,6 @@ import cn.schoolwow.quickdao.domain.PageVo;
 import cn.schoolwow.quickdao.entity.Order;
 import cn.schoolwow.quickdao.entity.Person;
 import com.alibaba.fastjson.JSONArray;
-import org.h2.engine.User;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -286,8 +285,10 @@ public class DAOTest extends BaseDAOTest{
         //聚合查询
         {
             Response response = dao.query(Person.class)
-                    .addAggerate("count","id")
-                    .addAggerate("max","id","m(id)")
+                    .addAggregate("count","id")
+                    .addAggregate("max","id","m(id)")
+                    .groupBy("id")
+                    .having("count","id",1)
                     .orderByDesc("m(id)")
                     .execute();
             JSONArray array = response.getAggerateList();
