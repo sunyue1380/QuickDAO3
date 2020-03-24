@@ -127,8 +127,11 @@ public class AbstractCondition<T> implements Condition<T>{
     }
 
     @Override
-    public Condition<T> addQuery(String query) {
+    public Condition<T> addQuery(String query, List parameterList) {
         this.query.whereBuilder.append("(" + query + ") and ");
+        if(null!=parameterList&&!parameterList.isEmpty()){
+            this.query.parameterList.addAll(parameterList);
+        }
         return this;
     }
 
@@ -277,14 +280,14 @@ public class AbstractCondition<T> implements Condition<T>{
     }
 
     @Override
-    public Condition<T> addAggerate(String aggerate, String field) {
+    public Condition<T> addAggregate(String aggerate, String field) {
         field = StringUtil.Camel2Underline(field);
         String alias = aggerate + "(" + field + ")";
-        return addAggerate(aggerate,field,alias);
+        return addAggregate(aggerate,field,alias);
     }
 
     @Override
-    public Condition<T> addAggerate(String aggerate, String field, String alias) {
+    public Condition<T> addAggregate(String aggerate, String field, String alias) {
         field = StringUtil.Camel2Underline(field);
         query.aggregateColumnBuilder.append(aggerate + "("+mainTableAlias+"." + query.quickDAOConfig.database.escape(field) + ") as " + query.quickDAOConfig.database.escape(alias) + ",");
         return this;
@@ -300,6 +303,50 @@ public class AbstractCondition<T> implements Condition<T>{
     public Condition<T> groupBy(String[] fields) {
         for(String field:fields){
             groupBy(field);
+        }
+        return this;
+    }
+
+    public Condition<T> having(String aggregate, String field, Object value){
+        return having(aggregate,field,"=",value);
+    }
+
+    public Condition<T> having(String sourceAggregate, String sourceField, String operator, Object value){
+        if(null==sourceAggregate||sourceAggregate.isEmpty()){
+            query.havingBuilder.append(mainTableAlias + "." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(sourceField)));
+        }else{
+            query.havingBuilder.append(sourceAggregate+"(" + mainTableAlias + "." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(sourceField)) +")");
+        }
+        query.havingBuilder.append(" "+operator+" ? and ");
+        query.havingParameterList.add(value);
+        return this;
+    }
+
+    public Condition<T> having(String sourceAggregate, String sourceField, String targetAggregate, String targetField){
+        return having(sourceAggregate,sourceField,"=",targetAggregate,targetField);
+    }
+
+    public Condition<T> having(String sourceAggregate, String sourceField, String operator, String targetAggregate, String targetField){
+        if(null==sourceAggregate||sourceAggregate.isEmpty()){
+            query.havingBuilder.append(mainTableAlias + "." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(sourceField)));
+        }else{
+            query.havingBuilder.append(sourceAggregate+"(" + mainTableAlias + "." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(sourceField)) +")");
+        }
+        query.havingBuilder.append(" "+operator+" ");
+        if(null==targetAggregate||targetAggregate.isEmpty()){
+            query.havingBuilder.append(mainTableAlias + "." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(targetField)));
+        }else{
+            query.havingBuilder.append(targetAggregate+"(" + mainTableAlias + "." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(targetField)) +")");
+        }
+        query.havingBuilder.append(" and ");
+        return this;
+    }
+
+    @Override
+    public Condition<T> addHaving(String having, List parameterList) {
+        query.havingBuilder.append("(" + having + ") and ");
+        if(null!=parameterList&&parameterList.isEmpty()){
+            query.havingParameterList.addAll(parameterList);
         }
         return this;
     }
@@ -436,10 +483,13 @@ public class AbstractCondition<T> implements Condition<T>{
                 query.whereBuilder.delete(query.whereBuilder.length() - 5, query.whereBuilder.length());
                 query.whereBuilder.insert(0, "where ");
             }
-            if ("group by ".equals(query.groupByBuilder.toString())) {
-                query.groupByBuilder.setLength(0);
-            } else {
-                query.groupByBuilder.deleteCharAt(query.groupByBuilder.length() - 1);
+            if (query.groupByBuilder.length() > 0) {
+                query.groupByBuilder.deleteCharAt(query.groupByBuilder.length()-1);
+                query.groupByBuilder.insert(0, "group by ");
+            }
+            if (query.havingBuilder.length() > 0) {
+                query.havingBuilder.delete(query.havingBuilder.length() - 5, query.havingBuilder.length());
+                query.havingBuilder.insert(0, "having ");
             }
             if (query.orderByBuilder.length() > 0) {
                 query.orderByBuilder.deleteCharAt(query.orderByBuilder.length() - 1);
