@@ -20,6 +20,10 @@ public class QuickDAOConfig {
      */
     public Map<String, String> packageNameMap = new HashMap<>();
     /**
+     * 待扫描类
+     */
+    public Map<Class, String> entityClassMap = new HashMap<>();
+    /**
      * 要忽略的类
      */
     public List<Class> ignoreClassList;

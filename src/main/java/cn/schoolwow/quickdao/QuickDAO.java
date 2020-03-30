@@ -59,6 +59,25 @@ public class QuickDAO {
     }
 
     /**
+     * 待扫描实体类包名,支持嵌套扫描
+     * @param entityClass 实体类
+     * */
+    public QuickDAO entity(Class entityClass) {
+        quickDAOConfig.entityClassMap.put(entityClass,"");
+        return this;
+    }
+
+    /**
+     * 待扫描实体类包名,支持嵌套扫描
+     * @param entityClass 实体类
+     * @param prefix 表前缀
+     * */
+    public QuickDAO entity(Class entityClass, String prefix) {
+        quickDAOConfig.entityClassMap.put(entityClass,prefix);
+        return this;
+    }
+
+    /**
      * 忽略包名
      * @param ignorePackageName 扫描实体类时需要忽略的包
      * */
