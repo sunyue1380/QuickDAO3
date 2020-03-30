@@ -51,6 +51,12 @@ public class DefaultTablePropertyDefiner implements TablePropertyDefiner{
     }
 
     @Override
+    public TablePropertyDefiner index(boolean index) {
+        property.index = index;
+        return this;
+    }
+
+    @Override
     public TablePropertyDefiner primaryKey(boolean primaryKey) {
         property.id = true;
         return this;
