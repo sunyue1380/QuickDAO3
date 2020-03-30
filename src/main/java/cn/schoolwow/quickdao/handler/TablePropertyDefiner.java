@@ -14,6 +14,8 @@ public interface TablePropertyDefiner {
     TablePropertyDefiner notNull(boolean notNull);
     /**是否唯一*/
     TablePropertyDefiner unique(boolean unique);
+    /**是否建立索引*/
+    TablePropertyDefiner index(boolean index);
     /**是否主键*/
     TablePropertyDefiner primaryKey(boolean primaryKey);
     /**check约束*/

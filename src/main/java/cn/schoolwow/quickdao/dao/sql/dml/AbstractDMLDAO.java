@@ -35,7 +35,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
             effect = ps.executeUpdate();
             if (effect > 0) {
                 Property property = dmlsqlBuilder.quickDAOConfig.entityMap.get(instance.getClass().getName()).id;
-                if(property.autoIncrement){
+                if(null!=property&&property.autoIncrement){
                     ResultSet rs = ps.getGeneratedKeys();
                     if (rs.next()) {
                         long id = rs.getLong(1);
