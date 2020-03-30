@@ -77,10 +77,11 @@ public class DefaultTableDefiner implements TableDefiner{
      * 获取实体类信息
      */
     public synchronized void getEntityMap() throws Exception {
-        Set<String> keySet = quickDAOConfig.packageNameMap.keySet();
-        for (String packageName : keySet) {
-            List<Class> classList = scanEntity(packageName);
-            for (Class c : classList) {
+        List<Class> classList = new ArrayList<>();
+        //扫描实体类包
+        for (String packageName : quickDAOConfig.packageNameMap.keySet()) {
+            List<Class> packageClassList = scanEntity(packageName);
+            for (Class c : packageClassList) {
                 Entity entity = new Entity();
                 if(c.getDeclaredAnnotation(TableName.class)!=null){
                     entity.tableName = ((TableName) c.getDeclaredAnnotation(TableName.class)).value();
@@ -93,89 +94,103 @@ public class DefaultTableDefiner implements TableDefiner{
                 entity.clazz = c;
                 quickDAOConfig.entityMap.put(c.getName(), entity);
             }
-            for (Class c : classList) {
-                Entity entity = quickDAOConfig.entityMap.get(c.getName());
-                entity.className = c.getSimpleName();
-                if (c.getDeclaredAnnotation(Comment.class) != null) {
-                    Comment comment = (Comment) c.getDeclaredAnnotation(Comment.class);
-                    entity.comment = comment.value();
-                }
-                //属性列表
-                List<Property> propertyList = new ArrayList<>();
-                //实体包类列表
-                List<Field> compositFieldList = new ArrayList<>();
-                //添加字段信息
-                {
-                    Field[] fields = c.getDeclaredFields();
-                    Field.setAccessible(fields, true);
-                    for(Field field:fields){
-                        if (field.getDeclaredAnnotation(Ignore.class) != null) {
-                            logger.debug("[跳过实体属性]{},该属性被Ignore注解修饰!", field.getName());
-                            continue;
-                        }
-                        if(Modifier.isStatic(field.getModifiers())||Modifier.isFinal(field.getModifiers())){
-                            logger.debug("[跳过常量或静态变量]{},该属性被static或者final修饰!", field.getName());
-                            continue;
-                        }
-                        //跳过实体包类
-                        if (isCompositProperty(field.getType())) {
-                            compositFieldList.add(field);
-                            continue;
-                        }
-                        //跳过List类型和数组类型
-                        if(field.getType().isArray()||(!field.getType().isPrimitive()&&isCollection(field.getType()))){
-                            continue;
-                        }
-                        Property property = new Property();
-                        if (null!=field.getAnnotation(ColumnName.class)) {
-                            property.column = field.getAnnotation(ColumnName.class).value();
-                        }else{
-                            property.column = StringUtil.Camel2Underline(field.getName());
-                        }
-                        if(null!=field.getAnnotation(ColumnType.class)){
-                            property.columnType = field.getAnnotation(ColumnType.class).value();
-                        }
-                        property.name = field.getName();
-                        property.simpleTypeName = field.getType().getSimpleName().toLowerCase();
-                        Constraint constraint = field.getDeclaredAnnotation(Constraint.class);
-                        if(null!=constraint){
-                            property.notNull = constraint.notNull();
-                            property.unique = constraint.unique();
-                            property.check = constraint.check();
-                            property.defaultValue = constraint.defaultValue();
-                        }
-                        if("id".equals(property.column)){
-                            property.id = true;
-                            property.autoIncrement = true;
-                        }
-                        Id id = field.getDeclaredAnnotation(Id.class);
-                        if(null!=id){
-                            property.id = true;
-                            property.autoIncrement = id.autoIncrement();
-                        }
-                        TableField tableField = field.getDeclaredAnnotation(TableField.class);
-                        if(null!=tableField){
-                            property.createdAt = tableField.createdAt();
-                            property.updateAt = tableField.updatedAt();
-                        }
-                        property.index = field.getDeclaredAnnotation(Index.class) != null;
-                        if(null!=field.getDeclaredAnnotation(Comment.class)){
-                            property.comment = field.getDeclaredAnnotation(Comment.class).value();
-                        }
-                        property.foreignKey = field.getDeclaredAnnotation(ForeignKey.class);
-                        property.entity = entity;
-                        if(property.id){
-                            entity.id = property;
-                        }
-                        propertyList.add(property);
+            classList.addAll(packageClassList);
+        }
+        //扫描指定实体类
+        for(Class c:quickDAOConfig.entityClassMap.keySet()){
+            Entity entity = new Entity();
+            if(quickDAOConfig.entityClassMap.get(c).isEmpty()){
+                entity.tableName = StringUtil.Camel2Underline(c.getSimpleName());
+            }else{
+                entity.tableName = quickDAOConfig.entityClassMap.get(c)+"@"+StringUtil.Camel2Underline(c.getSimpleName());
+            }
+            entity.clazz = c;
+            quickDAOConfig.entityMap.put(c.getName(), entity);
+            classList.add(c);
+        }
+        for (Class c : classList) {
+            Entity entity = quickDAOConfig.entityMap.get(c.getName());
+            entity.className = c.getSimpleName();
+            if (c.getDeclaredAnnotation(Comment.class) != null) {
+                Comment comment = (Comment) c.getDeclaredAnnotation(Comment.class);
+                entity.comment = comment.value();
+            }
+            //属性列表
+            List<Property> propertyList = new ArrayList<>();
+            //实体包类列表
+            List<Field> compositFieldList = new ArrayList<>();
+            //添加字段信息
+            {
+                Field[] fields = c.getDeclaredFields();
+                Field.setAccessible(fields, true);
+                for(Field field:fields){
+                    if (field.getDeclaredAnnotation(Ignore.class) != null) {
+                        logger.debug("[跳过实体属性]{},该属性被Ignore注解修饰!", field.getName());
+                        continue;
                     }
-                }
-                entity.properties = propertyList.toArray(new Property[0]);
-                if (compositFieldList.size() > 0) {
-                    entity.compositFields = compositFieldList.toArray(new Field[0]);
+                    if(Modifier.isStatic(field.getModifiers())||Modifier.isFinal(field.getModifiers())){
+                        logger.debug("[跳过常量或静态变量]{},该属性被static或者final修饰!", field.getName());
+                        continue;
+                    }
+                    //跳过实体包类
+                    if (isCompositProperty(field.getType())) {
+                        compositFieldList.add(field);
+                        continue;
+                    }
+                    //跳过List类型和数组类型
+                    if(field.getType().isArray()||(!field.getType().isPrimitive()&&isCollection(field.getType()))){
+                        continue;
+                    }
+                    Property property = new Property();
+                    if (null!=field.getAnnotation(ColumnName.class)) {
+                        property.column = field.getAnnotation(ColumnName.class).value();
+                    }else{
+                        property.column = StringUtil.Camel2Underline(field.getName());
+                    }
+                    if(null!=field.getAnnotation(ColumnType.class)){
+                        property.columnType = field.getAnnotation(ColumnType.class).value();
+                    }
+                    property.name = field.getName();
+                    property.simpleTypeName = field.getType().getSimpleName().toLowerCase();
+                    Constraint constraint = field.getDeclaredAnnotation(Constraint.class);
+                    if(null!=constraint){
+                        property.notNull = constraint.notNull();
+                        property.unique = constraint.unique();
+                        property.check = constraint.check();
+                        property.defaultValue = constraint.defaultValue();
+                    }
+                    if("id".equals(property.column)){
+                        property.id = true;
+                        property.autoIncrement = true;
+                    }
+                    Id id = field.getDeclaredAnnotation(Id.class);
+                    if(null!=id){
+                        property.id = true;
+                        property.autoIncrement = id.autoIncrement();
+                    }
+                    TableField tableField = field.getDeclaredAnnotation(TableField.class);
+                    if(null!=tableField){
+                        property.createdAt = tableField.createdAt();
+                        property.updateAt = tableField.updatedAt();
+                    }
+                    property.index = field.getDeclaredAnnotation(Index.class) != null;
+                    if(null!=field.getDeclaredAnnotation(Comment.class)){
+                        property.comment = field.getDeclaredAnnotation(Comment.class).value();
+                    }
+                    property.foreignKey = field.getDeclaredAnnotation(ForeignKey.class);
+                    property.entity = entity;
+                    if(property.id){
+                        entity.id = property;
+                    }
+                    propertyList.add(property);
                 }
             }
+            entity.properties = propertyList.toArray(new Property[0]);
+            if (compositFieldList.size() > 0) {
+                entity.compositFields = compositFieldList.toArray(new Field[0]);
+            }
         }
+
         logger.debug("[获取实体信息]实体类个数:{}", quickDAOConfig.entityMap.size());
     }
 
