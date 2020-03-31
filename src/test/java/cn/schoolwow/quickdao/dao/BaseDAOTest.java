@@ -6,7 +6,6 @@ import org.junit.runners.Parameterized;
 
 import javax.sql.DataSource;
 import java.io.File;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -14,7 +13,7 @@ public class BaseDAOTest {
     protected DAO dao;
 
     @Parameterized.Parameters
-    public static Collection prepareData() throws SQLException {
+    public static Collection prepareData() {
         BasicDataSource mysqlDataSource = new BasicDataSource();
         mysqlDataSource.setDriverClassName("com.mysql.jdbc.Driver");
         mysqlDataSource.setUrl("jdbc:mysql://127.0.0.1:3306/quickdao");
@@ -42,8 +41,7 @@ public class BaseDAOTest {
         sqlServerDataSource.setPassword("aa1122335");
 
         //各种数据库产品
-//        DataSource[] dataSources = {mysqlDataSource, sqliteDataSource, h2DataSource, postgreDataSource,sqliteDataSource};
-        DataSource[] dataSources = {postgreDataSource};
+        DataSource[] dataSources = {mysqlDataSource, sqliteDataSource, h2DataSource, postgreDataSource,sqliteDataSource};
         Object[][] data = new Object[dataSources.length][1];
         for (int i = 0; i < dataSources.length; i++) {
             DAO dao = QuickDAO.newInstance().dataSource(dataSources[i])
