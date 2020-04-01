@@ -105,10 +105,6 @@ List<User> userList = dao.query(User.class)
     .getList();
 ```
 
-# 详细文档
-
-### [点此访问](https://sunyue1380.github.io/QuickDAO3)
-
 # 反馈
 
 目前QuickDAO还不成熟,还在不断完善中.若有问题请提交Issue或者发送邮件到648823596@qq.com,作者将第一时间跟进并努力解决.同时欢迎热心认识提交PR,共同完善QuickDAO项目!
