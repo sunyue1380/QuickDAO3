@@ -168,6 +168,13 @@ public interface Condition<T> {
 
     /**
      * 添加Or查询条件
+     * <p>在返回Condition对象上添加的查询条件,会以or(......)的方式拼接到SQL字符串上.</p>
+     * <code>
+     *     Condition or = dao.query(User.class).or();<br/>
+     *     or.addQuery("username","quickdao").addQuery("password","123456");
+     * </code>
+     * <p>以上代码最终拼接字符串为</p>
+     * <code>or (t.username = 'quickado' and t.password = '123456')</code>
      */
     Condition<T> or();
 

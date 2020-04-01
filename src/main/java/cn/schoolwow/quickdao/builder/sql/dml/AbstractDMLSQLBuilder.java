@@ -35,12 +35,14 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
         String sql = insert(instances[0].getClass());
         connection.setAutoCommit(false);
         PreparedStatement ps = connection.prepareStatement(sql);
+        StringBuilder builder = new StringBuilder();
         for(Object instance : instances){
             StringBuilder sqlBuilder = new StringBuilder(sql.replace("?", PLACEHOLDER));
             insert(ps,instance,sqlBuilder);
-            logger.trace("[批量插入对象]执行SQL:{}",sqlBuilder.toString());
+            builder.append(sqlBuilder.toString()+";");
             ps.addBatch();
         }
+        logger.debug("[批量插入对象]执行SQL:{}",builder.toString());
         return ps;
     }
 
@@ -50,7 +52,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
         StringBuilder sqlBuilder = new StringBuilder(sql.replace("?", PLACEHOLDER));
         PreparedStatement ps = connection.prepareStatement(sql);
         updateByUniqueKey(ps,instance,sqlBuilder);
-        logger.debug("[更新对象][根据唯一性约束]执行SQL:{}",sqlBuilder.toString());
+        logger.debug("[根据唯一性约束更新对象]执行SQL:{}",sqlBuilder.toString());
         return ps;
     }
 
@@ -59,12 +61,14 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
         String sql = updateByUniqueKey(instances[0].getClass());
         connection.setAutoCommit(false);
         PreparedStatement ps = connection.prepareStatement(sql);
+        StringBuilder builder = new StringBuilder();
         for(Object instance : instances){
             StringBuilder sqlBuilder = new StringBuilder(sql.replace("?", PLACEHOLDER));
             updateByUniqueKey(ps,instance,sqlBuilder);
-            logger.trace("[批量更新对象][根据唯一性约束]执行SQL:{}",sqlBuilder.toString());
+            builder.append(sqlBuilder.toString()+";");
             ps.addBatch();
         }
+        logger.debug("[根据唯一性约束批量更新对象]执行SQL:{}",builder.toString());
         return ps;
     }
 
@@ -83,12 +87,14 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
         String sql = updateById(instances[0].getClass());
         connection.setAutoCommit(false);
         PreparedStatement ps = connection.prepareStatement(sql);
+        StringBuilder builder = new StringBuilder();
         for(Object instance : instances){
             StringBuilder sqlBuilder = new StringBuilder(sql.replace("?", PLACEHOLDER));
             updateById(ps,instance,sqlBuilder);
-            logger.trace("[批量更新对象][根据id更新]执行SQL:{}",sqlBuilder.toString());
+            builder.append(sqlBuilder.toString()+";");
             ps.addBatch();
         }
+        logger.debug("[根据id批量更新对象]执行SQL:{}", builder.toString());
         return ps;
     }
 
