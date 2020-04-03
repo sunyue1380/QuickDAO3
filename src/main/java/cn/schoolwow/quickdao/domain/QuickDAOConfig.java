@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
 /**数据源访问配置选项*/
@@ -59,4 +60,8 @@ public class QuickDAOConfig {
      * 数据库信息
      * */
     public Database database;
+    /**
+     * 数据库锁
+     * */
+    public ReentrantLock reentrantLock;
 }
