@@ -41,35 +41,7 @@ public class SQLiteTableBuilder extends AbstractTableBuilder{
                 }
                 propertiesRs.close();
             }
-            //获取索引信息
-            {
-                ResultSet resultSet = connection.prepareStatement("SELECT sql FROM sqlite_master WHERE type='index' and tbl_name = '"+entity.tableName+"';").executeQuery();
-                while (resultSet.next()) {
-                    //判断是普通索引还是唯一性约束
-                    String sql = resultSet.getString(1).toLowerCase();
-                    String[] columns = sql.substring(sql.indexOf("(")+1,sql.indexOf(")")).split(",");
-                    if(sql.contains("unique index")){
-                        for(String column:columns){
-                            for(Property property:propertyList){
-                                if(property.column.equals(column.substring(1,column.length()-1))){
-                                    property.unique = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }else{
-                        for(String column:columns){
-                            for(Property property:propertyList){
-                                if(property.column.equals(column.substring(1,column.length()-1))){
-                                    property.index = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                resultSet.close();
-            }
+            updateTableIndex("SELECT sql FROM sqlite_master WHERE type='index' and tbl_name = '"+entity.tableName+"';",propertyList);
             entity.properties = propertyList.toArray(new Property[0]);
             entityList.add(entity);
         }

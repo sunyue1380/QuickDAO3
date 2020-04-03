@@ -20,7 +20,9 @@ public class SQLDAOInvocationHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if(!method.getDeclaringClass().getName().equals(DQLDAO.class.getName())
-                &&! method.getDeclaringClass().getName().equals(DMLDAO.class.getName())){
+                &&! method.getDeclaringClass().getName().equals(DMLDAO.class.getName())
+                &&! method.getDeclaringClass().getName().equals(SQLDAO.class.getName())
+        ){
             Object result = method.invoke(abstractSQLDAO, args);
             return result;
         }

@@ -42,6 +42,40 @@ public abstract class AbstractTableBuilder implements TableBuilder{
 
     public abstract Entity[] getDatabaseEntity() throws SQLException;
 
+    /**
+     * 更新字段索引信息
+     * @param executeSQL 待执行SQL语句
+     * @param propertyList 字段列表
+     * */
+    public void updateTableIndex(String executeSQL, List<Property> propertyList) throws SQLException{
+        ResultSet resultSet = connection.prepareStatement(executeSQL).executeQuery();
+        while (resultSet.next()) {
+            //判断是普通索引还是唯一性约束
+            String sql = resultSet.getString(1).toLowerCase();
+            String[] columns = sql.substring(sql.indexOf("(")+1,sql.indexOf(")")).toLowerCase().split(",");
+            if(sql.contains("create unique index")){
+                for(String column:columns){
+                    for(Property property:propertyList){
+                        if(property.column.equals(column.substring(1,column.length()-1))){
+                            property.unique = true;
+                            break;
+                        }
+                    }
+                }
+            }else if(sql.contains("create index")){
+                for(String column:columns){
+                    for(Property property:propertyList){
+                        if(property.column.equals(column.substring(1,column.length()-1))){
+                            property.index = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        resultSet.close();
+    }
+
     public abstract String getAutoIncrementSQL(Property property);
 
     public abstract boolean hasTableExists(Entity entity) throws SQLException;

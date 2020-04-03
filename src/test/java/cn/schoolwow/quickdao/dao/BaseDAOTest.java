@@ -41,7 +41,7 @@ public class BaseDAOTest {
         sqlServerDataSource.setPassword("aa1122335");
 
         //各种数据库产品
-        DataSource[] dataSources = {mysqlDataSource, sqliteDataSource, h2DataSource, postgreDataSource,sqliteDataSource};
+        DataSource[] dataSources = {mysqlDataSource, sqliteDataSource, h2DataSource, postgreDataSource};
         Object[][] data = new Object[dataSources.length][1];
         for (int i = 0; i < dataSources.length; i++) {
             DAO dao = QuickDAO.newInstance().dataSource(dataSources[i])
