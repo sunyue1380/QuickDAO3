@@ -3,8 +3,6 @@ package cn.schoolwow.quickdao.entity;
 import cn.schoolwow.quickdao.annotation.*;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Comment("人")
 public class Person {

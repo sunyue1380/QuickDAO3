@@ -3,6 +3,7 @@ package cn.schoolwow.quickdao;
 import cn.schoolwow.quickdao.builder.table.*;
 import cn.schoolwow.quickdao.dao.AbstractDAO;
 import cn.schoolwow.quickdao.dao.DAO;
+import cn.schoolwow.quickdao.dao.SQLiteDAO;
 import cn.schoolwow.quickdao.database.*;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
@@ -193,7 +194,12 @@ public class QuickDAO {
             TableBuilder tableBuilderProxy = (TableBuilder) Proxy.newProxyInstance(Thread.currentThread()
                     .getContextClassLoader(), new Class<?>[]{TableBuilder.class},invocationHandler);
 
-            AbstractDAO dao = new AbstractDAO(tableBuilderProxy,quickDAOConfig);
+            AbstractDAO dao = null;
+            if(quickDAOConfig.database instanceof SQLiteDatabase){
+                dao = new SQLiteDAO(tableBuilderProxy,quickDAOConfig);
+            }else{
+                dao = new AbstractDAO(tableBuilderProxy,quickDAOConfig);
+            }
             return dao;
         }catch (SQLException e){
             throw new SQLRuntimeException(e);
