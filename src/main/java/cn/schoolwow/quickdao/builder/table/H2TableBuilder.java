@@ -1,10 +1,14 @@
 package cn.schoolwow.quickdao.builder.table;
 
 import cn.schoolwow.quickdao.domain.Entity;
+import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class H2TableBuilder extends MySQLTableBuilder{
 
@@ -13,6 +17,41 @@ public class H2TableBuilder extends MySQLTableBuilder{
         fieldMapping.put("long", "BIGINT");
         fieldMapping.put("float", "REAL");
         fieldMapping.put("double", "DOUBLE");
+    }
+
+    @Override
+    public Entity[] getDatabaseEntity() throws SQLException {
+        PreparedStatement tablePs = connection.prepareStatement("show tables;");
+        ResultSet tableRs = tablePs.executeQuery();
+        List<Entity> entityList = new ArrayList<>();
+        while (tableRs.next()) {
+            Entity entity = new Entity();
+            entity.tableName = tableRs.getString(1);
+
+            List<Property> propertyList = new ArrayList<>();
+            //获取所有列
+            {
+                ResultSet propertiesRs = connection.prepareStatement("show columns from " + quickDAOConfig.database.escape(entity.tableName)).executeQuery();
+                while (propertiesRs.next()) {
+                    Property property = new Property();
+                    property.column = propertiesRs.getString("Field");
+                    property.columnType = propertiesRs.getString("Type");
+                    property.notNull = "NO".equals(propertiesRs.getString("Null"));
+                    property.unique = "UNI".equals(propertiesRs.getString("Key"));
+                    if (null != propertiesRs.getString("Default")) {
+                        property.defaultValue = propertiesRs.getString("Default");
+                    }
+                    propertyList.add(property);
+                }
+                propertiesRs.close();
+            }
+            //处理索引
+            updateTableIndex("SELECT SQL FROM INFORMATION_SCHEMA.INDEXES WHERE TABLE_NAME = '"+entity.tableName.toUpperCase()+"'",propertyList);
+            entity.properties = propertyList.toArray(new Property[0]);
+            entityList.add(entity);
+        }
+        tableRs.close();
+        return entityList.toArray(new Entity[0]);
     }
 
     @Override
