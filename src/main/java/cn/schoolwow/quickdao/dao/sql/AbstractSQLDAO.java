@@ -3,6 +3,7 @@ package cn.schoolwow.quickdao.dao.sql;
 import cn.schoolwow.quickdao.builder.sql.AbstractSQLBuilder;
 import cn.schoolwow.quickdao.builder.sql.SQLBuilder;
 import cn.schoolwow.quickdao.dao.AbstractDAO;
+import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,11 @@ public class AbstractSQLDAO implements SQLDAO {
      * 默认主键必须存在且为long型
      */
     public boolean hasId(Object instance) throws Exception {
-        Field field = instance.getClass().getDeclaredField(abstractDAO.quickDAOConfig.entityMap.get(instance.getClass().getName()).id.name);
+        Entity entity = abstractDAO.quickDAOConfig.entityMap.get(instance.getClass().getName());
+        if(null==entity.id){
+            return false;
+        }
+        Field field = instance.getClass().getDeclaredField(entity.id.name);
         field.setAccessible(true);
         switch(field.getType().getSimpleName().toLowerCase()){
             case "long":{
