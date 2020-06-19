@@ -366,44 +366,23 @@ public interface Condition<T> {
     /**
      * 部分查询,用于<b>{@link cn.schoolwow.quickdao.dao.response.Response#getPartList()}</b>
      *
-     * @param field 待返回字段名数组
-     */
-    Condition<T> addColumn(String field);
-
-    /**
-     * 部分查询,用于<b>{@link cn.schoolwow.quickdao.dao.response.Response#getPartList()}</b>
-     *
      * @param fields 待返回字段名数组
      */
-    Condition<T> addColumns(String[] fields);
-
-    /**
-     * 排除部分字段,用于<b>{@link cn.schoolwow.quickdao.dao.response.Response#getPartList()}</b>
-     *
-     * @param field 待返回字段名数组
-     */
-    Condition<T> excludeColumn(String field);
+    Condition<T> addColumn(String... fields);
 
     /**
      * 排除部分字段,用于<b>{@link cn.schoolwow.quickdao.dao.response.Response#getPartList()}</b>
      *
      * @param fields 待返回字段名数组
      */
-    Condition<T> excludeColumn(String[] fields);
-
-    /**
-     * 自定义查询列,用于<b>{@link cn.schoolwow.quickdao.dao.response.Response#getSpecialList()}</b>
-     *
-     * @param field 自定义查询列
-     */
-    Condition<T> addSpecialColumn(String field);
+    Condition<T> excludeColumn(String... fields);
 
     /**
      * 自定义查询列,用于<b>{@link cn.schoolwow.quickdao.dao.response.Response#getSpecialList()} ()}</b>
      *
      * @param fields 自定义查询列
      */
-    Condition<T> addSpecialColumns(String[] fields);
+    Condition<T> addSpecialColumn(String... fields);
 
     /**
      * 返回子表实体类字段信息

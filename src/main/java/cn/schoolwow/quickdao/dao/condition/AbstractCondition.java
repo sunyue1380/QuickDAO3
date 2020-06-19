@@ -419,44 +419,26 @@ public class AbstractCondition<T> implements Condition<T>{
     }
 
     @Override
-    public Condition<T> addColumn(String field) {
-        field = StringUtil.Camel2Underline(field);
-        query.columnBuilder.append(query.tableAliasName+"." + query.quickDAOConfig.database.escape(field) + " as " + query.quickDAOConfig.database.escape(query.tableAliasName+"_" + field) + ",");
-        return this;
-    }
-
-    @Override
-    public Condition<T> addColumns(String[] fields) {
+    public Condition<T> addColumn(String... fields) {
         for(String field:fields){
-            addColumn(field);
+            field = StringUtil.Camel2Underline(field);
+            query.columnBuilder.append(query.tableAliasName+"." + query.quickDAOConfig.database.escape(field) + " as " + query.quickDAOConfig.database.escape(query.tableAliasName+"_" + field) + ",");
         }
         return this;
     }
 
     @Override
-    public Condition<T> excludeColumn(String field) {
-        query.excludeColumns.add(field);
-        return this;
-    }
-
-    @Override
-    public Condition<T> excludeColumn(String[] fields) {
+    public Condition<T> excludeColumn(String... fields) {
         for(String field:fields){
-            excludeColumn(field);
+            query.excludeColumns.add(field);
         }
         return this;
     }
 
     @Override
-    public Condition<T> addSpecialColumn(String field) {
-        query.columnBuilder.append(field+ ",");
-        return this;
-    }
-
-    @Override
-    public Condition<T> addSpecialColumns(String[] fields) {
+    public Condition<T> addSpecialColumn(String... fields) {
         for(String field:fields){
-            addSpecialColumn(field);
+            query.columnBuilder.append(field+ ",");
         }
         return this;
     }
