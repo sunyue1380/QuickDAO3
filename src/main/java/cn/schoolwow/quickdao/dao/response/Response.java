@@ -41,10 +41,10 @@ public interface Response<T> {
 
     /**
      * <p>返回聚合字段的数据库记录</p>
-     * <p>此方法会同时返回<b>addAggerate()方法</b>和<b>addColumns()方法</b>所指定的字段</p>
+     * <p>此方法会同时返回<b>addAggerate()方法</b>和<b>addColumn()方法</b>所指定的字段</p>
      * <p><b>注意:</b>调用此方法时请务必先调用{@link cn.schoolwow.quickdao.dao.condition.Condition#addAggerate(String, String)}</p>
      * @see {@link cn.schoolwow.quickdao.dao.condition.Condition#addAggerate(String, String)}
-     * @see {@link cn.schoolwow.quickdao.dao.condition.Condition#addColumns(String[])}}
+     * @see {@link cn.schoolwow.quickdao.dao.condition.Condition#addColumn(String[])}}
      */
     JSONArray getAggerateList();
 
@@ -72,21 +72,21 @@ public interface Response<T> {
 
     /**
      * <p>返回指定字段的数据库记录</p>
-     * <p>此方法会返回<b>addColumns()方法</b>所指定的字段</p>
-     * @see {@link cn.schoolwow.quickdao.dao.condition.Condition#addColumns(String[])}}
+     * <p>此方法会返回<b>addColumn()方法</b>所指定的字段</p>
+     * @see {@link cn.schoolwow.quickdao.dao.condition.Condition#addColumn(String[])}}
      */
     List<T> getPartList();
 
     /**
      * <p>返回指定字段的数据库记录</p>
-     * <p>此方法会返回<b>addColumns()方法</b>所指定的字段</p>
-     * @see {@link cn.schoolwow.quickdao.dao.condition.Condition#addColumns(String[])}}
+     * <p>此方法会返回<b>addColumn()方法</b>所指定的字段</p>
+     * @see {@link cn.schoolwow.quickdao.dao.condition.Condition#addColumn(String[])}}
      */
     JSONArray getSpecialList();
 
     /**
      * 返回符合条件的分页数据库记录.
-     * <p>此方法会返回<b>addColumns()方法</b>所指定的字段</p>
+     * <p>此方法会返回<b>addColumn()方法</b>所指定的字段</p>
      * <p><b>注意:</b>调用此方法时必须调用分页方法</p>
      * @see {@link cn.schoolwow.quickdao.dao.condition.Condition#page(int, int)}
      */
@@ -96,7 +96,7 @@ public interface Response<T> {
      * 返回符合条件的分页数据库记录.
      * <p><b>注意:</b>调用此方法时必须调用分页方法</p>
      * @see {@link cn.schoolwow.quickdao.dao.condition.Condition#page(int, int)}
-     * @see {@link cn.schoolwow.quickdao.dao.condition.Condition#addColumns(String[])}}
+     * @see {@link cn.schoolwow.quickdao.dao.condition.Condition#addColumn(String[])}}
      */
     PageVo<T> getPartPagingList();
 
