@@ -16,6 +16,12 @@ public class AbstractSubCondition<T> implements SubCondition<T>{
     }
 
     @Override
+    public SubCondition<T> tableAliasName(String tableAliasName) {
+        this.subQuery.tableAliasName = tableAliasName;
+        return this;
+    }
+
+    @Override
     public SubCondition<T> leftJoin() {
         subQuery.join = "left outer join";
         return this;

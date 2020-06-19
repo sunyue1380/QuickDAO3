@@ -9,8 +9,11 @@ import java.util.List;
 
 /**查询接口*/
 public interface Condition<T> {
-    //主表别名
-    String mainTableAlias = "t";
+    /**
+     * 手动设置主表别名
+     * @param tableAliasName 主表别名
+     */
+    Condition<T> tableAliasName(String tableAliasName);
     /**
      * 添加distinct关键字
      */
@@ -389,14 +392,14 @@ public interface Condition<T> {
     Condition<T> excludeColumn(String[] fields);
 
     /**
-     * 自定义查询列,用于<b>{@link cn.schoolwow.quickdao.dao.response.Response#getPartList()}</b>
+     * 自定义查询列,用于<b>{@link cn.schoolwow.quickdao.dao.response.Response#getSpecialList()}</b>
      *
      * @param field 自定义查询列
      */
     Condition<T> addSpecialColumn(String field);
 
     /**
-     * 自定义查询列,用于<b>{@link cn.schoolwow.quickdao.dao.response.Response#getPartList()}</b>
+     * 自定义查询列,用于<b>{@link cn.schoolwow.quickdao.dao.response.Response#getSpecialList()} ()}</b>
      *
      * @param fields 自定义查询列
      */

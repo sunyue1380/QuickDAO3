@@ -18,6 +18,10 @@ public class Query implements Serializable {
      */
     public Entity entity;
     /**
+     * 主表别名
+     */
+    public String tableAliasName = "t";
+    /**
      * distinct
      */
     public String distinct = "";

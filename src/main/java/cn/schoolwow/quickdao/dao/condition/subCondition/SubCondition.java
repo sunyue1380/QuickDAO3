@@ -7,6 +7,10 @@ import java.util.List;
 /**子表查询接口*/
 public interface SubCondition<T>{
     /**
+     * 手动设置表别名
+     */
+    SubCondition<T> tableAliasName(String tableAliasName);
+    /**
      * 左外连接
      */
     SubCondition<T> leftJoin();

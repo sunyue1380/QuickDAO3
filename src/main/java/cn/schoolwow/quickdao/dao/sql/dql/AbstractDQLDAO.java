@@ -52,7 +52,7 @@ public class AbstractDQLDAO extends AbstractSQLDAO implements DQLDAO {
             ResultSet resultSet = ps.executeQuery();
             JSONArray array = new JSONArray();
             while(resultSet.next()){
-                array.add(AbstractResponse.getObject(entity, AbstractCondition.mainTableAlias,resultSet));
+                array.add(AbstractResponse.getObject(entity, "t",resultSet));
             }
             resultSet.close();
             ps.close();
