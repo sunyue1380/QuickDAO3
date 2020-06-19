@@ -1,6 +1,7 @@
 package cn.schoolwow.quickdao.domain;
 
 import java.lang.reflect.Field;
+import java.util.Objects;
 
 /**
  * 实体类信息
@@ -50,4 +51,17 @@ public class Entity {
      * Field数组(实体包类)
      */
     public Field[] compositFields;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Entity entity = (Entity) o;
+        return tableName.equals(entity.tableName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tableName);
+    }
 }

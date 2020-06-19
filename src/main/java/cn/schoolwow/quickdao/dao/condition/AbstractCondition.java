@@ -450,7 +450,7 @@ public class AbstractCondition<T> implements Condition<T>{
     @Override
     public Condition<T> addSpecialColumns(String[] fields) {
         for(String field:fields){
-            addColumn(field);
+            addSpecialColumn(field);
         }
         return this;
     }

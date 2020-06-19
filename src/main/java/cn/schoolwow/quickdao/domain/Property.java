@@ -27,6 +27,10 @@ public class Property {
      */
     public String simpleTypeName;
     /**
+     * 类名
+     */
+    public String className;
+    /**
      * 属性名
      */
     public String name;

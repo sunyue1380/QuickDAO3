@@ -2,6 +2,16 @@ package cn.schoolwow.quickdao.util;
 
 public class StringUtil {
     /**
+     * 首字母大写
+     */
+    public static String firstLetterUpper(String s) {
+        char firstLetter = s.charAt(0);
+        if(firstLetter>=97&&firstLetter<=122){
+            firstLetter -= 32;
+        }
+        return firstLetter+s.substring(1);
+    }
+    /**
      * 驼峰命名转下划线命名
      */
     public static String Camel2Underline(String s) {
