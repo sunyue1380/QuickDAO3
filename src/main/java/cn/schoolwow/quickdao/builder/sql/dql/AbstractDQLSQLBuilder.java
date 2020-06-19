@@ -2,7 +2,6 @@ package cn.schoolwow.quickdao.builder.sql.dql;
 
 import cn.schoolwow.quickdao.builder.sql.AbstractSQLBuilder;
 import cn.schoolwow.quickdao.dao.condition.AbstractCondition;
-import cn.schoolwow.quickdao.dao.condition.Condition;
 import cn.schoolwow.quickdao.domain.*;
 import cn.schoolwow.quickdao.util.StringUtil;
 
@@ -55,7 +54,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
 
     @Override
     public PreparedStatement count(Query query) throws SQLException {
-        StringBuilder builder = new StringBuilder("select count(1) from "+query.quickDAOConfig.database.escape(query.entity.tableName)+" as t");
+        StringBuilder builder = new StringBuilder("select count(1) from "+query.quickDAOConfig.database.escape(query.entity.tableName)+" as "+query.tableAliasName);
         addJoinTableStatement(query,builder);
         addWhereStatement(query,builder);
 
@@ -125,10 +124,10 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         }else{
             builder.deleteCharAt(builder.length()-1);
         }
-        builder.append(" from " + quickDAOConfig.database.escape(query.entity.tableName) + " as "+Condition.mainTableAlias);
+        builder.append(" from " + quickDAOConfig.database.escape(query.entity.tableName) + " as "+query.tableAliasName);
         addJoinTableStatement(query,builder);
         addWhereStatement(query,builder);
-        query.orderByBuilder = new StringBuilder(query.orderByBuilder.toString().replace(Condition.mainTableAlias+".",""));
+        query.orderByBuilder = new StringBuilder(query.orderByBuilder.toString().replace(query.tableAliasName+".",""));
         builder.append(" " + query.groupByBuilder.toString() + " " + query.havingBuilder.toString() + " " + query.orderByBuilder.toString() + " " + query.limit);
 
         PreparedStatement ps = connection.prepareStatement(builder.toString());
@@ -147,8 +146,8 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
     public PreparedStatement getValueList(String column, Query query) throws SQLException {
         column = StringUtil.Camel2Underline(column);
         StringBuilder builder = new StringBuilder("select "+query.distinct);
-        builder.append(" "+Condition.mainTableAlias+"."+quickDAOConfig.database.escape(column)+" as "+Condition.mainTableAlias+"_"+column);
-        builder.append(" from "+quickDAOConfig.database.escape(query.entity.tableName)+" as "+Condition.mainTableAlias);
+        builder.append(" "+query.tableAliasName+"."+quickDAOConfig.database.escape(column)+" as "+query.tableAliasName+"_"+column);
+        builder.append(" from "+quickDAOConfig.database.escape(query.entity.tableName)+" as "+query.tableAliasName);
         addJoinTableStatement(query,builder);
         addWhereStatement(query,builder);
         builder.append(" " + query.orderByBuilder.toString() + " " + query.limit);
@@ -170,15 +169,15 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
                 if(query.excludeColumns.contains(property.name)){
                     continue;
                 }
-                builder.append(Condition.mainTableAlias+"."+query.quickDAOConfig.database.escape(property.column)+" as "+query.quickDAOConfig.database.escape(Condition.mainTableAlias+"_" + property.column)+",");
+                builder.append(query.tableAliasName+"."+query.quickDAOConfig.database.escape(property.column)+" as "+query.quickDAOConfig.database.escape(query.tableAliasName+"_" + property.column)+",");
             }
             builder.deleteCharAt(builder.length()-1);
         }else if(!query.columnBuilder.toString().isEmpty()){
             builder.append(query.columnBuilder.toString());
         }else{
-            builder.append(columns(query.entity,Condition.mainTableAlias));
+            builder.append(columns(query.entity,query.tableAliasName));
         }
-        builder.append(" from "+quickDAOConfig.database.escape(query.entity.tableName)+" as "+Condition.mainTableAlias+" ");
+        builder.append(" from "+quickDAOConfig.database.escape(query.entity.tableName)+" as "+query.tableAliasName+" ");
         addJoinTableStatement(query,builder);
         addWhereStatement(query,builder);
         builder.append(" " + query.orderByBuilder.toString() + " " + query.limit);
@@ -238,13 +237,13 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
 
     private StringBuilder getArraySQL(Query query) {
         StringBuilder builder = new StringBuilder("select " + query.distinct + " ");
-        builder.append(columns(query.entity, Condition.mainTableAlias));
+        builder.append(columns(query.entity, query.tableAliasName));
         if(query.compositField){
             for (SubQuery subQuery : query.subQueryList) {
                 builder.append("," + columns(subQuery.entity, subQuery.tableAliasName));
             }
         }
-        builder.append(" from "+quickDAOConfig.database.escape(query.entity.tableName)+" as "+Condition.mainTableAlias+" ");
+        builder.append(" from "+quickDAOConfig.database.escape(query.entity.tableName)+" as "+query.tableAliasName+" ");
         addJoinTableStatement(query,builder);
         addWhereStatement(query,builder);
         return builder;
@@ -257,7 +256,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         for (SubQuery subQuery : query.subQueryList) {
             if (subQuery.parentSubQuery == null) {
                 //如果parentSubCondition为空,则为主表关联子表
-                sqlBuilder.append(" "+subQuery.join + " " + query.quickDAOConfig.database.escape(subQuery.entity.tableName) + " as " + subQuery.tableAliasName + " on t." + query.quickDAOConfig.database.escape(subQuery.primaryField) + " = " + subQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.joinTableField)+" ");
+                sqlBuilder.append(" "+subQuery.join + " " + query.quickDAOConfig.database.escape(subQuery.entity.tableName) + " as " + subQuery.tableAliasName + " on "+query.tableAliasName+"." + query.quickDAOConfig.database.escape(subQuery.primaryField) + " = " + subQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.joinTableField)+" ");
             } else {
                 //如果parentSubCondition不为空,则为子表关联子表
                 sqlBuilder.append(" "+subQuery.join + " " + query.quickDAOConfig.database.escape(subQuery.entity.tableName) + " as " + subQuery.tableAliasName + " on " + subQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.joinTableField) + " = " + subQuery.parentSubQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.primaryField) + " ");

@@ -1,7 +1,5 @@
 package cn.schoolwow.quickdao.dao.response;
 
-import cn.schoolwow.quickdao.dao.condition.AbstractCondition;
-import cn.schoolwow.quickdao.dao.condition.Condition;
 import cn.schoolwow.quickdao.domain.*;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import cn.schoolwow.quickdao.util.StringUtil;
@@ -93,7 +91,7 @@ public class AbstractResponse<T> implements Response<T>{
             array = new JSONArray(count(query));
             ResultSet resultSet = ps.executeQuery();
             while (resultSet.next()) {
-                JSONObject o = getObject(query.entity, AbstractCondition.mainTableAlias, resultSet);
+                JSONObject o = getObject(query.entity, query.tableAliasName, resultSet);
                 if(query.compositField){
                     mappingCompositResultSetToJSONArray(resultSet,o);
                 }
@@ -307,8 +305,8 @@ public class AbstractResponse<T> implements Response<T>{
         String[] columnNames = new String[metaData.getColumnCount()];
         for (int i = 1; i <= columnNames.length; i++) {
             String label = metaData.getColumnLabel(i);
-            if(label.toLowerCase().startsWith(Condition.mainTableAlias+"_")){
-                label = StringUtil.Underline2Camel(label.toLowerCase().substring(Condition.mainTableAlias.length()+1));
+            if(label.toLowerCase().startsWith(query.tableAliasName+"_")){
+                label = StringUtil.Underline2Camel(label.toLowerCase().substring(query.tableAliasName.length()+1));
             }
             columnNames[i - 1] = label;
         }
