@@ -152,6 +152,7 @@ public class DefaultTableDefiner implements TableDefiner{
                     }
                     property.name = field.getName();
                     property.simpleTypeName = field.getType().getSimpleName().toLowerCase();
+                    property.className = field.getType().getName();
                     Constraint constraint = field.getDeclaredAnnotation(Constraint.class);
                     if(null!=constraint){
                         property.notNull = constraint.notNull();

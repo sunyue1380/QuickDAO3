@@ -32,7 +32,7 @@ public class MySQLTableBuilder extends AbstractTableBuilder {
             List<Property> propertyList = new ArrayList<>();
             //获取所有列
             {
-                ResultSet propertiesRs = connection.prepareStatement("show columns from " + quickDAOConfig.database.escape(entity.tableName)).executeQuery();
+                ResultSet propertiesRs = connection.prepareStatement("show full columns from " + quickDAOConfig.database.escape(entity.tableName)).executeQuery();
                 while (propertiesRs.next()) {
                     Property property = new Property();
                     property.column = propertiesRs.getString("Field");
@@ -42,6 +42,7 @@ public class MySQLTableBuilder extends AbstractTableBuilder {
                     if (null != propertiesRs.getString("Default")) {
                         property.defaultValue = propertiesRs.getString("Default");
                     }
+                    property.comment = propertiesRs.getString("Comment");
                     propertyList.add(property);
                 }
                 propertiesRs.close();

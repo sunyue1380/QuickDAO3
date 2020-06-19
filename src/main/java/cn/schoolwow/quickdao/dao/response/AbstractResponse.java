@@ -306,9 +306,9 @@ public class AbstractResponse<T> implements Response<T>{
         ResultSetMetaData metaData = resultSet.getMetaData();
         String[] columnNames = new String[metaData.getColumnCount()];
         for (int i = 1; i <= columnNames.length; i++) {
-            String label = metaData.getColumnLabel(i).toLowerCase();
-            if(label.startsWith(Condition.mainTableAlias+"_")){
-                label = StringUtil.Underline2Camel(label.substring(Condition.mainTableAlias.length()+1));
+            String label = metaData.getColumnLabel(i);
+            if(label.toLowerCase().startsWith(Condition.mainTableAlias+"_")){
+                label = StringUtil.Underline2Camel(label.toLowerCase().substring(Condition.mainTableAlias.length()+1));
             }
             columnNames[i - 1] = label;
         }
