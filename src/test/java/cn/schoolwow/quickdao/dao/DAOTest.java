@@ -299,8 +299,10 @@ public class DAOTest extends BaseDAOTest{
         //关联查询
         {
             Response response = dao.query(Person.class)
+                    .tableAliasName("p")
                     .addQuery("lastName","Gates")
                     .joinTable(Order.class,"id","personId")
+                    .tableAliasName("o")
                     .done()
                     .compositField()
                     .execute();
@@ -313,12 +315,12 @@ public class DAOTest extends BaseDAOTest{
             Response response = dao.query(Person.class)
                     .union(dao.query(Person.class)
                             .addQuery("lastName","Gates")
-                            .addColumns(new String[]{"id","lastName","firstName"}))
+                            .addColumn(new String[]{"id","lastName","firstName"}))
                     .union(dao.query(Person.class)
                             .addQuery("firstName","Bill")
-                            .addColumns(new String[]{"id","lastName","firstName"}),UnionType.UnionAll)
+                            .addColumn(new String[]{"id","lastName","firstName"}),UnionType.UnionAll)
                     .addQuery("address","Xuanwumen 11")
-                    .addColumns(new String[]{"id","lastName","firstName"})
+                    .addColumn(new String[]{"id","lastName","firstName"})
                     .orderByDesc("id")
                     .page(1,10)
                     .execute();
@@ -355,7 +357,7 @@ public class DAOTest extends BaseDAOTest{
         {
             Response response = dao.query(Person.class)
                     .addQuery("lastName","Gates")
-                    .addSpecialColumn("max("+ Condition.mainTableAlias +".id) as m")
+                    .addSpecialColumn("max(t.id) as m")
                     .execute();
             JSONArray array = response.getSpecialList();
             Assert.assertEquals(1,array.size());
