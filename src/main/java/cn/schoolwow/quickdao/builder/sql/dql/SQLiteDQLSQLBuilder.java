@@ -2,6 +2,7 @@ package cn.schoolwow.quickdao.builder.sql.dql;
 
 import cn.schoolwow.quickdao.domain.Query;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
+import org.slf4j.MDC;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -24,7 +25,8 @@ public class SQLiteDQLSQLBuilder extends AbstractDQLSQLBuilder{
             setParameter(parameter,ps,query.parameterIndex++,builder);
         }
         addMainTableParameters(ps,query,builder);
-        logger.debug("[批量更新]执行SQL:{}", builder.toString());
+        MDC.put("name","批量更新");
+        MDC.put("sql",builder.toString());
         return ps;
     }
 
@@ -36,7 +38,8 @@ public class SQLiteDQLSQLBuilder extends AbstractDQLSQLBuilder{
         PreparedStatement ps = connection.prepareStatement(builder.toString());
         builder = new StringBuilder(builder.toString().replace("?",PLACEHOLDER));
         addMainTableParameters(ps,query,builder);
-        logger.debug("[批量删除]执行SQL:{}", builder.toString());
+        MDC.put("name","批量删除");
+        MDC.put("sql",builder.toString());
         return ps;
     }
 }

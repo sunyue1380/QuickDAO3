@@ -7,6 +7,7 @@ import cn.schoolwow.quickdao.dao.sql.AbstractSQLDAO;
 import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
+import org.slf4j.MDC;
 
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
@@ -54,6 +55,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
         } catch (Exception e) {
             throw new SQLRuntimeException(e);
         }
+        MDC.put("effectCount",effect+"");
         return effect;
     }
 
@@ -74,6 +76,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
         } catch (Exception e) {
             throw new SQLRuntimeException(e);
         }
+        MDC.put("effectCount",effect+"");
         return effect;
     }
 
@@ -106,6 +109,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
         } catch (Exception e) {
             throw new SQLRuntimeException(e);
         }
+        MDC.put("effectCount",effect+"");
         return effect;
     }
 
@@ -147,6 +151,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
         } catch (Exception e) {
             throw new SQLRuntimeException(e);
         }
+        MDC.put("effectCount",effect+"");
         return effect;
     }
 
@@ -184,6 +189,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
         }
         effect += update(updateList);
         effect += insert(insertList);
+        MDC.put("effectCount",effect+"");
         return effect;
     }
 
@@ -214,6 +220,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
+        MDC.put("effectCount",effect+"");
         return effect;
     }
 
@@ -227,6 +234,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
+        MDC.put("effectCount",effect+"");
         return effect;
     }
 }

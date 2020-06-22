@@ -90,3 +90,11 @@ List<UserSetting> userList = dao.query(UserFollow.class)
         .execute()
         .getList();
 ```
+# 设置别名(v3.3新增)
+
+使用joinTable后可以手动设置表别名了.
+```java
+joinTable(User.class,"userId","id")
+.tableAliasName("u")
+```
+后续涉及到手动编写SQL时就可以使用u表示User表了

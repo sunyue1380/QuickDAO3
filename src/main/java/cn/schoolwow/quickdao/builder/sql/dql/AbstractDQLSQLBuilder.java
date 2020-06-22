@@ -4,6 +4,7 @@ import cn.schoolwow.quickdao.builder.sql.AbstractSQLBuilder;
 import cn.schoolwow.quickdao.dao.condition.AbstractCondition;
 import cn.schoolwow.quickdao.domain.*;
 import cn.schoolwow.quickdao.util.StringUtil;
+import org.slf4j.MDC;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -25,7 +26,8 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         }
         String sql = sqlCache.get(key);
         PreparedStatement ps = connection.prepareStatement(sql);
-        logger.debug("[Null查询]执行SQL:{}",sql);
+        MDC.put("name","Null查询");
+        MDC.put("sql",sql);
         return ps;
     }
 
@@ -48,7 +50,8 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         String sql = sqlCache.get(key);
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setObject(1,value);
-        logger.debug("[根据字段查询]执行SQL:{}",sql.replace("?",(value instanceof String)?"'"+value.toString()+"'":value.toString()));
+        MDC.put("name","字段查询");
+        MDC.put("sql",sql.replace("?",(value instanceof String)?"'"+value.toString()+"'":value.toString()));
         return ps;
     }
 
@@ -62,7 +65,8 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         builder = new StringBuilder(builder.toString().replace("?",PLACEHOLDER));
         addMainTableParameters(ps,query,builder);
         addJoinTableParameters(ps,query,builder);
-        logger.debug("[获取总数]执行SQL:{}", builder.toString());
+        MDC.put("name","获取总行数");
+        MDC.put("sql",builder.toString());
         return ps;
     }
 
@@ -81,7 +85,8 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         }
         addMainTableParameters(ps,query,builder);
         addJoinTableParameters(ps,query,builder);
-        logger.debug("[批量更新]执行SQL:{}", builder.toString());
+        MDC.put("name","批量更新");
+        MDC.put("sql",builder.toString());
         return ps;
     }
 
@@ -95,7 +100,8 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         builder = new StringBuilder(builder.toString().replace("?",PLACEHOLDER));
         addMainTableParameters(ps,query,builder);
         addJoinTableParameters(ps,query,builder);
-        logger.debug("[批量删除]执行SQL:{}", builder.toString());
+        MDC.put("name","批量删除");
+        MDC.put("sql",builder.toString());
         return ps;
     }
 
@@ -109,7 +115,8 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         addMainTableParameters(ps,query,builder);
         addJoinTableParameters(ps,query,builder);
         query.sql = builder.toString();
-        logger.debug("[获取列表]执行SQL:{}", builder.toString());
+        MDC.put("name","获取列表");
+        MDC.put("sql",builder.toString());
         return ps;
     }
 
@@ -138,7 +145,8 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
             setParameter(parameter,ps,query.parameterIndex++,builder);
         }
         query.sql = builder.toString();
-        logger.debug("[获取聚合列表]执行SQL:{}", builder.toString());
+        MDC.put("name","获取聚合列表");
+        MDC.put("sql",builder.toString());
         return ps;
     }
 
@@ -157,7 +165,8 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         addMainTableParameters(ps,query,builder);
         addJoinTableParameters(ps,query,builder);
         query.sql = builder.toString();
-        logger.debug("[获取单列列表]执行SQL:{}", builder.toString());
+        MDC.put("name","获取单列集合");
+        MDC.put("sql",builder.toString());
         return ps;
     }
 
@@ -187,7 +196,8 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         addMainTableParameters(ps,query,builder);
         addJoinTableParameters(ps,query,builder);
         query.sql = builder.toString();
-        logger.debug("[获取部分字段列表]执行SQL:{}", builder.toString());
+        MDC.put("name","获取部分字段列表");
+        MDC.put("sql",builder.toString());
         return ps;
     }
 
@@ -231,7 +241,8 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
                 }
             }
         }
-        logger.debug("[获取联合查询列表]执行SQL:{}", builder.toString());
+        MDC.put("name","联合查询");
+        MDC.put("sql",builder.toString());
         return ps;
     }
 

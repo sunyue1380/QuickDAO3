@@ -4,6 +4,7 @@ import cn.schoolwow.quickdao.dao.sql.dml.DMLDAO;
 import cn.schoolwow.quickdao.dao.sql.dql.DQLDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -42,7 +43,17 @@ public class SQLDAOInvocationHandler implements InvocationHandler {
             } else {
                 abstractSQLDAO.sqlBuilder.connection = abstractSQLDAO.sqlBuilder.quickDAOConfig.dataSource.getConnection();
             }
+            long startTime = System.currentTimeMillis();
             Object result = method.invoke(abstractSQLDAO, args);
+            long endTime = System.currentTimeMillis();
+            if(null!=MDC.get("returnCount")){
+                logger.debug("[{}]返回行数:{},耗时:{}ms,执行SQL:{}",MDC.get("name"),MDC.get("returnCount"),(endTime-startTime),MDC.get("sql"));
+            }else if(null!=MDC.get("effectCount")){
+                logger.debug("[{}]影响行数:{},耗时:{}ms,执行SQL:{}",MDC.get("name"),MDC.get("effectCount"),(endTime-startTime),MDC.get("sql"));
+            }else if(null!=MDC.get("name")){
+                logger.debug("[{}]耗时:{}ms,执行SQL:{}",MDC.get("name"),(endTime-startTime),MDC.get("sql"));
+            }
+            MDC.clear();
             if (!abstractSQLDAO.transaction && !abstractSQLDAO.sqlBuilder.connection.isClosed()) {
                 abstractSQLDAO.sqlBuilder.connection.close();
             }
