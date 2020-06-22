@@ -22,3 +22,7 @@
 - 事务
 
   - [事务操作](zh-cn/transaction/transaction.md)
+
+- 更新日志
+
+  - [更新日志](zh-cn/update.md)

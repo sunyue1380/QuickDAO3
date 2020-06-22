@@ -11,6 +11,7 @@ import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.Query;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import com.alibaba.fastjson.JSONArray;
+import org.slf4j.MDC;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -56,6 +57,7 @@ public class AbstractDQLDAO extends AbstractSQLDAO implements DQLDAO {
             }
             resultSet.close();
             ps.close();
+            MDC.put("returnCount",array.size()+"");
             return array.toJavaList(clazz);
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);

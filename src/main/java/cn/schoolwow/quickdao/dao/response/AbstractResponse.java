@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ public class AbstractResponse<T> implements Response<T>{
             throw new SQLRuntimeException(e);
         }
         query.parameterIndex = 1;
+        MDC.put("returnCount",count+"");
         return count;
     }
 
@@ -231,7 +233,6 @@ public class AbstractResponse<T> implements Response<T>{
             query.sql = query.sql.replace(replaceString,"");
         }
         String countSQL = "select count(1) from ("+query.sql+") as foo";
-        logger.debug("[分页总数]执行SQL:{}",countSQL);
         PreparedStatement ps = connection.prepareStatement(countSQL);
         ResultSet resultSet = ps.executeQuery();
         int count = 0;
@@ -239,6 +240,7 @@ public class AbstractResponse<T> implements Response<T>{
             count = resultSet.getInt(1);
         }
         resultSet.close();
+        MDC.put("returnCount",countSQL+"");
         return count;
     }
 

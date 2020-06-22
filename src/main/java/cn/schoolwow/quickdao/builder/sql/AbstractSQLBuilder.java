@@ -5,11 +5,13 @@ import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AbstractSQLBuilder implements SQLBuilder{
@@ -41,14 +43,15 @@ public class AbstractSQLBuilder implements SQLBuilder{
             sqlCache.put(key, builder.toString());
         }
         String sql = sqlCache.get(key);
-        StringBuilder sqlBuilder = new StringBuilder(sql.replace("?", PLACEHOLDER));
+        StringBuilder builder = new StringBuilder(sql.replace("?", PLACEHOLDER));
         PreparedStatement ps = connection.prepareStatement(sql);
         int parameterIndex = 1;
         for(Property property:entity.uniqueKeyProperties){
-            setParameter(instance,property,ps,parameterIndex,sqlBuilder);
+            setParameter(instance,property,ps,parameterIndex, builder);
             parameterIndex++;
         }
-        logger.debug("[根据唯一性约束查询]执行SQL:{}",sqlBuilder.toString());
+        MDC.put("name","根据唯一性约束查询");
+        MDC.put("sql",builder.toString());
         return ps;
     }
 
@@ -140,11 +143,13 @@ public class AbstractSQLBuilder implements SQLBuilder{
                 Object o = field.get(instance);
                 if (o == null) {
                     ps.setObject(parameterIndex, null);
-                } else {
-                    java.sql.Date sqlDate = new java.sql.Date(((java.util.Date) o).getTime());
-                    ps.setDate(parameterIndex, sqlDate);
+                    parameter = "null";
+                } else{
+                    java.util.Date date = (java.util.Date) o;
+                    Timestamp timestamp = new Timestamp(date.getTime());
+                    ps.setTimestamp(parameterIndex, timestamp);
+                    parameter = "'"+timestamp.toString()+"'";
                 }
-                parameter = "'" + (field.get(instance) == null ? "" : field.get(instance).toString()) + "'";
             }break;
             default: {
                 ps.setObject(parameterIndex, field.get(instance));

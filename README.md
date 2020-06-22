@@ -16,6 +16,10 @@ QuickDAO是一个简单易用方便的Java ORM框架.具有以下优势:
 * Postgre(9.0.0以上)
 * SQL Server(2012版本以上)
 
+# 更新日志
+
+[点此访问](https://sunyue1380.github.io/QuickDAO3/#/zh-cn/update)
+
 # 快速入门
 
 ## 1 导入QuickDAO
@@ -32,7 +36,7 @@ QuickDAO基于JDBC,为提高效率,默认只支持数据库连接池.
 <dependency>
   <groupId>cn.schoolwow</groupId>
   <artifactId>QuickDAO</artifactId>
-  <version>3.2</version>
+  <version>3.3</version>
 </dependency>
 ```
 

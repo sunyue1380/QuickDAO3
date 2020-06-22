@@ -5,6 +5,7 @@ import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
 import cn.schoolwow.quickdao.util.StringUtil;
+import org.slf4j.MDC;
 
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
@@ -23,10 +24,11 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
     @Override
     public PreparedStatement insert(Object instance) throws Exception {
         String sql = insert(instance.getClass());
-        StringBuilder sqlBuilder = new StringBuilder(sql.replace("?", PLACEHOLDER));
+        StringBuilder builder = new StringBuilder(sql.replace("?", PLACEHOLDER));
         PreparedStatement ps = connection.prepareStatement(sql,PreparedStatement.RETURN_GENERATED_KEYS);
-        insert(ps,instance,sqlBuilder);
-        logger.debug("[插入对象]执行SQL:{}",sqlBuilder.toString());
+        insert(ps,instance, builder);
+        MDC.put("name","插入对象");
+        MDC.put("sql",builder.toString());
         return ps;
     }
 
@@ -42,17 +44,19 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             builder.append(sqlBuilder.toString()+";");
             ps.addBatch();
         }
-        logger.debug("[批量插入对象]执行SQL:{}",builder.toString());
+        MDC.put("name","批量插入对象");
+        MDC.put("sql",builder.toString());
         return ps;
     }
 
     @Override
     public PreparedStatement updateByUniqueKey(Object instance) throws Exception{
         String sql = updateByUniqueKey(instance.getClass());
-        StringBuilder sqlBuilder = new StringBuilder(sql.replace("?", PLACEHOLDER));
+        StringBuilder builder = new StringBuilder(sql.replace("?", PLACEHOLDER));
         PreparedStatement ps = connection.prepareStatement(sql);
-        updateByUniqueKey(ps,instance,sqlBuilder);
-        logger.debug("[根据唯一性约束更新对象]执行SQL:{}",sqlBuilder.toString());
+        updateByUniqueKey(ps,instance, builder);
+        MDC.put("name","根据唯一性约束更新对象");
+        MDC.put("sql",builder.toString());
         return ps;
     }
 
@@ -68,17 +72,19 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             builder.append(sqlBuilder.toString()+";");
             ps.addBatch();
         }
-        logger.debug("[根据唯一性约束批量更新对象]执行SQL:{}",builder.toString());
+        MDC.put("name","根据唯一性约束批量更新对象");
+        MDC.put("sql",builder.toString());
         return ps;
     }
 
     @Override
     public PreparedStatement updateById(Object instance) throws Exception {
         String sql = updateById(instance.getClass());
-        StringBuilder sqlBuilder = new StringBuilder(sql.replace("?", PLACEHOLDER));
+        StringBuilder builder = new StringBuilder(sql.replace("?", PLACEHOLDER));
         PreparedStatement ps = connection.prepareStatement(sql);
-        updateById(ps,instance,sqlBuilder);
-        logger.debug("[更新对象][根据id更新]执行SQL:{}",sqlBuilder.toString());
+        updateById(ps,instance, builder);
+        MDC.put("name","根据ID更新对象");
+        MDC.put("sql",builder.toString());
         return ps;
     }
 
@@ -94,7 +100,8 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             builder.append(sqlBuilder.toString()+";");
             ps.addBatch();
         }
-        logger.debug("[根据id批量更新对象]执行SQL:{}", builder.toString());
+        MDC.put("name","根据ID批量更新对象");
+        MDC.put("sql",builder.toString());
         return ps;
     }
 
@@ -110,7 +117,8 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
         String sql = sqlCache.get(key);
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setObject(1, value);
-        logger.debug("[根据字段值删除]执行SQL:{}", sql.replace("?",(value instanceof String)?"'"+value.toString()+"'":value.toString()));
+        MDC.put("name","根据单个字段删除");
+        MDC.put("sql",sql.replace("?",(value instanceof String)?"'"+value.toString()+"'":value.toString()));
         return ps;
     }
 
