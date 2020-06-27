@@ -300,15 +300,9 @@ public class AbstractCondition<T> implements Condition<T>{
     }
 
     @Override
-    public Condition<T> groupBy(String field) {
-        query.groupByBuilder.append(query.tableAliasName+"." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field)) + ",");
-        return this;
-    }
-
-    @Override
-    public Condition<T> groupBy(String[] fields) {
+    public Condition<T> groupBy(String... fields) {
         for(String field:fields){
-            groupBy(field);
+            query.groupByBuilder.append(query.tableAliasName+"." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field)) + ",");
         }
         return this;
     }
@@ -384,21 +378,25 @@ public class AbstractCondition<T> implements Condition<T>{
     }
 
     @Override
-    public Condition<T> orderBy(String field) {
-        if(!query.unionList.isEmpty()){
-            query.orderByBuilder.append(query.quickDAOConfig.database.escape(query.tableAliasName+"_"+StringUtil.Camel2Underline(field))+" asc,");
-        }else{
-            query.orderByBuilder.append(query.tableAliasName+"."+query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field))+" asc,");
+    public Condition<T> orderBy(String... fields) {
+        for(String field:fields){
+            if(!query.unionList.isEmpty()){
+                query.orderByBuilder.append(query.quickDAOConfig.database.escape(query.tableAliasName+"_"+StringUtil.Camel2Underline(field))+" asc,");
+            }else{
+                query.orderByBuilder.append(query.tableAliasName+"."+query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field))+" asc,");
+            }
         }
         return this;
     }
 
     @Override
-    public Condition<T> orderByDesc(String field) {
-        if(!query.unionList.isEmpty()){
-            query.orderByBuilder.append(query.quickDAOConfig.database.escape(query.tableAliasName+"_"+StringUtil.Camel2Underline(field))+" desc,");
-        }else{
-            query.orderByBuilder.append(query.tableAliasName+"."+query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field))+" desc,");
+    public Condition<T> orderByDesc(String... fields) {
+        for(String field:fields){
+            if(!query.unionList.isEmpty()){
+                query.orderByBuilder.append(query.quickDAOConfig.database.escape(query.tableAliasName+"_"+StringUtil.Camel2Underline(field))+" desc,");
+            }else{
+                query.orderByBuilder.append(query.tableAliasName+"."+query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field))+" desc,");
+            }
         }
         return this;
     }
