@@ -208,12 +208,6 @@ public interface Condition<T> {
 
     /**
      * 添加分组查询
-     * @param field 分组字段
-     */
-    Condition<T> groupBy(String field);
-
-    /**
-     * 添加分组查询
      * @param fields 分组字段
      */
     Condition<T> groupBy(String[] fields);
@@ -338,14 +332,14 @@ public interface Condition<T> {
      *
      * @param field 升序排列字段名
      */
-    Condition<T> orderBy(String field);
+    Condition<T> orderBy(String... field);
 
     /**
      * 根据指定字段降序排列
      *
      * @param field 降序排列字段名
      */
-    Condition<T> orderByDesc(String field);
+    Condition<T> orderByDesc(String... field);
 
     /**
      * 分页操作
