@@ -34,24 +34,4 @@ public interface DQLSQLBuilder {
      * 返回符合条件的数据库记录
      */
     PreparedStatement getArray(Query query) throws SQLException;
-
-    /**
-     * 返回聚合字段的数据库记录
-     */
-    PreparedStatement getAggerateList(Query query) throws SQLException;
-
-    /**
-     * 返回指定单个字段的集合
-     */
-    PreparedStatement getValueList(String column,Query query) throws SQLException;
-
-    /**
-     * 返回指定字段的数据库记录
-     */
-    PreparedStatement getPartList(Query query) throws SQLException;
-
-    /**
-     * 合并查询
-     */
-    PreparedStatement getUnionList(Query query) throws SQLException;
 }

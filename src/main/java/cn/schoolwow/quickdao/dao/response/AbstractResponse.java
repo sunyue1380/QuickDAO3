@@ -2,7 +2,6 @@ package cn.schoolwow.quickdao.dao.response;
 
 import cn.schoolwow.quickdao.domain.*;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
-import cn.schoolwow.quickdao.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -40,7 +39,7 @@ public class AbstractResponse<T> implements Response<T>{
             throw new SQLRuntimeException(e);
         }
         query.parameterIndex = 1;
-        MDC.put("returnCount",count+"");
+        MDC.put("count",count+"");
         return count;
     }
 
@@ -54,6 +53,7 @@ public class AbstractResponse<T> implements Response<T>{
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
+        MDC.put("count",count+"");
         return count;
     }
 
@@ -67,6 +67,7 @@ public class AbstractResponse<T> implements Response<T>{
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
+        MDC.put("count",count+"");
         return count;
     }
 
@@ -90,14 +91,29 @@ public class AbstractResponse<T> implements Response<T>{
         JSONArray array = null;
         try {
             PreparedStatement ps = query.dqlsqlBuilder.getArray(query);
-            array = new JSONArray(count(query));
+            array = new JSONArray((int) count());
             ResultSet resultSet = ps.executeQuery();
-            while (resultSet.next()) {
-                JSONObject o = getObject(query.entity, query.tableAliasName, resultSet);
-                if(query.compositField){
-                    mappingCompositResultSetToJSONArray(resultSet,o);
+            if(query.columnBuilder.length()>0){
+                ResultSetMetaData metaData = resultSet.getMetaData();
+                String[] columnNames = new String[metaData.getColumnCount()];
+                for (int i = 1; i <= columnNames.length; i++) {
+                    columnNames[i - 1] = metaData.getColumnLabel(i);
                 }
-                array.add(o);
+                while (resultSet.next()) {
+                    JSONObject o = new JSONObject();
+                    for (int i = 1; i <= columnNames.length; i++) {
+                        o.put(columnNames[i - 1], resultSet.getString(i));
+                    }
+                    array.add(o);
+                }
+            }else{
+                while (resultSet.next()) {
+                    JSONObject o = getObject(query.entity, query.tableAliasName, resultSet);
+                    if(query.compositField){
+                        getCompositObject(resultSet,o);
+                    }
+                    array.add(o);
+                }
             }
             resultSet.close();
             ps.close();
@@ -108,10 +124,10 @@ public class AbstractResponse<T> implements Response<T>{
     }
 
     @Override
-    public List getValueList(Class clazz, String column) {
+    public List getSingleColumnList(Class clazz) {
         try {
-            PreparedStatement ps = query.dqlsqlBuilder.getValueList(column,query);
-            JSONArray array = new JSONArray(count(query));
+            PreparedStatement ps = query.dqlsqlBuilder.getArray(query);
+            JSONArray array = new JSONArray((int) count());
             ResultSet resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 array.add(resultSet.getString(1));
@@ -125,123 +141,10 @@ public class AbstractResponse<T> implements Response<T>{
     }
 
     @Override
-    public JSONArray getAggerateList() {
-        try {
-            PreparedStatement ps = query.dqlsqlBuilder.getAggerateList(query);
-            JSONArray array = new JSONArray(count(query));
-            ResultSet resultSet = ps.executeQuery();
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            int columnCount = metaData.getColumnCount();
-            while (resultSet.next()) {
-                JSONObject o = new JSONObject();
-                for (int i = 1; i <= columnCount; i++) {
-                    o.put(metaData.getColumnName(i), resultSet.getString(i));
-                }
-                array.add(o);
-            }
-            resultSet.close();
-            ps.close();
-            return array;
-        } catch (SQLException e) {
-            throw new SQLRuntimeException(e);
-        }
-    }
-
-    @Override
-    public PageVo getAggeratePagingList() {
-        query.pageVo.setList(getAggerateList());
-        setPageVo();
-        return query.pageVo;
-    }
-
-    @Override
-    public <E> PageVo<E> getAggeratePagingList(Class<E> clazz) {
-        query.pageVo.setList(getAggerateList().toJavaList(clazz));
-        setPageVo();
-        return query.pageVo;
-    }
-
-    @Override
-    public List getPartList() {
-        JSONArray array = null;
-        try {
-            PreparedStatement ps = query.dqlsqlBuilder.getPartList(query);
-            ResultSet resultSet = ps.executeQuery();
-            array = mappingResultSetToJSONArray(resultSet);
-            resultSet.close();
-            ps.close();
-        } catch (SQLException e) {
-            throw new SQLRuntimeException(e);
-        }
-        return array.toJavaList(query.entity.clazz);
-    }
-
-    @Override
-    public JSONArray getSpecialList() {
-        JSONArray array = null;
-        try {
-            PreparedStatement ps = query.dqlsqlBuilder.getPartList(query);
-            ResultSet resultSet = ps.executeQuery();
-            array = mappingResultSetToJSONArray(resultSet);
-            resultSet.close();
-            ps.close();
-        } catch (SQLException e) {
-            throw new SQLRuntimeException(e);
-        }
-        return array;
-    }
-
-    @Override
     public PageVo<T> getPagingList() {
         query.pageVo.setList(getList());
         setPageVo();
         return query.pageVo;
-    }
-
-    @Override
-    public PageVo<T> getPartPagingList() {
-        query.pageVo.setList(getPartList());
-        setPageVo();
-        return query.pageVo;
-    }
-
-    @Override
-    public List getUnionList() {
-        JSONArray array = null;
-        try {
-            PreparedStatement ps = query.dqlsqlBuilder.getUnionList(query);
-            ResultSet resultSet = ps.executeQuery();
-            array = mappingResultSetToJSONArray(resultSet);
-            resultSet.close();
-            ps.close();
-        } catch (SQLException e) {
-            throw new SQLRuntimeException(e);
-        }
-        return array.toJavaList(query.entity.clazz);
-    }
-
-    @Override
-    public PageVo<T> getUnionPagingList() {
-        query.pageVo.setList(getUnionList());
-        setPageVo();
-        return query.pageVo;
-    }
-
-    private int count(Query query) throws SQLException {
-        String replaceString = " " + query.orderByBuilder.toString() + " " + query.limit;
-        if(!replaceString.trim().isEmpty()){
-            query.sql = query.sql.replace(replaceString,"");
-        }
-        String countSQL = "select count(1) from ("+query.sql+") as foo";
-        PreparedStatement ps = connection.prepareStatement(countSQL);
-        ResultSet resultSet = ps.executeQuery();
-        int count = 0;
-        if(resultSet.next()){
-            count = resultSet.getInt(1);
-        }
-        resultSet.close();
-        MDC.put("returnCount",countSQL+"");
-        return count;
     }
 
     /**设置分页对象*/
@@ -249,11 +152,7 @@ public class AbstractResponse<T> implements Response<T>{
         if (query.pageVo == null) {
             throw new IllegalArgumentException("请先调用page()函数!");
         }
-        try {
-            query.pageVo.setTotalSize(count(query));
-        } catch (SQLException e) {
-            throw new SQLRuntimeException(e);
-        }
+        query.pageVo.setTotalSize(count());
         query.pageVo.setTotalPage((int)(query.pageVo.getTotalSize() / query.pageVo.getPageSize() + (query.pageVo.getTotalSize() % query.pageVo.getPageSize() > 0 ? 1 : 0)));
         query.pageVo.setHasMore(query.pageVo.getCurrentPage() < query.pageVo.getTotalPage());
     }
@@ -299,31 +198,7 @@ public class AbstractResponse<T> implements Response<T>{
         return subObject;
     }
 
-    /**将结果集映射到JSONArray中*/
-    private JSONArray mappingResultSetToJSONArray(ResultSet resultSet) throws SQLException {
-        int count = (int) count();
-        JSONArray array = new JSONArray(count);
-        ResultSetMetaData metaData = resultSet.getMetaData();
-        String[] columnNames = new String[metaData.getColumnCount()];
-        for (int i = 1; i <= columnNames.length; i++) {
-            String label = metaData.getColumnLabel(i);
-            if(label.toLowerCase().startsWith(query.tableAliasName+"_")){
-                label = StringUtil.Underline2Camel(label.toLowerCase().substring(query.tableAliasName.length()+1));
-            }
-            columnNames[i - 1] = label;
-        }
-        while (resultSet.next()) {
-            JSONObject o = new JSONObject();
-            for (int i = 1; i <= columnNames.length; i++) {
-                o.put(columnNames[i - 1], resultSet.getString(i));
-            }
-            array.add(o);
-        }
-        return array;
-    }
-
-    /**将结果集映射到JSONArray中*/
-    private void mappingCompositResultSetToJSONArray(ResultSet resultSet, JSONObject o) throws SQLException {
+    private void getCompositObject(ResultSet resultSet, JSONObject o) throws SQLException {
         for (SubQuery subQuery : query.subQueryList) {
             if(null==subQuery.compositField||subQuery.compositField.isEmpty()) {
                 continue;

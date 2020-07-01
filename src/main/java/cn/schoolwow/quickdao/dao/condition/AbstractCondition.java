@@ -3,8 +3,10 @@ package cn.schoolwow.quickdao.dao.condition;
 import cn.schoolwow.quickdao.dao.condition.subCondition.AbstractSubCondition;
 import cn.schoolwow.quickdao.dao.condition.subCondition.SQLiteSubCondition;
 import cn.schoolwow.quickdao.dao.condition.subCondition.SubCondition;
-import cn.schoolwow.quickdao.dao.response.*;
-import cn.schoolwow.quickdao.database.H2Database;
+import cn.schoolwow.quickdao.dao.response.AbstractResponse;
+import cn.schoolwow.quickdao.dao.response.Response;
+import cn.schoolwow.quickdao.dao.response.ResponseInvocationHandler;
+import cn.schoolwow.quickdao.dao.response.UnionType;
 import cn.schoolwow.quickdao.database.SQLiteDatabase;
 import cn.schoolwow.quickdao.domain.*;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
@@ -19,8 +21,6 @@ import java.util.List;
 import java.util.Stack;
 
 public class AbstractCondition<T> implements Condition<T>{
-    //转义字符
-    public static String[] patterns = new String[]{"%", "_", "[", "[^", "[!", "]"};
     //查询对象
     public Query query;
     //关联表计数
@@ -118,17 +118,7 @@ public class AbstractCondition<T> implements Condition<T>{
             return this;
         }
         query.whereBuilder.append("("+query.tableAliasName+"." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field)) + " like ?) and ");
-        boolean hasContains = false;
-        for (String pattern : patterns) {
-            if (((String) value).contains(pattern)) {
-                query.parameterList.add(value);
-                hasContains = true;
-                break;
-            }
-        }
-        if (!hasContains) {
-            query.parameterList.add("%" + value + "%");
-        }
+        query.parameterList.add(value);
         return this;
     }
 
@@ -157,6 +147,21 @@ public class AbstractCondition<T> implements Condition<T>{
             query.whereBuilder.append("("+query.tableAliasName+"." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field)) + " " + operator + " ?) and ");
             query.parameterList.add(value);
         }
+        return this;
+    }
+
+    @Override
+    public Condition<T> addColumn(String... fields) {
+        for(String field:fields){
+            query.columnBuilder.append(field+ ",");
+        }
+        return this;
+    }
+
+    @Override
+    public Condition<T> addUpdate(String field, Object value) {
+        query.setBuilder.append(query.tableAliasName+"." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field)) + "=?,");
+        query.updateParameterList.add(value);
         return this;
     }
 
@@ -279,71 +284,19 @@ public class AbstractCondition<T> implements Condition<T>{
     }
 
     @Override
-    public Condition<T> addUpdate(String field, Object value) {
-        query.setBuilder.append(query.tableAliasName+"." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field)) + "=?,");
-        query.updateParameterList.add(value);
-        return this;
-    }
-
-    @Override
-    public Condition<T> addAggregate(String aggerate, String field) {
-        field = StringUtil.Camel2Underline(field);
-        String alias = aggerate + "(" + field + ")";
-        return addAggregate(aggerate,field,alias);
-    }
-
-    @Override
-    public Condition<T> addAggregate(String aggerate, String field, String alias) {
-        field = StringUtil.Camel2Underline(field);
-        query.aggregateColumnBuilder.append(aggerate + "("+query.tableAliasName+"." + query.quickDAOConfig.database.escape(field) + ") as " + query.quickDAOConfig.database.escape(alias) + ",");
-        return this;
-    }
-
-    @Override
     public Condition<T> groupBy(String... fields) {
         for(String field:fields){
-            query.groupByBuilder.append(query.tableAliasName+"." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field)) + ",");
+            if(query.columnBuilder.length()==0){
+                query.groupByBuilder.append(query.tableAliasName+"." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field)) + ",");
+            }else{
+                query.groupByBuilder.append(field + ",");
+            }
         }
-        return this;
-    }
-
-    public Condition<T> having(String aggregate, String field, Object value){
-        return having(aggregate,field,"=",value);
-    }
-
-    public Condition<T> having(String sourceAggregate, String sourceField, String operator, Object value){
-        if(null==sourceAggregate||sourceAggregate.isEmpty()){
-            query.havingBuilder.append(query.tableAliasName + "." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(sourceField)));
-        }else{
-            query.havingBuilder.append(sourceAggregate+"(" + query.tableAliasName + "." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(sourceField)) +")");
-        }
-        query.havingBuilder.append(" "+operator+" ? and ");
-        query.havingParameterList.add(value);
-        return this;
-    }
-
-    public Condition<T> having(String sourceAggregate, String sourceField, String targetAggregate, String targetField){
-        return having(sourceAggregate,sourceField,"=",targetAggregate,targetField);
-    }
-
-    public Condition<T> having(String sourceAggregate, String sourceField, String operator, String targetAggregate, String targetField){
-        if(null==sourceAggregate||sourceAggregate.isEmpty()){
-            query.havingBuilder.append(query.tableAliasName + "." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(sourceField)));
-        }else{
-            query.havingBuilder.append(sourceAggregate+"(" + query.tableAliasName + "." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(sourceField)) +")");
-        }
-        query.havingBuilder.append(" "+operator+" ");
-        if(null==targetAggregate||targetAggregate.isEmpty()){
-            query.havingBuilder.append(query.tableAliasName + "." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(targetField)));
-        }else{
-            query.havingBuilder.append(targetAggregate+"(" + query.tableAliasName + "." + query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(targetField)) +")");
-        }
-        query.havingBuilder.append(" and ");
         return this;
     }
 
     @Override
-    public Condition<T> addHaving(String having, List parameterList) {
+    public Condition<T> having(String having, List parameterList) {
         query.havingBuilder.append("(" + having + ") and ");
         if(null!=parameterList&&parameterList.isEmpty()){
             query.havingParameterList.addAll(parameterList);
@@ -380,10 +333,10 @@ public class AbstractCondition<T> implements Condition<T>{
     @Override
     public Condition<T> orderBy(String... fields) {
         for(String field:fields){
-            if(!query.unionList.isEmpty()){
-                query.orderByBuilder.append(query.quickDAOConfig.database.escape(query.tableAliasName+"_"+StringUtil.Camel2Underline(field))+" asc,");
-            }else{
+            if(query.columnBuilder.length()==0){
                 query.orderByBuilder.append(query.tableAliasName+"."+query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field))+" asc,");
+            }else{
+                query.orderByBuilder.append(field+" asc,");
             }
         }
         return this;
@@ -392,10 +345,10 @@ public class AbstractCondition<T> implements Condition<T>{
     @Override
     public Condition<T> orderByDesc(String... fields) {
         for(String field:fields){
-            if(!query.unionList.isEmpty()){
-                query.orderByBuilder.append(query.quickDAOConfig.database.escape(query.tableAliasName+"_"+StringUtil.Camel2Underline(field))+" desc,");
-            }else{
+            if(query.columnBuilder.length()==0){
                 query.orderByBuilder.append(query.tableAliasName+"."+query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field))+" desc,");
+            }else{
+                query.orderByBuilder.append(field+" desc,");
             }
         }
         return this;
@@ -413,31 +366,6 @@ public class AbstractCondition<T> implements Condition<T>{
         query.pageVo = new PageVo<>();
         query.pageVo.setPageSize(pageSize);
         query.pageVo.setCurrentPage(pageNum);
-        return this;
-    }
-
-    @Override
-    public Condition<T> addColumn(String... fields) {
-        for(String field:fields){
-            field = StringUtil.Camel2Underline(field);
-            query.columnBuilder.append(query.tableAliasName+"." + query.quickDAOConfig.database.escape(field) + " as " + query.quickDAOConfig.database.escape(query.tableAliasName+"_" + field) + ",");
-        }
-        return this;
-    }
-
-    @Override
-    public Condition<T> excludeColumn(String... fields) {
-        for(String field:fields){
-            query.excludeColumns.add(field);
-        }
-        return this;
-    }
-
-    @Override
-    public Condition<T> addSpecialColumn(String... fields) {
-        for(String field:fields){
-            query.columnBuilder.append(field+ ",");
-        }
         return this;
     }
 
@@ -498,12 +426,7 @@ public class AbstractCondition<T> implements Condition<T>{
             hasExecute = true;
         }
 
-        AbstractResponse abstractResponse = null;
-        if(query.quickDAOConfig.database instanceof H2Database){
-            abstractResponse = new H2Response(query);
-        }else{
-            abstractResponse = new AbstractResponse(query);
-        }
+        AbstractResponse abstractResponse = new AbstractResponse(query);
         ResponseInvocationHandler invocationHandler = new ResponseInvocationHandler(abstractResponse);
         return (Response) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),new Class<?>[]{Response.class},invocationHandler);
     }

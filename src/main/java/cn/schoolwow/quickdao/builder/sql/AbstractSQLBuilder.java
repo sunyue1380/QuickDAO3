@@ -12,10 +12,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AbstractSQLBuilder implements SQLBuilder{
-    protected Logger logger = LoggerFactory.getLogger(AbstractSQLBuilder.class);
+    protected static Logger logger = LoggerFactory.getLogger(AbstractSQLBuilder.class);
+    /**格式化日期参数*/
+    private static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
     /**SQL参数占位符*/
     protected static String PLACEHOLDER = "** NOT SPECIFIED **";
     /**SQL语句缓存*/
@@ -56,10 +62,13 @@ public class AbstractSQLBuilder implements SQLBuilder{
     }
 
     /**
-     * 设置参数
+     * DQL查询操作设置参数
      */
     protected static void setParameter(Object parameter, PreparedStatement ps, int parameterIndex, StringBuilder sqlBuilder) throws SQLException {
         ps.setObject(parameterIndex, parameter);
+        if(!logger.isDebugEnabled()){
+            return;
+        }
         switch (parameter.getClass().getSimpleName().toLowerCase()) {
             case "boolean": {
                 Boolean bool = Boolean.parseBoolean(parameter.toString());
@@ -75,8 +84,21 @@ public class AbstractSQLBuilder implements SQLBuilder{
             case "string": {
                 replaceFirst(sqlBuilder,"'"+parameter.toString()+"'");
             }break;
-            case "date": {
-            }
+            case "date": {}
+            case "timestamp": {
+                java.util.Date date = (java.util.Date) parameter;
+                LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+                replaceFirst(sqlBuilder,"'"+dateTimeFormatter.format(localDateTime)+"'");
+            }break;
+            case "localdate": {
+                LocalDate localDate = (LocalDate) parameter;
+                replaceFirst(sqlBuilder,"'"+dateTimeFormatter.format(localDate)+"'");
+            }break;
+            case "localdatetime": {
+                LocalDateTime localDateTime = (LocalDateTime) parameter;
+                replaceFirst(sqlBuilder,"'"+dateTimeFormatter.format(localDateTime)+"'");
+            }break;
+
             default: {
                 replaceFirst(sqlBuilder,parameter.toString());
             }
@@ -84,7 +106,7 @@ public class AbstractSQLBuilder implements SQLBuilder{
     }
 
     /**
-     * 设置参数
+     * DML操作设置参数
      */
     protected static void setParameter(Object instance, Property property, PreparedStatement ps, int parameterIndex, StringBuilder sqlBuilder) throws Exception{
         Field field = instance.getClass().getDeclaredField(property.name);
@@ -139,16 +161,39 @@ public class AbstractSQLBuilder implements SQLBuilder{
                 ps.setString(parameterIndex, field.get(instance) == null ? null : field.get(instance).toString());
                 parameter = "'" + (field.get(instance) == null ? "" : field.get(instance).toString()) + "'";
             }break;
-            case "date": {
+            case "date": {};
+            case "timestamp": {
                 Object o = field.get(instance);
-                if (o == null) {
+                if (null==o) {
                     ps.setObject(parameterIndex, null);
                     parameter = "null";
                 } else{
                     java.util.Date date = (java.util.Date) o;
-                    Timestamp timestamp = new Timestamp(date.getTime());
-                    ps.setTimestamp(parameterIndex, timestamp);
-                    parameter = "'"+timestamp.toString()+"'";
+                    ps.setTimestamp(parameterIndex, new Timestamp(date.getTime()));
+                    LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+                    parameter = "'"+dateTimeFormatter.format(localDateTime)+"'";
+                }
+            }break;
+            case "localdate": {
+                Object o = field.get(instance);
+                if(null==o){
+                    ps.setObject(parameterIndex, null);
+                    parameter = "null";
+                }else{
+                    ps.setObject(parameterIndex, o);
+                    LocalDate localDate = (LocalDate) o;
+                    parameter = "'"+dateTimeFormatter.format(localDate)+"'";
+                }
+            }break;
+            case "localdatetime": {
+                Object o = field.get(instance);
+                if(null==o){
+                    ps.setObject(parameterIndex, null);
+                    parameter = "null";
+                }else{
+                    ps.setObject(parameterIndex, o);
+                    LocalDateTime localDate = (LocalDateTime) o;
+                    parameter = "'"+dateTimeFormatter.format(localDate)+"'";
                 }
             }break;
             default: {

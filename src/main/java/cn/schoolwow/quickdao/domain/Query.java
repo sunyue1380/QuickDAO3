@@ -30,10 +30,6 @@ public class Query implements Serializable {
      */
     public StringBuilder columnBuilder = new StringBuilder();
     /**
-     * 待排除的字段
-     * */
-    public List<String> excludeColumns = new ArrayList<>();
-    /**
      * 聚合函数列名
      */
     public StringBuilder aggregateColumnBuilder = new StringBuilder();
@@ -113,8 +109,4 @@ public class Query implements Serializable {
      * DQL查询语句构建
      * */
     public DQLSQLBuilder dqlsqlBuilder;
-    /**
-     * sql语句
-     * */
-    public String sql;
 }
