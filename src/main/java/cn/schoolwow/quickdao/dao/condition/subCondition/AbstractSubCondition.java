@@ -1,6 +1,5 @@
 package cn.schoolwow.quickdao.dao.condition.subCondition;
 
-import cn.schoolwow.quickdao.dao.condition.AbstractCondition;
 import cn.schoolwow.quickdao.dao.condition.Condition;
 import cn.schoolwow.quickdao.domain.SubQuery;
 import cn.schoolwow.quickdao.util.StringUtil;
@@ -124,17 +123,7 @@ public class AbstractSubCondition<T> implements SubCondition<T>{
             return this;
         }
         subQuery.whereBuilder.append("("+subQuery.tableAliasName+"." + subQuery.query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field)) + " like ?) and ");
-        boolean hasContains = false;
-        for (String pattern : AbstractCondition.patterns) {
-            if (value.toString().contains(pattern)) {
-                subQuery.parameterList.add(value);
-                hasContains = true;
-                break;
-            }
-        }
-        if (!hasContains) {
-            subQuery.parameterList.add("%" + value + "%");
-        }
+        subQuery.parameterList.add(value);
         return this;
     }
 

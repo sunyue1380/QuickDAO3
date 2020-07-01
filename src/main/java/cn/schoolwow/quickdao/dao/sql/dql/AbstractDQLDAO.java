@@ -57,7 +57,7 @@ public class AbstractDQLDAO extends AbstractSQLDAO implements DQLDAO {
             }
             resultSet.close();
             ps.close();
-            MDC.put("returnCount",array.size()+"");
+            MDC.put("count",array.size()+"");
             return array.toJavaList(clazz);
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);

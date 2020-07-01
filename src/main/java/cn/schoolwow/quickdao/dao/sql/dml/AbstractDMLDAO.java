@@ -55,7 +55,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
         } catch (Exception e) {
             throw new SQLRuntimeException(e);
         }
-        MDC.put("effectCount",effect+"");
+        MDC.put("count",effect+"");
         return effect;
     }
 
@@ -76,7 +76,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
         } catch (Exception e) {
             throw new SQLRuntimeException(e);
         }
-        MDC.put("effectCount",effect+"");
+        MDC.put("count",effect+"");
         return effect;
     }
 
@@ -109,7 +109,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
         } catch (Exception e) {
             throw new SQLRuntimeException(e);
         }
-        MDC.put("effectCount",effect+"");
+        MDC.put("count",effect+"");
         return effect;
     }
 
@@ -151,7 +151,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
         } catch (Exception e) {
             throw new SQLRuntimeException(e);
         }
-        MDC.put("effectCount",effect+"");
+        MDC.put("count",effect+"");
         return effect;
     }
 
@@ -189,7 +189,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
         }
         effect += update(updateList);
         effect += insert(insertList);
-        MDC.put("effectCount",effect+"");
+        MDC.put("count",effect+"");
         return effect;
     }
 
@@ -220,7 +220,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
-        MDC.put("effectCount",effect+"");
+        MDC.put("count",effect+"");
         return effect;
     }
 
@@ -234,7 +234,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
-        MDC.put("effectCount",effect+"");
+        MDC.put("count",effect+"");
         return effect;
     }
 }

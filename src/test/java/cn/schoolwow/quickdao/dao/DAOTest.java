@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -205,8 +206,9 @@ public class DAOTest extends BaseDAOTest{
                     .addInQuery("lastName",new String[]{"1","2"})
                     .addNotInQuery("lastName",new String[]{"3","4"})
                     .addBetweenQuery("id",1,2)
-                    .addLikeQuery("lastName","a")
+                    .addLikeQuery("lastName","%a%")
                     .addQuery("lastName","=","a")
+                    .addQuery("updatedAt","<=",new Date())
                     .compositField()
                     .joinTable(Order.class,"id","personId")
                     .addNullQuery("orderNo")
@@ -277,24 +279,25 @@ public class DAOTest extends BaseDAOTest{
         {
             Response response = dao.query(Person.class)
                     .addQuery("lastName","Gates")
+                    .addColumn("t.id")
                     .execute();
-            List<Long> idList = response.getValueList(Long.class,"id");
+            List<Long> idList = response.getSingleColumnList(Long.class);
             Assert.assertEquals(1,idList.size());
             Assert.assertEquals(1,idList.get(0).intValue());
         }
         //聚合查询
         {
             Response response = dao.query(Person.class)
-                    .addAggregate("count","id")
-                    .addAggregate("max","id","m(id)")
+                    .addColumn("COUNT(ID)")
+                    .addColumn("max(id) as `M(ID)`")
                     .groupBy("id")
-                    .having("count","id",1)
-                    .orderByDesc("m(id)")
+                    .having("count(id) = 1",null)
+                    .orderByDesc("max(id)")
                     .execute();
-            JSONArray array = response.getAggerateList();
+            JSONArray array = response.getArray();
             //H2数据库所有返回的列名都是全大写
-            Assert.assertEquals(1,array.getJSONObject(0).getInteger("count(id)").intValue());
-            Assert.assertEquals(1,array.getJSONObject(0).getInteger("m(id)").intValue());
+            Assert.assertEquals(1,array.getJSONObject(0).getInteger("COUNT(ID)").intValue());
+            Assert.assertEquals(1,array.getJSONObject(0).getInteger("M(ID)").intValue());
         }
         //关联查询
         {
@@ -314,22 +317,22 @@ public class DAOTest extends BaseDAOTest{
         {
             Response response = dao.query(Person.class)
                     .union(dao.query(Person.class)
-                            .addQuery("lastName","Gates")
-                            .addColumn(new String[]{"id","lastName","firstName"}))
+                            .addQuery("last_name","Gates")
+                            .addColumn("id","last_name","first_name"))
                     .union(dao.query(Person.class)
-                            .addQuery("firstName","Bill")
-                            .addColumn(new String[]{"id","lastName","firstName"}),UnionType.UnionAll)
+                            .addQuery("first_name","Bill")
+                            .addColumn("id","last_name","first_name"),UnionType.UnionAll)
                     .addQuery("address","Xuanwumen 11")
-                    .addColumn(new String[]{"id","lastName","firstName"})
+                    .addColumn("id","last_name","first_name")
                     .orderByDesc("id")
                     .page(1,10)
                     .execute();
             {
-                List<Person> personList = response.getPartList();
+                List<Person> personList = response.getList();
                 Assert.assertNull("部分查询结果城市字段应为空!",personList.get(0).getCity());
             }
             {
-                PageVo<Person> personPageVo = response.getPartPagingList();
+                PageVo<Person> personPageVo = response.getPagingList();
                 Assert.assertEquals(1,personPageVo.getCurrentPage());
                 Assert.assertEquals(10,personPageVo.getPageSize());
                 Assert.assertEquals(1,personPageVo.getTotalPage());
@@ -337,31 +340,23 @@ public class DAOTest extends BaseDAOTest{
                 Assert.assertNull(personPageVo.getList().get(0).getCity());
             }
             {
-                List<Person> personList = response.getUnionList();
+                List<Person> personList = response.getList();
                 Assert.assertEquals(2,personList.size());
             }
             {
-                PageVo<Person> personPageVo = response.getUnionPagingList();
+                PageVo<Person> personPageVo = response.getPagingList();
                 Assert.assertEquals(1,personPageVo.getTotalSize());
             }
-        }
-        //部分查询
-        {
-            Response<Person> response = dao.query(Person.class)
-                    .addQuery("lastName","Gates")
-                    .excludeColumn("city")
-                    .execute();
-            Assert.assertNull("部分查询结果城市字段应为空!",response.getPartList().get(0).getCity());
         }
         //自定义列查询
         {
             Response response = dao.query(Person.class)
                     .addQuery("lastName","Gates")
-                    .addSpecialColumn("max(t.id) as m")
+                    .addColumn("max(t.id) as M")
                     .execute();
-            JSONArray array = response.getSpecialList();
+            JSONArray array = response.getArray();
             Assert.assertEquals(1,array.size());
-            Assert.assertEquals(1,array.getJSONObject(0).getIntValue("m"));
+            Assert.assertEquals(1,array.getJSONObject(0).getIntValue("M"));
         }
         //删除
         {

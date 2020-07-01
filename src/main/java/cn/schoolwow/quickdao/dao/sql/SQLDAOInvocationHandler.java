@@ -46,12 +46,8 @@ public class SQLDAOInvocationHandler implements InvocationHandler {
             long startTime = System.currentTimeMillis();
             Object result = method.invoke(abstractSQLDAO, args);
             long endTime = System.currentTimeMillis();
-            if(null!=MDC.get("returnCount")){
-                logger.debug("[{}]返回行数:{},耗时:{}ms,执行SQL:{}",MDC.get("name"),MDC.get("returnCount"),(endTime-startTime),MDC.get("sql"));
-            }else if(null!=MDC.get("effectCount")){
-                logger.debug("[{}]影响行数:{},耗时:{}ms,执行SQL:{}",MDC.get("name"),MDC.get("effectCount"),(endTime-startTime),MDC.get("sql"));
-            }else if(null!=MDC.get("name")){
-                logger.debug("[{}]耗时:{}ms,执行SQL:{}",MDC.get("name"),(endTime-startTime),MDC.get("sql"));
+            if(null!=MDC.get("name")){
+                logger.debug("[{}]行数:{},耗时:{}ms,执行SQL:{}",MDC.get("name"),MDC.get("count"),endTime-startTime,MDC.get("sql"));
             }
             MDC.clear();
             if (!abstractSQLDAO.transaction && !abstractSQLDAO.sqlBuilder.connection.isClosed()) {

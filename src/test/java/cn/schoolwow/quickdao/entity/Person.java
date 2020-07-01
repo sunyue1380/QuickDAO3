@@ -3,6 +3,7 @@ package cn.schoolwow.quickdao.entity;
 import cn.schoolwow.quickdao.annotation.*;
 
 import java.sql.Timestamp;
+import java.util.Date;
 
 @Comment("人")
 public class Person {
@@ -19,10 +20,10 @@ public class Person {
     private String city;
 
     @TableField(createdAt = true)
-    private Timestamp createdAt;
+    private Date createdAt;
 
     @TableField(updatedAt = true)
-    private Timestamp updatedAt;
+    private Date updatedAt;
 
     private Order order;
 
@@ -74,19 +75,19 @@ public class Person {
         this.order = order;
     }
 
-    public Timestamp getCreatedAt() {
+    public Date getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Timestamp getUpdatedAt() {
+    public Date getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Timestamp updatedAt) {
+    public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
 }

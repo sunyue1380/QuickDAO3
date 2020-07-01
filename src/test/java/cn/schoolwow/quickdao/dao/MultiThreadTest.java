@@ -59,7 +59,7 @@ public class MultiThreadTest extends BaseDAOTest{
                     person3.setAddress("Champs-Elysees");
 
                     Person[] persons = new Person[]{person,person2,person3};
-                    System.out.println("插入数:"+dao.insert(persons));
+                    dao.insert(persons);
                 }
                 //开启事务
                 Transaction transaction = dao.startTransaction();
