@@ -299,6 +299,17 @@ public class DAOTest extends BaseDAOTest{
             Assert.assertEquals(1,array.getJSONObject(0).getInteger("COUNT(ID)").intValue());
             Assert.assertEquals(1,array.getJSONObject(0).getInteger("M(ID)").intValue());
         }
+        //聚合查询
+        {
+            Response response = dao.query(Person.class)
+                    .joinTable(Order.class,"id","personId")
+                    .groupBy("id")
+                    .done()
+                    .addColumn("t1.id")
+                    .orderByDesc("t1.id")
+                    .execute();
+            Assert.assertEquals(1,response.count());
+        }
         //关联查询
         {
             Response response = dao.query(Person.class)
@@ -306,12 +317,40 @@ public class DAOTest extends BaseDAOTest{
                     .addQuery("lastName","Gates")
                     .joinTable(Order.class,"id","personId")
                     .tableAliasName("o")
+                    .orderByDesc("id")
                     .done()
                     .compositField()
                     .execute();
             Assert.assertEquals(1,response.count());
             Person person = (Person) response.getOne();
             Assert.assertNotNull("关联查询订单实体类不能为空!",person.getOrder());
+        }
+        //关联查询
+        {
+            Response response = dao.query(Person.class)
+                    .joinTable(Order.class,"id","personId")
+                    .addQuery("orderNo",1)
+                    .orderByDesc("id")
+                    .done()
+                    .compositField()
+                    .execute();
+            Assert.assertEquals(1,response.count());
+            Person person = (Person) response.getOne();
+            Assert.assertNotNull("关联查询订单实体类不能为空!",person.getOrder());
+        }
+        //关联查询
+        {
+            Response response = dao.query(Person.class)
+                    .joinTable(dao.query(Order.class)
+                            .addColumn("id","order_no","person_id pId")
+                            .addQuery("orderNo",1)
+                            .done(),
+                            "id","pId")
+                    .orderByDesc("id")
+                    .done()
+                    .compositField()
+                    .execute();
+            Assert.assertEquals(1,response.count());
         }
         //部分查询
         {

@@ -159,13 +159,22 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         }
         if(query.compositField){
             for (SubQuery subQuery : query.subQueryList) {
-                builder.append("," + columns(subQuery.entity, subQuery.tableAliasName));
+                if(subQuery.columnBuilder.length()==0){
+                    builder.append("," + columns(subQuery.entity, subQuery.tableAliasName));
+                }
             }
         }
-        builder.append(" from "+quickDAOConfig.database.escape(query.entity.tableName)+" as "+query.tableAliasName+" ");
+        builder.append(" from "+quickDAOConfig.database.escape(query.entity.tableName) + " as " + query.tableAliasName + " ");
         addJoinTableStatement(query,builder);
         addWhereStatement(query,builder);
         builder.append(" " + query.groupByBuilder.toString() + " " + query.havingBuilder.toString());
+        return builder;
+    }
+
+    private StringBuilder getSubQueryArraySQL(SubQuery subQuery) {
+        StringBuilder builder = new StringBuilder("select "+subQuery.columnBuilder.toString());
+        builder.append(" from "+quickDAOConfig.database.escape(subQuery.entity.tableName));
+        builder.append(" "+ subQuery.whereBuilder.toString());
         return builder;
     }
 
@@ -176,10 +185,18 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         for (SubQuery subQuery : query.subQueryList) {
             if (subQuery.parentSubQuery == null) {
                 //如果parentSubCondition为空,则为主表关联子表
-                sqlBuilder.append(" "+subQuery.join + " " + query.quickDAOConfig.database.escape(subQuery.entity.tableName) + " as " + subQuery.tableAliasName + " on "+query.tableAliasName+"." + query.quickDAOConfig.database.escape(subQuery.primaryField) + " = " + subQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.joinTableField)+" ");
+                if(subQuery.columnBuilder.length()==0){
+                    sqlBuilder.append(" "+subQuery.join + " " + query.quickDAOConfig.database.escape(subQuery.entity.tableName) + " as " + subQuery.tableAliasName + " on "+query.tableAliasName+"." + query.quickDAOConfig.database.escape(subQuery.primaryField) + " = " + subQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.joinTableField)+" ");
+                }else{
+                    sqlBuilder.append(" "+subQuery.join + " ("+getSubQueryArraySQL(subQuery)+") as " + subQuery.tableAliasName + " on "+query.tableAliasName+"." + query.quickDAOConfig.database.escape(subQuery.primaryField) + " = " + subQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.joinTableField) + " ");
+                }
             } else {
                 //如果parentSubCondition不为空,则为子表关联子表
-                sqlBuilder.append(" "+subQuery.join + " " + query.quickDAOConfig.database.escape(subQuery.entity.tableName) + " as " + subQuery.tableAliasName + " on " + subQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.joinTableField) + " = " + subQuery.parentSubQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.primaryField) + " ");
+                if(subQuery.columnBuilder.length()==0){
+                    sqlBuilder.append(" "+subQuery.join + " " + query.quickDAOConfig.database.escape(subQuery.entity.tableName) + " as " + subQuery.tableAliasName + " on " + subQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.joinTableField) + " = " + subQuery.parentSubQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.primaryField) + " ");
+                }else{
+                    sqlBuilder.append(" "+subQuery.join + " " + getSubQueryArraySQL(subQuery) + " as " + subQuery.tableAliasName + " on " + subQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.joinTableField) + " = " + subQuery.parentSubQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.primaryField) + " ");
+                }
             }
         }
     }
@@ -191,7 +208,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         //添加查询条件
         sqlBuilder.append(" " + query.whereBuilder.toString());
         for (SubQuery subQuery : query.subQueryList) {
-            if (subQuery.whereBuilder.length() > 0) {
+            if (subQuery.columnBuilder.length()==0&&subQuery.whereBuilder.length() > 0) {
                 sqlBuilder.append(" and " + subQuery.whereBuilder.toString() + " ");
             }
         }
@@ -204,6 +221,13 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
      * 添加主表参数
      */
     protected void addMainTableParameters(PreparedStatement ps, Query query, StringBuilder sqlBuilder) throws SQLException {
+        for (SubQuery subQuery : query.subQueryList) {
+            if(subQuery.columnBuilder.length()>0){
+                for (Object parameter : subQuery.parameterList) {
+                    setParameter(parameter,ps,query.parameterIndex++,sqlBuilder);
+                }
+            }
+        }
         for (Object parameter : query.parameterList) {
             setParameter(parameter,ps,query.parameterIndex++,sqlBuilder);
         }
@@ -219,8 +243,10 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
      */
     private void addJoinTableParameters(PreparedStatement ps, Query query, StringBuilder sqlBuilder) throws SQLException {
         for (SubQuery subQuery : query.subQueryList) {
-            for (Object parameter : subQuery.parameterList) {
-                setParameter(parameter,ps,query.parameterIndex++,sqlBuilder);
+            if(subQuery.columnBuilder.length()==0){
+                for (Object parameter : subQuery.parameterList) {
+                    setParameter(parameter,ps,query.parameterIndex++,sqlBuilder);
+                }
             }
         }
     }

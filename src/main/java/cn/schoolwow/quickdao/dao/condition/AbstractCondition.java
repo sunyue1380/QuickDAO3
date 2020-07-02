@@ -317,6 +317,34 @@ public class AbstractCondition<T> implements Condition<T>{
         subQuery.primaryField = StringUtil.Camel2Underline(primaryField);
         subQuery.joinTableField = StringUtil.Camel2Underline(joinTableField);
         subQuery.compositField = StringUtil.Camel2Underline(compositField);
+        subQuery.query = query;
+        subQuery.condition = this;
+
+        AbstractSubCondition subCondition = null;
+        if(query.quickDAOConfig.database instanceof SQLiteDatabase){
+            subCondition = new SQLiteSubCondition(subQuery);
+        }else{
+            subCondition = new AbstractSubCondition(subQuery);
+        }
+        query.subQueryList.add(subQuery);
+        return subCondition;
+    }
+
+    @Override
+    public SubCondition<T> joinTable(Condition joinCondition, String primaryField, String joinConditionField) {
+        Query joinQuery = ((AbstractCondition) joinCondition).query;
+        SubQuery subQuery = new SubQuery();
+        subQuery.entity = joinQuery.entity;
+        subQuery.columnBuilder.append(joinQuery.columnBuilder.toString());
+        subQuery.columnBuilder.deleteCharAt(subQuery.columnBuilder.length()-1);
+        subQuery.tableAliasName = query.tableAliasName + (joinTableIndex++);
+        subQuery.primaryField = StringUtil.Camel2Underline(primaryField);
+        subQuery.joinTableField = joinConditionField;
+        subQuery.whereBuilder.append(joinQuery.whereBuilder.toString().replace(joinQuery.tableAliasName+".",""));
+        if(subQuery.whereBuilder.length()>0){
+            subQuery.whereBuilder.insert(0, "where ");
+        }
+        subQuery.parameterList = joinQuery.parameterList;
         subQuery.condition = this;
         subQuery.query = query;
 
@@ -385,9 +413,6 @@ public class AbstractCondition<T> implements Condition<T>{
         if(!hasExecute){
             if (query.columnBuilder.length() > 0) {
                 query.columnBuilder.deleteCharAt(query.columnBuilder.length() - 1);
-            }
-            if (query.aggregateColumnBuilder.length() > 0) {
-                query.aggregateColumnBuilder.deleteCharAt(query.aggregateColumnBuilder.length() - 1);
             }
             if (query.setBuilder.length() > 0) {
                 query.setBuilder.deleteCharAt(query.setBuilder.length() - 1);

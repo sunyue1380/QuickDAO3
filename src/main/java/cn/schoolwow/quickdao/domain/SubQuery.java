@@ -17,6 +17,10 @@ public class SubQuery<T> implements Serializable {
      */
     public Entity entity;
     /**
+     * 关联表自定义列名
+     */
+    public StringBuilder columnBuilder = new StringBuilder();
+    /**
      * 表别名
      */
     public String tableAliasName;

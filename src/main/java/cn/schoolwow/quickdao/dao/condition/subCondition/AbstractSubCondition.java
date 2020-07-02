@@ -153,14 +153,26 @@ public class AbstractSubCondition<T> implements SubCondition<T>{
     }
 
     @Override
-    public SubCondition<T> orderBy(String field) {
-        subQuery.query.orderByBuilder.append(subQuery.tableAliasName + "." + subQuery.query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field)) + " asc,");
+    public SubCondition<T> groupBy(String... fields) {
+        for(String field:fields){
+            subQuery.query.groupByBuilder.append(subQuery.tableAliasName+"." + subQuery.query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field)) + ",");
+        }
         return this;
     }
 
     @Override
-    public SubCondition<T> orderByDesc(String field) {
-        subQuery.query.orderByBuilder.append(subQuery.tableAliasName + "." + subQuery.query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field)) + " desc,");
+    public SubCondition<T> orderBy(String... fields) {
+        for(String field:fields){
+            subQuery.query.orderByBuilder.append(subQuery.tableAliasName + "." + subQuery.query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field)) + " asc,");
+        }
+        return this;
+    }
+
+    @Override
+    public SubCondition<T> orderByDesc(String... fields) {
+        for(String field:fields){
+            subQuery.query.orderByBuilder.append(subQuery.tableAliasName + "." + subQuery.query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field)) + " desc,");
+        }
         return this;
     }
 
