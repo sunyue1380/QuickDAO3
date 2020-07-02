@@ -174,18 +174,24 @@ public interface SubCondition<T>{
     SubCondition<T> addQuery(String field, String operator, Object value);
 
     /**
+     * 添加分组查询
+     * @param fields 分组字段
+     */
+    SubCondition<T> groupBy(String... fields);
+
+    /**
      * 根据指定字段升序排列
      *
-     * @param field 升序排列字段名
+     * @param fields 升序排列字段名
      */
-    SubCondition<T> orderBy(String field);
+    SubCondition<T> orderBy(String... fields);
 
     /**
      * 根据指定字段降序排列
      *
-     * @param field 降序排列字段名
+     * @param fields 降序排列字段名
      */
-    SubCondition<T> orderByDesc(String field);
+    SubCondition<T> orderByDesc(String... fields);
 
     /**
      * 返回<b>父表</b>

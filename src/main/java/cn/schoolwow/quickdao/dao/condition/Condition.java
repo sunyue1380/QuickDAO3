@@ -289,7 +289,23 @@ public interface Condition<T> {
     SubCondition<T> joinTable(Class clazz, String primaryField, String joinTableField, String compositField);
 
     /**
+     * 关联子查询
+     * <ul>
+     *     <li>主表,表别名为t</li>
+     *     <li>子表,依据关联顺序别名依次为t1,t2,t3......</li>
+     * </ul>
+     * <p>调用本方法将在sql语句中拼接如下字符串
+     * <b>join #{condition子表} as t1 on t.primaryField = t1.joinTableField</b>
+     * </p>
+     *
+     * @param joinCondition 关联Condition
+     * @param primaryField   <b>主表</b>关联字段
+     * @param joinConditionField <b>子查询</b>关联字段
+     */
+    SubCondition<T> joinTable(Condition joinCondition, String primaryField, String joinConditionField);
+    /**
      * 根据指定字段升序排列
+     * <b>注意</b>若调用了addColumn方法,请将调用本方法放在addColumn方法之后
      *
      * @param field 升序排列字段名
      */
@@ -297,7 +313,7 @@ public interface Condition<T> {
 
     /**
      * 根据指定字段降序排列
-     *
+     * <b>注意</b>若调用了addColumn方法,请将调用本方法放在addColumn方法之后
      * @param field 降序排列字段名
      */
     Condition<T> orderByDesc(String... field);

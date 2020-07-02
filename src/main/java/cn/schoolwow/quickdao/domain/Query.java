@@ -30,10 +30,6 @@ public class Query implements Serializable {
      */
     public StringBuilder columnBuilder = new StringBuilder();
     /**
-     * 聚合函数列名
-     */
-    public StringBuilder aggregateColumnBuilder = new StringBuilder();
-    /**
      * 字段更新
      */
     public StringBuilder setBuilder = new StringBuilder();
