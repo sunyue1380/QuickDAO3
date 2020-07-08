@@ -2,20 +2,11 @@
 
 QuickDAO提供了手动建表删表功能,该功能对于编写测试用例时非常有用.
 
-* 手动建表
-
 ```java
+//手动建表
 dao.create(User.class);
-```
-
-* 手动删表
-
-```java
+//手动删表
 dao.drop(User.class);
-```
-
-* 重建表
-
-```java
+//重建表
 dao.rebuild(User.class);
 ```

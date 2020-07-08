@@ -7,8 +7,8 @@ QuickDAO提供了丰富的单表查询操作.
 调用``dao.query(User.class);``就得到了User类的Condition对象,Condition接口定义了大量添加条件查询的方法.
 
 ```java
-Condition condition = dao.query(User.class);
-condition.distinct()
+Condition condition = dao.query(User.class)
+    .distinct()
     .addNullQuery("lastName")
     .addNotNullQuery("lastName")
     .addEmptyQuery("lastName")

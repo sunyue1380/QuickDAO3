@@ -4,6 +4,7 @@ import cn.schoolwow.quickdao.builder.table.*;
 import cn.schoolwow.quickdao.dao.AbstractDAO;
 import cn.schoolwow.quickdao.dao.DAO;
 import cn.schoolwow.quickdao.dao.SQLiteDAO;
+import cn.schoolwow.quickdao.dao.sql.dml.IDGenerator;
 import cn.schoolwow.quickdao.database.*;
 import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.Property;
@@ -137,6 +138,14 @@ public class QuickDAO {
     /**是否自动新增属性*/
     public QuickDAO autoCreateProperty(boolean autoCreateProperty) {
         quickDAOConfig.autoCreateProperty = autoCreateProperty;
+        return this;
+    }
+
+    /**
+     * 指定id生成器策略
+     * */
+    public QuickDAO idGenerator(IDGenerator idGenerator) {
+        quickDAOConfig.idGenerator = idGenerator;
         return this;
     }
 

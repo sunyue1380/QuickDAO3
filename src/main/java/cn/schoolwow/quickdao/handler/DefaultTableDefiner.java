@@ -160,10 +160,6 @@ public class DefaultTableDefiner implements TableDefiner{
                         property.check = constraint.check();
                         property.defaultValue = constraint.defaultValue();
                     }
-                    if("id".equals(property.column)){
-                        property.id = true;
-                        property.autoIncrement = true;
-                    }
                     Id id = field.getDeclaredAnnotation(Id.class);
                     if(null!=id){
                         property.id = true;

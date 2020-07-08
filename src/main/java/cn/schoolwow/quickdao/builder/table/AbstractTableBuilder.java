@@ -85,7 +85,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         StringBuilder createTableBuilder = new StringBuilder("create table " + quickDAOConfig.database.escape(entity.tableName) + "(");
         Property[] properties = entity.properties;
         for (Property property : properties) {
-            if(property.id){
+            if(property.id&&null==quickDAOConfig.idGenerator){
                 createTableBuilder.append(getAutoIncrementSQL(property));
             }else{
                 createTableBuilder.append(quickDAOConfig.database.escape(property.column) + " " + property.columnType);
