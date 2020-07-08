@@ -1,5 +1,6 @@
 package cn.schoolwow.quickdao.domain;
 
+import cn.schoolwow.quickdao.dao.sql.dml.IDGenerator;
 import cn.schoolwow.quickdao.database.Database;
 import cn.schoolwow.quickdao.handler.DefaultTableDefiner;
 
@@ -48,6 +49,10 @@ public class QuickDAOConfig {
      * 是否自动新增属性
      */
     public boolean autoCreateProperty = true;
+    /**
+     * 是否自动新增属性
+     */
+    public IDGenerator idGenerator;
     /**
      * 实体表自定义
      */

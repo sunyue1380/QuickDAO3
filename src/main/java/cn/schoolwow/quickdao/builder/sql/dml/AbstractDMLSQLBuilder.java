@@ -144,7 +144,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
             builder.append("insert into " + quickDAOConfig.database.escape(entity.tableName) + "(");
             for (Property property : entity.properties) {
-                if (property.id&&property.autoIncrement) {
+                if (property.id&&property.autoIncrement&&null==quickDAOConfig.idGenerator) {
                     continue;
                 }
                 builder.append(quickDAOConfig.database.escape(property.column) + ",");
@@ -152,7 +152,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             builder.deleteCharAt(builder.length() - 1);
             builder.append(") values(");
             for (Property property : entity.properties) {
-                if (property.id&&property.autoIncrement) {
+                if (property.id&&property.autoIncrement&&null==quickDAOConfig.idGenerator) {
                     continue;
                 }
                 builder.append("?,");
@@ -174,8 +174,17 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
         int parameterIndex = 1;
         Entity entity = quickDAOConfig.entityMap.get(instance.getClass().getName());
         for (Property property : entity.properties) {
-            if (property.id&&property.autoIncrement) {
+            if (property.id&&property.autoIncrement&&null==quickDAOConfig.idGenerator) {
                 continue;
+            }
+            if(property.id&&null!=quickDAOConfig.idGenerator){
+                Field idField = instance.getClass().getDeclaredField(property.name);
+                idField.setAccessible(true);
+                if (idField.getType().isPrimitive()) {
+                    idField.setLong(instance, quickDAOConfig.idGenerator.getNextId());
+                } else {
+                    idField.set(instance, Long.valueOf(quickDAOConfig.idGenerator.getNextId()));
+                }
             }
             if(property.createdAt||property.updateAt){
                 setCurrentDateTime(property,instance);
@@ -264,7 +273,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
                 if(property.createdAt){
                     continue;
                 }
-                builder.append(quickDAOConfig.database.escape(property.column) + "=?,");
+                builder.append(quickDAOConfig.database.escape(property.column) + " = ?,");
             }
             builder.deleteCharAt(builder.length() - 1);
             builder.append(" where " + quickDAOConfig.database.escape(entity.id.column) + " = ?");

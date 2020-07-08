@@ -2,82 +2,74 @@
 
 QuickDAO通过配置信息生成DAO对象以便对数据库进行操作.用户可根据实际需求设置相应配置信息
 
-## 数据源
-
-QuickDAO通过DataSource获取Connection对象,故配置DAO时需要传递DataSource的实现类.
-您可以自由选择市面已有的DataSource实现,例如dbcp,c3p0,druid等等.
+## 配置DAO对象
 
 ```java
+//QuickDAO需要传递DataSource实现对象,您可以自由选择市面上的任意DataSource实现,本例采用dbcp
 BasicDataSource mysqlDataSource = new BasicDataSource();
-mysqlDataSource.setDriverClassName("com.mysql.jdbc.Driver");
-mysqlDataSource.setUrl("jdbc:mysql://127.0.0.1:3306/quickdao");
-mysqlDataSource.setUsername("root");
-mysqlDataSource.setPassword("123456");
-QuickDAO.newInstance().dataSource(mysqlDataSource);
-```
-
-## 配置项
-
-* 指定数据源(*)
-
-```java
-dataSource("cn.schoolwow.quickdao.entity")
-```
-
-* 指定要扫描的包
-
-```java
-packageName("cn.schoolwow.quickdao.entity")
-//扫描包并且为该包下的所有实体类表添加t_前缀
-packageName("cn.schoolwow.quickdao.entity","t")
-```
-
-* 扫描单个实体类
-
-> 3.2版本开始提供
-
-```java
-entity(User.class)
-//扫描指定实体类并且添加表前缀u_
-entity(User.class,"u")
-```
-
-* 忽略指定包,指定类
-
-```java
-ignorePackageName("cn.schoolwow.quickdao.entity")
-.ignoreClass(User.class)
-.filter(Predicate<Class> predicate)
-```
-
-* 是否建立数据库外键约束,默认为false
-
-```java
-foreignKey(true)
-```
-
-* 是否自动建表,默认为true
-
-```java
-autoCreateTable(true)
-```
-
-* 是否自动新增字段,默认为true
-
-```java
-autoCreateProperty(true)
+        mysqlDataSource.setDriverClassName("com.mysql.jdbc.Driver");
+        mysqlDataSource.setUrl("jdbc:mysql://127.0.0.1:3306/quickdao");
+        mysqlDataSource.setUsername("root");
+        mysqlDataSource.setPassword("123456");
+        DAO dao = QuickDAO.newInstance()
+                //指定DataSource
+                .dataSource(mysqlDataSource)
+                //指定要扫描的实体类包,支持多级目录
+                .packageName("cn.schoolwow.quickdao.entity")
+                //指定要扫描的实体类包,支持多级目录,同时添加表名前缀quickdao
+                .packageName("cn.schoolwow.quickdao.entity","quickdao")
+                //指定扫描单个实体类(v3.2版本开始提供)
+                .entity(Person.class)
+                //是否自动新增表,默认开启
+                .autoCreateTable(true)
+                //是否自动新增字段,默认开启
+                .autoCreateProperty(true)
+                //是否建表时建立外键约束,默认关闭
+                .foreignKey(false)
+                //忽略指定实体类
+                .ignoreClass(Person.class)
+                //忽略指定实体类包
+                .ignorePackageName("cn.schoolwow.quickdao.entity.ignore")
+                //返回DAO接口对象
+                .build();
 ```
 
 ## 动态定义实体类注解
 
-使用场景: 当项目引入了第三方代码,不能直接在源码上添加实体类注解时,可使用define()方法实现动态设置实体注解.
-
-> define方法设计采用了流式操作,done方法返回
+QuickDAO指定动态指定实体类注解,此功能适用于扫描第三方实体类包,即无法编辑实体类源码时.
 
 ```java
-.define(User.class)
-.property("username").unique(true).done()
-.property("password").notNull(true).done()
-.done()
-``` 
+DAO dao = QuickDAO.newInstance()
+                .define(Person.class)
+                .tableName("p")
+                .property("lastName")
+                .notNull(true)
+                .unique(true)
+                .defaultValue("quickdao")
+                .done()
+                .comment("Person表")
+                .done()
+                .build();
+```
 
+## 指定id生成器
+
+> 此功能从v3.4版本新增
+
+QuickDAO支持指定ID生成器策略.实例如下:
+
+```java
+public class User{
+  @Id
+  private long id;
+}
+
+QuickDAO.newInstance()
+              //指定雪花算法Id生成器
+              .idGenerator(new SnowflakeIdGenerator())
+              .done();
+```
+
+QuickDAO内置了SnowflakeIdGenerator生成器,您也可以通过实现IdGenerator接口自定义Id生成器
+
+> id生成器只对所有用@Id注解的属性起效果,请务必在id属性上添加@Id注解
