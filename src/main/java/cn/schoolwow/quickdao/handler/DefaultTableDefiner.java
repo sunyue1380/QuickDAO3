@@ -178,6 +178,7 @@ public class DefaultTableDefiner implements TableDefiner{
                     property.entity = entity;
                     if(property.id){
                         entity.id = property;
+                        property.comment = "自增id";
                     }
                     propertyList.add(property);
                 }
@@ -334,6 +335,12 @@ public class DefaultTableDefiner implements TableDefiner{
         Set<String> packageNameSet = quickDAOConfig.packageNameMap.keySet();
         for (String packageName : packageNameSet) {
             if (clazz.getName().contains(packageName)) {
+                return true;
+            }
+        }
+        Set<Class> classSet = quickDAOConfig.entityClassMap.keySet();
+        for (Class c : classSet) {
+            if(c.getName().equals(clazz.getName())){
                 return true;
             }
         }

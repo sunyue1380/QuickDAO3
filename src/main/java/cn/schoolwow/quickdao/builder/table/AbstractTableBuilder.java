@@ -85,6 +85,9 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         StringBuilder createTableBuilder = new StringBuilder("create table " + quickDAOConfig.database.escape(entity.tableName) + "(");
         Property[] properties = entity.properties;
         for (Property property : properties) {
+            if(null==property.columnType||property.columnType.isEmpty()){
+                continue;
+            }
             if(property.id&&null==quickDAOConfig.idGenerator){
                 createTableBuilder.append(getAutoIncrementSQL(property));
             }else{
@@ -290,7 +293,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                     break;
                 }
             }
-            if (!columnExist) {
+            if (!columnExist&&null!=entityProperty.columnType&&!entityProperty.columnType.isEmpty()) {
                 addProperty(entityProperty);
                 if(entityProperty.index){
                     hasIndexProperty = true;
