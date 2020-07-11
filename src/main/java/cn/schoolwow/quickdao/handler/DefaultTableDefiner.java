@@ -124,12 +124,15 @@ public class DefaultTableDefiner implements TableDefiner{
                 Field[] fields = c.getDeclaredFields();
                 Field.setAccessible(fields, true);
                 for(Field field:fields){
+                    if(Modifier.isStatic(field.getModifiers())||Modifier.isFinal(field.getModifiers())){
+                        logger.debug("[跳过常量或静态变量]{},该属性被static或者final修饰!", field.getName());
+                        continue;
+                    }
                     if (field.getDeclaredAnnotation(Ignore.class) != null) {
                         logger.debug("[跳过实体属性]{},该属性被Ignore注解修饰!", field.getName());
                         continue;
                     }
-                    if(Modifier.isStatic(field.getModifiers())||Modifier.isFinal(field.getModifiers())){
-                        logger.debug("[跳过常量或静态变量]{},该属性被static或者final修饰!", field.getName());
+                    if(needIgnoreClass(field.getType())){
                         continue;
                     }
                     //跳过实体包类
@@ -294,36 +297,8 @@ public class DefaultTableDefiner implements TableDefiner{
             logger.warn("[扫描实体类信息为空]前缀:{},包名:{}", quickDAOConfig.packageNameMap.get(packageName), packageName);
             return classList;
         }
-        Stream<Class> stream = classList.stream().filter((_class) -> {
-            if(_class.isEnum()){
-                return false;
-            }
-            if (_class.getAnnotation(Ignore.class) != null) {
-                logger.debug("[忽略实体类]类名:{},原因:@Ignore注解.", _class.getName());
-                return false;
-            }
-            boolean result = true;
-            //根据类过滤
-            if (quickDAOConfig.ignoreClassList != null) {
-                if (quickDAOConfig.ignoreClassList.contains(_class)) {
-                    logger.debug("[忽略实体类]类名:{},原因:忽略该类.", _class.getName());
-                    result = false;
-                }
-            }
-            //根据包名过滤
-            if (quickDAOConfig.ignorePackageNameList != null) {
-                for (String ignorePackageName : quickDAOConfig.ignorePackageNameList) {
-                    if (_class.getName().contains(ignorePackageName)) {
-                        logger.warn("[忽略实体类]类名:{},原因:该类所在包被忽略.所在包:{}", _class.getName(),ignorePackageName);
-                        result = false;
-                    }
-                }
-            }
-            if(null!=quickDAOConfig.predicate){
-                logger.debug("[忽略实体类]类名:{},原因:过滤接口返回false!", _class.getName());
-                result = quickDAOConfig.predicate.test(_class);
-            }
-            return result;
+        Stream<Class> stream = classList.stream().filter((clazz) -> {
+            return !needIgnoreClass(clazz);
         });
         return stream.collect(Collectors.toList());
     }
@@ -361,6 +336,39 @@ public class DefaultTableDefiner implements TableDefiner{
                 if(null!=subClasses&&subClasses.length>0){
                     stack.push(subClasses);
                 }
+            }
+        }
+        return false;
+    }
+
+    /**是否需要忽略该类*/
+    private boolean needIgnoreClass(Class clazz){
+        if(clazz.isEnum()){
+            return true;
+        }
+        if (clazz.getAnnotation(Ignore.class) != null) {
+            return true;
+        }
+        //根据类过滤
+        if(null!=quickDAOConfig.ignoreClassList){
+            for(Class _clazz:quickDAOConfig.ignoreClassList){
+                if(_clazz.getName().equals(clazz.getName())){
+                    return true;
+                }
+            }
+        }
+        //根据包名过滤
+        if (null!=quickDAOConfig.ignorePackageNameList) {
+            for (String ignorePackageName : quickDAOConfig.ignorePackageNameList) {
+                if (clazz.getName().contains(ignorePackageName)) {
+                    return true;
+                }
+            }
+        }
+
+        if(null!=quickDAOConfig.predicate){
+            if(quickDAOConfig.predicate.test(clazz)){
+                return true;
             }
         }
         return false;
