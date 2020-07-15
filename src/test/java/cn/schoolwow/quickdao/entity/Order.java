@@ -1,14 +1,10 @@
 package cn.schoolwow.quickdao.entity;
 
-import cn.schoolwow.quickdao.annotation.Comment;
-import cn.schoolwow.quickdao.annotation.Constraint;
-import cn.schoolwow.quickdao.annotation.ForeignKey;
-import cn.schoolwow.quickdao.annotation.Id;
+import cn.schoolwow.quickdao.annotation.*;
 
 @Comment("订单")
 public class Order {
-    @Comment("自增id")
-    @Id(autoIncrement = false)
+    @Id(strategy = IdStrategy.None)
     private String id;
 
     @Comment("订单id")

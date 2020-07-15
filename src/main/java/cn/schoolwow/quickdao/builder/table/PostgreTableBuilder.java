@@ -58,11 +58,7 @@ public class PostgreTableBuilder extends AbstractTableBuilder {
 
     @Override
     public String getAutoIncrementSQL(Property property) {
-        if(property.autoIncrement){
-            return property.column + " SERIAL unique";
-        }else{
-            return property.column + " " + property.columnType;
-        }
+        return property.column + " SERIAL unique";
     }
 
     @Override

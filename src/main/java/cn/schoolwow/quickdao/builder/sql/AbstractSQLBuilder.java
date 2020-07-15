@@ -36,6 +36,27 @@ public class AbstractSQLBuilder implements SQLBuilder{
     }
 
     @Override
+    public PreparedStatement selectById(Object instance) throws Exception {
+        String key = "selectById_" + instance.getClass().getName()+"_"+quickDAOConfig.database.getClass().getName();
+        Entity entity = quickDAOConfig.entityMap.get(instance.getClass().getName());
+        if (!sqlCache.containsKey(key)) {
+            StringBuilder builder = new StringBuilder();
+            builder.append("select count(1) from " + quickDAOConfig.database.escape(entity.tableName)+" where ");
+            builder.append(entity.id.column+" = ? ");
+            sqlCache.put(key, builder.toString());
+        }
+        String sql = sqlCache.get(key);
+        StringBuilder builder = new StringBuilder(sql.replace("?", PLACEHOLDER));
+        PreparedStatement ps = connection.prepareStatement(sql);
+        Field field = instance.getClass().getDeclaredField(entity.id.name);
+        field.setAccessible(true);
+        ps.setObject(1,field.get(instance));
+        MDC.put("name","根据id查询");
+        MDC.put("sql",builder.toString());
+        return ps;
+    }
+
+    @Override
     public PreparedStatement selectByUniqueKey(Object instance) throws Exception {
         String key = "selectByUniqueKey_" + instance.getClass().getName()+"_"+quickDAOConfig.database.getClass().getName();
         Entity entity = quickDAOConfig.entityMap.get(instance.getClass().getName());

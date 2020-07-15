@@ -1,6 +1,8 @@
 package cn.schoolwow.quickdao.domain;
 
+import cn.schoolwow.quickdao.annotation.IdStrategy;
 import cn.schoolwow.quickdao.dao.sql.dml.IDGenerator;
+import cn.schoolwow.quickdao.dao.sql.dml.SnowflakeIdGenerator;
 import cn.schoolwow.quickdao.database.Database;
 import cn.schoolwow.quickdao.handler.DefaultTableDefiner;
 
@@ -50,9 +52,14 @@ public class QuickDAOConfig {
      */
     public boolean autoCreateProperty = true;
     /**
-     * 是否自动新增属性
+     * 全局Id生成策略
      */
-    public IDGenerator idGenerator;
+    public IdStrategy idStrategy;
+    /**
+     * Id生成器实例
+     * 默认生成器为雪花算法生成器
+     */
+    public IDGenerator idGenerator = new SnowflakeIdGenerator();
     /**
      * 实体表自定义
      */

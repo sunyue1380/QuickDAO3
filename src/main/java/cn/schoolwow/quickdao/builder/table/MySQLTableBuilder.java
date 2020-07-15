@@ -75,11 +75,7 @@ public class MySQLTableBuilder extends AbstractTableBuilder {
 
     @Override
     public String getAutoIncrementSQL(Property property) {
-        if(property.autoIncrement){
-            return property.column + " " + property.columnType + " primary key auto_increment";
-        }else{
-            return property.column + " " + property.columnType;
-        }
+        return property.column + " " + property.columnType + " primary key auto_increment";
     }
 
     @Override

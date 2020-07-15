@@ -1,5 +1,6 @@
 package cn.schoolwow.quickdao.handler;
 
+import cn.schoolwow.quickdao.annotation.IdStrategy;
 import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
@@ -18,7 +19,7 @@ public class TableDefinerTest {
                 .tableName("t_person")
                 .comment("人物")
                 .done();
-        Assert.assertEquals(2,quickDAOConfig.entityMap.size());
+        Assert.assertEquals(3,quickDAOConfig.entityMap.size());
         Entity entity =  quickDAOConfig.entityMap.get(Person.class.getName());
         Assert.assertEquals("t_person",entity.tableName);
         Assert.assertEquals("人物",entity.comment);
@@ -38,8 +39,12 @@ public class TableDefinerTest {
                 .notNull(true)
                 .unique(true)
                 .defaultValue("sun")
+                .done()
+                .property("id")
+                .id(true)
+                .strategy(IdStrategy.AutoIncrement)
                 .done();
-        Assert.assertEquals(2,quickDAOConfig.entityMap.size());
+        Assert.assertEquals(3,quickDAOConfig.entityMap.size());
         Entity entity =  quickDAOConfig.entityMap.get(Person.class.getName());
         for(Property property:entity.properties){
             if(property.name.equals("lastName")){

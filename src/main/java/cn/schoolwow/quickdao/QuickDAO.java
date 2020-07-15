@@ -1,5 +1,6 @@
 package cn.schoolwow.quickdao;
 
+import cn.schoolwow.quickdao.annotation.IdStrategy;
 import cn.schoolwow.quickdao.builder.table.*;
 import cn.schoolwow.quickdao.dao.AbstractDAO;
 import cn.schoolwow.quickdao.dao.DAO;
@@ -123,26 +124,46 @@ public class QuickDAO {
         return this;
     }
 
-    /**是否建立外键约束*/
+    /**
+     * 是否建立外键约束
+     * @param openForeignKey 指定管是否建立外键约束
+     * */
     public QuickDAO foreignKey(boolean openForeignKey) {
         quickDAOConfig.openForeignKey = openForeignKey;
         return this;
     }
 
-    /**是否自动建表*/
+    /**
+     * 是否自动建表
+     * @param autoCreateTable 指定是否自动建表
+     * */
     public QuickDAO autoCreateTable(boolean autoCreateTable) {
         quickDAOConfig.autoCreateTable = autoCreateTable;
         return this;
     }
 
-    /**是否自动新增属性*/
+    /**
+     * 是否自动新增属性
+     * @param autoCreateProperty 指定是否自动新增字段
+     * */
     public QuickDAO autoCreateProperty(boolean autoCreateProperty) {
         quickDAOConfig.autoCreateProperty = autoCreateProperty;
         return this;
     }
 
     /**
-     * 指定id生成器策略
+     * 指定全局Id生成策略
+     * @param idStrategy 全局id生成策略
+     * */
+    public QuickDAO idStrategy(IdStrategy idStrategy) {
+        quickDAOConfig.idStrategy = idStrategy;
+        return this;
+    }
+
+    /**
+     * 指定id生成器接口实例
+     * <p><b>当id字段策略为IdGenerator起作用</b></p>
+     * @param idGenerator id生成器实例
      * */
     public QuickDAO idGenerator(IDGenerator idGenerator) {
         quickDAOConfig.idGenerator = idGenerator;

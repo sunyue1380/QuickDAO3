@@ -1,5 +1,6 @@
 package cn.schoolwow.quickdao.builder.sql.dml;
 
+import cn.schoolwow.quickdao.annotation.IdStrategy;
 import cn.schoolwow.quickdao.builder.sql.AbstractSQLBuilder;
 import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.Property;
@@ -144,7 +145,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
             builder.append("insert into " + quickDAOConfig.database.escape(entity.tableName) + "(");
             for (Property property : entity.properties) {
-                if (property.id&&property.autoIncrement&&null==quickDAOConfig.idGenerator) {
+                if (property.id&&property.strategy==IdStrategy.AutoIncrement) {
                     continue;
                 }
                 builder.append(quickDAOConfig.database.escape(property.column) + ",");
@@ -152,7 +153,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             builder.deleteCharAt(builder.length() - 1);
             builder.append(") values(");
             for (Property property : entity.properties) {
-                if (property.id&&property.autoIncrement&&null==quickDAOConfig.idGenerator) {
+                if (property.id&&property.strategy==IdStrategy.AutoIncrement) {
                     continue;
                 }
                 builder.append("?,");
@@ -174,10 +175,10 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
         int parameterIndex = 1;
         Entity entity = quickDAOConfig.entityMap.get(instance.getClass().getName());
         for (Property property : entity.properties) {
-            if (property.id&&property.autoIncrement&&null==quickDAOConfig.idGenerator) {
+            if (property.id&&property.strategy==IdStrategy.AutoIncrement) {
                 continue;
             }
-            if(property.id&&null!=quickDAOConfig.idGenerator){
+            if(property.id&&property.strategy==IdStrategy.IdGenerator){
                 Field idField = instance.getClass().getDeclaredField(property.name);
                 idField.setAccessible(true);
                 if (idField.getType().isPrimitive()) {

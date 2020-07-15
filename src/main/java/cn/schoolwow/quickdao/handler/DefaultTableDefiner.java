@@ -119,72 +119,44 @@ public class DefaultTableDefiner implements TableDefiner{
             List<Property> propertyList = new ArrayList<>();
             //实体包类列表
             List<Field> compositFieldList = new ArrayList<>();
-            //添加字段信息
-            {
-                Field[] fields = c.getDeclaredFields();
-                Field.setAccessible(fields, true);
-                for(Field field:fields){
-                    if(Modifier.isStatic(field.getModifiers())||Modifier.isFinal(field.getModifiers())){
-                        logger.debug("[跳过常量或静态变量]{},该属性被static或者final修饰!", field.getName());
-                        continue;
-                    }
-                    if (field.getDeclaredAnnotation(Ignore.class) != null) {
-                        logger.debug("[跳过实体属性]{},该属性被Ignore注解修饰!", field.getName());
-                        continue;
-                    }
-                    if(needIgnoreClass(field.getType())){
-                        continue;
-                    }
-                    //跳过实体包类
-                    if (isCompositProperty(field.getType())) {
-                        compositFieldList.add(field);
-                        continue;
-                    }
-                    //跳过List类型和数组类型
-                    if(field.getType().isArray()||(!field.getType().isPrimitive()&&isCollection(field.getType()))){
-                        continue;
-                    }
-                    Property property = new Property();
-                    if (null!=field.getAnnotation(ColumnName.class)) {
-                        property.column = field.getAnnotation(ColumnName.class).value();
-                    }else{
-                        property.column = StringUtil.Camel2Underline(field.getName());
-                    }
-                    if(null!=field.getAnnotation(ColumnType.class)){
-                        property.columnType = field.getAnnotation(ColumnType.class).value();
-                    }
-                    property.name = field.getName();
-                    property.simpleTypeName = field.getType().getSimpleName().toLowerCase();
-                    property.className = field.getType().getName();
-                    Constraint constraint = field.getDeclaredAnnotation(Constraint.class);
-                    if(null!=constraint){
-                        property.notNull = constraint.notNull();
-                        property.unique = constraint.unique();
-                        property.check = constraint.check();
-                        property.defaultValue = constraint.defaultValue();
-                    }
-                    Id id = field.getDeclaredAnnotation(Id.class);
-                    if(null!=id){
-                        property.id = true;
-                        property.autoIncrement = id.autoIncrement();
-                    }
-                    TableField tableField = field.getDeclaredAnnotation(TableField.class);
-                    if(null!=tableField){
-                        property.createdAt = tableField.createdAt();
-                        property.updateAt = tableField.updatedAt();
-                    }
-                    property.index = field.getDeclaredAnnotation(Index.class) != null;
-                    if(null!=field.getDeclaredAnnotation(Comment.class)){
-                        property.comment = field.getDeclaredAnnotation(Comment.class).value();
-                    }
-                    property.foreignKey = field.getDeclaredAnnotation(ForeignKey.class);
-                    property.entity = entity;
-                    if(property.id){
-                        entity.id = property;
-                        property.comment = "自增id";
-                    }
-                    propertyList.add(property);
+            Field[] fields = getAllField(c,compositFieldList);
+            for(Field field:fields){
+                Property property = new Property();
+                if (null!=field.getAnnotation(ColumnName.class)) {
+                    property.column = field.getAnnotation(ColumnName.class).value();
+                }else{
+                    property.column = StringUtil.Camel2Underline(field.getName());
                 }
+                if(null!=field.getAnnotation(ColumnType.class)){
+                    property.columnType = field.getAnnotation(ColumnType.class).value();
+                }
+                property.name = field.getName();
+                property.simpleTypeName = field.getType().getSimpleName().toLowerCase();
+                property.className = field.getType().getName();
+                Constraint constraint = field.getDeclaredAnnotation(Constraint.class);
+                if(null!=constraint){
+                    property.notNull = constraint.notNull();
+                    property.unique = constraint.unique();
+                    property.check = constraint.check();
+                    property.defaultValue = constraint.defaultValue();
+                }
+                Id id = field.getDeclaredAnnotation(Id.class);
+                if(null!=id){
+                    property.id = true;
+                    property.strategy = id.strategy();
+                }
+                TableField tableField = field.getDeclaredAnnotation(TableField.class);
+                if(null!=tableField){
+                    property.createdAt = tableField.createdAt();
+                    property.updateAt = tableField.updatedAt();
+                }
+                property.index = field.getDeclaredAnnotation(Index.class) != null;
+                if(null!=field.getDeclaredAnnotation(Comment.class)){
+                    property.comment = field.getDeclaredAnnotation(Comment.class).value();
+                }
+                property.foreignKey = field.getDeclaredAnnotation(ForeignKey.class);
+                property.entity = entity;
+                propertyList.add(property);
             }
             entity.properties = propertyList.toArray(new Property[0]);
             if (compositFieldList.size() > 0) {
@@ -204,8 +176,14 @@ public class DefaultTableDefiner implements TableDefiner{
             List<Property> foreignKeyPropertyList = new ArrayList<>();
             for(Property property : entity.properties){
                 if(property.id){
+                    entity.id = property;
                     property.notNull = true;
                     property.unique = true;
+                    property.comment = "自增id";
+                    //@Id注解生成策略为默认值又在全局指定里Id生成策略则使用全局策略
+                    if(property.strategy==IdStrategy.AutoIncrement&&null!=quickDAOConfig.idStrategy){
+                        property.strategy = quickDAOConfig.idStrategy;
+                    }
                 }
                 if(property.unique){
                     property.notNull = true;
@@ -301,6 +279,48 @@ public class DefaultTableDefiner implements TableDefiner{
             return !needIgnoreClass(clazz);
         });
         return stream.collect(Collectors.toList());
+    }
+
+    /**
+     * 获得该类所有字段(包括父类字段)
+     * @param clazz 类
+     * */
+    private Field[] getAllField(Class clazz,List<Field> compositFieldList){
+        List<Field> fieldList = new ArrayList<>();
+        Class tempClass = clazz;
+        while (null != tempClass) {
+            Field[] fields = tempClass.getDeclaredFields();
+            Field.setAccessible(fields, true);
+            for (Field field : fields) {
+                if(Modifier.isStatic(field.getModifiers())||Modifier.isFinal(field.getModifiers())){
+                    logger.debug("[跳过常量或静态变量]{},该属性被static或者final修饰!", field.getName());
+                    continue;
+                }
+                if (field.getDeclaredAnnotation(Ignore.class) != null) {
+                    logger.debug("[跳过实体属性]{},该属性被Ignore注解修饰!", field.getName());
+                    continue;
+                }
+                //跳过List类型和数组类型
+                if(field.getType().isArray()||(!field.getType().isPrimitive()&&isCollection(field.getType()))){
+                    continue;
+                }
+                if(needIgnoreClass(field.getType())){
+                    continue;
+                }
+                //跳过实体包类
+                if (isCompositProperty(field.getType())) {
+                    compositFieldList.add(field);
+                    continue;
+                }
+                field.setAccessible(true);
+                fieldList.add(field);
+            }
+            tempClass = tempClass.getSuperclass();
+            if (null!=tempClass&&"java.lang.Object".equals(tempClass.getName())) {
+                break;
+            }
+        }
+        return fieldList.toArray(new Field[0]);
     }
 
     /**

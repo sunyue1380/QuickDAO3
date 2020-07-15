@@ -36,7 +36,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
             effect = ps.executeUpdate();
             if (effect>0&&null==dmlsqlBuilder.quickDAOConfig.idGenerator) {
                 Property property = dmlsqlBuilder.quickDAOConfig.entityMap.get(instance.getClass().getName()).id;
-                if(null!=property&&property.autoIncrement){
+                if(null!=property){
                     ResultSet rs = ps.getGeneratedKeys();
                     if (rs.next()) {
                         long id = rs.getLong(1);
@@ -97,7 +97,7 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
             if (entity.uniqueKeyProperties.length>0&&entity.uniqueKeyProperties.length + 1 != entity.properties.length) {
                 ps = dmlsqlBuilder.updateByUniqueKey(instance);
                 effect = ps.executeUpdate();
-            }else if(hasId(instance)){
+            }else if(null!=entity.id){
                 ps = dmlsqlBuilder.updateById(instance);
                 effect = ps.executeUpdate();
             }else{
@@ -121,32 +121,19 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
         int effect = 0;
         PreparedStatement ps = null;
         try {
-            List updateByIdList = new ArrayList<>();
-            List updateByUniqueKeyList = new ArrayList<>();
             Entity entity = dmlsqlBuilder.quickDAOConfig.entityMap.get(instances[0].getClass().getName());
-            for(Object instance:instances){
-                if (null!=entity.uniqueKeyProperties&&entity.uniqueKeyProperties.length>0&&entity.uniqueKeyProperties.length + 1 != entity.properties.length) {
-                    updateByUniqueKeyList.add(instance);
-                }else if(hasId(instance)){
-                    updateByIdList.add(instance);
-                }
+            if(null!=entity.uniqueKeyProperties&&entity.uniqueKeyProperties.length>0&&entity.uniqueKeyProperties.length + 1 != entity.properties.length){
+                //根据唯一性约束更新
+                ps = dmlsqlBuilder.updateByUniqueKey(instances);
+            }else if(null!=entity.id){
+                //根据id更新
+                ps = dmlsqlBuilder.updateById(instances);
             }
-            if(!updateByIdList.isEmpty()){
-                ps = dmlsqlBuilder.updateById(updateByIdList.toArray(new Object[0]));
-                int[] batches = ps.executeBatch();
-                for (int batch : batches) {
-                    effect += batch;
-                }
-                ps.close();
+            int[] batches = ps.executeBatch();
+            for (int batch : batches) {
+                effect += batch;
             }
-            if(!updateByUniqueKeyList.isEmpty()){
-                ps = dmlsqlBuilder.updateByUniqueKey(updateByUniqueKeyList.toArray(new Object[0]));
-                int[] batches = ps.executeBatch();
-                for (int batch : batches) {
-                    effect += batch;
-                }
-                ps.close();
-            }
+            ps.close();
             dmlsqlBuilder.connection.commit();
         } catch (Exception e) {
             throw new SQLRuntimeException(e);
