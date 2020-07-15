@@ -35,42 +35,22 @@ public class AbstractSQLDAO implements SQLDAO {
         }
         boolean result = false;
         try {
-            if(hasId(instance)){
-                result = true;
-            }else{
-                PreparedStatement ps = sqlBuilder.selectByUniqueKey(instance);
-                ResultSet resultSet = ps.executeQuery();
-                if (resultSet.next()) {
-                    result = resultSet.getLong(1)>0;
-                }
-                resultSet.close();
-                ps.close();
+            Entity entity = abstractDAO.quickDAOConfig.entityMap.get(instance.getClass().getName());
+            PreparedStatement ps = null;
+            if(entity.uniqueKeyProperties.length>0){
+                ps = sqlBuilder.selectByUniqueKey(instance);
+            }else if(null!=entity.id){
+                ps = sqlBuilder.selectById(instance);
             }
+            ResultSet resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+                result = resultSet.getLong(1)>0;
+            }
+            resultSet.close();
+            ps.close();
         } catch (Exception e) {
             throw new SQLRuntimeException(e);
         }
         return result;
-    }
-
-    /**
-     * 对象是否存在id
-     * 默认主键必须存在且为long型
-     */
-    public boolean hasId(Object instance) throws Exception {
-        Entity entity = abstractDAO.quickDAOConfig.entityMap.get(instance.getClass().getName());
-        if(null==entity.id){
-            return false;
-        }
-        Field field = instance.getClass().getDeclaredField(entity.id.name);
-        field.setAccessible(true);
-        switch(field.getType().getSimpleName().toLowerCase()){
-            case "long":{
-                return field.getLong(instance)>0;
-            }
-            case "string":{
-                return field.get(instance)!=null;
-            }
-        }
-        throw new IllegalArgumentException("不支持的主键类型!当前主键类型:"+field.getType().getName());
     }
 }

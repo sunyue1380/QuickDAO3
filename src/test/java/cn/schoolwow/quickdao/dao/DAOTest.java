@@ -5,6 +5,7 @@ import cn.schoolwow.quickdao.dao.response.Response;
 import cn.schoolwow.quickdao.dao.response.UnionType;
 import cn.schoolwow.quickdao.dao.sql.transaction.Transaction;
 import cn.schoolwow.quickdao.domain.PageVo;
+import cn.schoolwow.quickdao.entity.Product;
 import cn.schoolwow.quickdao.entity.Order;
 import cn.schoolwow.quickdao.entity.Person;
 import com.alibaba.fastjson.JSONArray;
@@ -13,7 +14,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +29,7 @@ public class DAOTest extends BaseDAOTest{
     public void testSQLDAO() {
         dao.rebuild(Person.class);
         dao.rebuild(Order.class);
+        dao.rebuild(Product.class);
         singleInsert();
         multiInsert();
         multiUpdate();
@@ -86,6 +87,14 @@ public class DAOTest extends BaseDAOTest{
             Assert.assertEquals(true,person.getCreatedAt().getTime()-System.currentTimeMillis()<1000);
             Assert.assertEquals(true,person.getUpdatedAt().getTime()-System.currentTimeMillis()<1000);
         }
+        {
+            Product product = new Product();
+            product.setName("笔记本电脑");
+            int effect = dao.insert(product);
+            Assert.assertEquals(1, effect);
+            Assert.assertTrue(dao.exist(product));
+            Assert.assertTrue(product.getId()>0);
+        }
     }
 
     private void multiInsert() {
@@ -130,6 +139,9 @@ public class DAOTest extends BaseDAOTest{
         }
         {
             Person person = dao.fetch(Person.class,"lastName","Gates");
+            System.out.println(person.getCreatedAt());
+            System.out.println(person.getUpdatedAt());
+            System.out.println(new Date());
             Assert.assertEquals(true,System.currentTimeMillis()-person.getCreatedAt().getTime()<1000);
             Assert.assertEquals(true,System.currentTimeMillis()-person.getUpdatedAt().getTime()<1000);
         }

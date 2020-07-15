@@ -1,5 +1,6 @@
 package cn.schoolwow.quickdao.handler;
 
+import cn.schoolwow.quickdao.annotation.IdStrategy;
 import cn.schoolwow.quickdao.domain.Property;
 
 /**数据库表的列定义*/
@@ -17,6 +18,13 @@ public class DefaultTablePropertyDefiner implements TablePropertyDefiner{
     @Override
     public TablePropertyDefiner id(boolean id) {
         property.id = true;
+        property.strategy = IdStrategy.AutoIncrement;
+        return this;
+    }
+
+    @Override
+    public TablePropertyDefiner strategy(IdStrategy idStrategy) {
+        property.strategy = idStrategy;
         return this;
     }
 

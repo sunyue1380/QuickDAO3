@@ -1,6 +1,7 @@
 package cn.schoolwow.quickdao.domain;
 
 import cn.schoolwow.quickdao.annotation.ForeignKey;
+import cn.schoolwow.quickdao.annotation.IdStrategy;
 
 /**
  * 实体类属性信息
@@ -11,9 +12,9 @@ public class Property {
      */
     public boolean id;
     /**
-     * 是否自增
-     */
-    public boolean autoIncrement;
+     * id生成策略
+     * */
+    public IdStrategy strategy;
     /**
      * 列名
      */

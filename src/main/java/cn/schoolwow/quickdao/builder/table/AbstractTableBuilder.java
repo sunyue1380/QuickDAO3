@@ -1,5 +1,6 @@
 package cn.schoolwow.quickdao.builder.table;
 
+import cn.schoolwow.quickdao.annotation.IdStrategy;
 import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
@@ -88,7 +89,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
             if(null==property.columnType||property.columnType.isEmpty()){
                 continue;
             }
-            if(property.id&&null==quickDAOConfig.idGenerator){
+            if(property.id&&property.strategy==IdStrategy.AutoIncrement){
                 createTableBuilder.append(getAutoIncrementSQL(property));
             }else{
                 createTableBuilder.append(quickDAOConfig.database.escape(property.column) + " " + property.columnType);
@@ -103,6 +104,9 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                 }
                 if (null!=property.check&&!property.check.isEmpty()) {
                     createTableBuilder.append(" check " + property.check);
+                }
+                if (property.id){
+                    createTableBuilder.append(" unique ");
                 }
             }
             createTableBuilder.append(",");

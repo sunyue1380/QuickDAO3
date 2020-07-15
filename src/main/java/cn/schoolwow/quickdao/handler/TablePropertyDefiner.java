@@ -1,9 +1,13 @@
 package cn.schoolwow.quickdao.handler;
 
+import cn.schoolwow.quickdao.annotation.IdStrategy;
+
 /**自定义列属性*/
 public interface TablePropertyDefiner {
     /**是否id属性*/
     TablePropertyDefiner id(boolean id);
+    /**指定id生成策略*/
+    TablePropertyDefiner strategy(IdStrategy idStrategy);
     /**类型*/
     TablePropertyDefiner columnType(String columnType);
     /**列名*/
