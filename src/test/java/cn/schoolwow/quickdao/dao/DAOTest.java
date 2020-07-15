@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -203,8 +204,8 @@ public class DAOTest extends BaseDAOTest{
                     .addNotNullQuery("lastName")
                     .addEmptyQuery("lastName")
                     .addNotEmptyQuery("lastName")
-                    .addInQuery("lastName",new String[]{"1","2"})
-                    .addNotInQuery("lastName",new String[]{"3","4"})
+                    .addInQuery("lastName","1","2")
+                    .addNotInQuery("lastName","3","4")
                     .addBetweenQuery("id",1,2)
                     .addLikeQuery("lastName","%a%")
                     .addQuery("lastName","=","a")
@@ -229,6 +230,16 @@ public class DAOTest extends BaseDAOTest{
                     .addQuery("lastName","a")
                     .addQuery("address","b")
                     .addQuery("city","c");
+            Response response = condition.execute();
+            Assert.assertEquals(0,response.getList().size());
+        }
+        {
+            Condition condition = dao.query(Person.class)
+                    .distinct()
+                    .addQuery("firstName","a")
+                    .or("t.last_name = ?","a")
+                    .or("t.address = ?","b")
+                    .or("t.city = ?","c");
             Response response = condition.execute();
             Assert.assertEquals(0,response.getList().size());
         }
@@ -343,8 +354,7 @@ public class DAOTest extends BaseDAOTest{
             Response response = dao.query(Person.class)
                     .joinTable(dao.query(Order.class)
                             .addColumn("id","order_no","person_id pId")
-                            .addQuery("orderNo",1)
-                            .done(),
+                            .addQuery("orderNo",1),
                             "id","pId")
                     .orderByDesc("id")
                     .done()

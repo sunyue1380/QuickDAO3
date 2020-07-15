@@ -7,7 +7,24 @@ import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
 
-/**查询接口*/
+/**
+ * 查询接口
+ *
+ * <p>本接口定义里单表查询接口,多表关联查询等方法</p>
+ *
+ * <p>对于查询接口您需要知道以下几点</p>
+ * <ol>
+ *     <li>实体类字段使用驼峰式命名映射到数据库中.例如字段<b>firstName</b>映射到数据库后字段名为<b>first_name</b>.
+ *     <br/><b>如您使用了@ColumnName注解则以该注解设置的字段为准</b>
+ *     </li>
+ *     <li>对于关联查询,主表别名为t,使用join方法添加的表按照添加顺序依次为t1,t2,t3......
+ *     <br/><b>如您使用了tableAliasName方法则以该方法设置的值为准</b>
+ *     </li>
+ *     <li>当您调用getArray方法,返回字段名称均为<b>表别名_字段名</b>.例如主表中的firstName字段,则返回字段名称为<b>t_first_name</b></li>
+ *     <li>对于直接添加查询语句的方法,请注意查询语句参数将直接拼接到sql字符上,不会做任何转义操作,请注意SQL注入等安全问题</li>
+ * </ol>
+ * </p>
+ */
 public interface Condition<T> {
     /**
      * 手动设置主表别名
@@ -48,7 +65,7 @@ public interface Condition<T> {
      * @param field  字段名
      * @param values 指明在该范围内的值
      */
-    Condition<T> addInQuery(String field, Object[] values);
+    Condition<T> addInQuery(String field, Object... values);
 
     /**
      * 添加范围查询语句
@@ -62,7 +79,7 @@ public interface Condition<T> {
      * @param field  字段名
      * @param values 指明在不该范围内的值
      */
-    Condition<T> addNotInQuery(String field, Object[] values);
+    Condition<T> addNotInQuery(String field, Object... values);
 
     /**
      * 添加范围查询语句
@@ -87,19 +104,11 @@ public interface Condition<T> {
     Condition<T> addLikeQuery(String field, Object value);
 
     /**
-     * 添加自定义查询条件
-     * <p>调用此方法您需要知道以下几点
-     * <ol>
-     *     <li>实体类字段使用驼峰式命名映射到数据库中.例如字段<b>firstName</b>映射到数据库后字段名为<b>first_name</b></li>
-     *     <li>对于所有的查询语句,主表别名为t,使用join方法添加的表按照添加顺序依次为t1,t2,t3......</li>
-     *     <li>返回字段名称均为<b>表别名_字段名</b>.例如主表中的firstName字段,则对应数据库返回列名为<b>t_first_name</b></li>
-     *     <li>本方法的query参数将直接拼接到sql字符上,不会做任何转义操作,请注意SQL注入等安全问题</li>
-     * </ol>
-     * </p>
+     * 自定义查询语句,具体映射规则请看此{@link cn.schoolwow.quickdao.dao.condition.Condition}
      * @param query 子查询条件,可使用?占位符
-     * @param parameterList 占位符参数列表
+     * @param parameterList 占位符参数列表,可为null
      */
-    Condition<T> addQuery(String query, List parameterList);
+    Condition<T> addQuery(String query, Object... parameterList);
 
     /**
      * 添加字段查询
@@ -117,15 +126,7 @@ public interface Condition<T> {
     Condition<T> addQuery(String field, String operator, Object value);
 
     /**
-     * 添加自定义查询列
-     * <p>调用此方法您需要知道以下几点
-     * <ol>
-     *     <li>实体类字段使用驼峰式命名映射到数据库中.例如字段<b>firstName</b>映射到数据库后字段名为<b>first_name</b></li>
-     *     <li>对于所有的查询语句,主表别名为t,使用join方法添加的表按照添加顺序依次为t1,t2,t3......</li>
-     *     <li>返回字段名称均为<b>表别名_字段名</b>.例如主表中的firstName字段,则对应数据库返回列名为<b>t_first_name</b></li>
-     *     <li>参数将直接拼接到SQL语句上,请注意SQL注入安全问题</li>
-     * </ol>
-     * </p>
+     * 添加自定义字段,具体映射规则请看此{@link cn.schoolwow.quickdao.dao.condition.Condition}
      * @param fields 自定义查询列
      */
     Condition<T> addColumn(String... fields);
@@ -192,16 +193,26 @@ public interface Condition<T> {
     Condition<T> union(Condition<T> condition, UnionType unionType);
 
     /**
-     * 添加Or查询条件
+     * 添加Or查询条件,返回一个新的OrCondition对象
      * <p>在返回Condition对象上添加的查询条件,会以or(......)的方式拼接到SQL字符串上.</p>
-     * <code>
-     *     Condition or = dao.query(User.class).or();<br/>
-     *     or.addQuery("username","quickdao").addQuery("password","123456");
-     * </code>
+     * <pre>
+     *     Condition condition= dao.query(User.class);
+     *     condition.or().addQuery("username","quickdao")
+     *               .addQuery("password","123456");
+     *     //继续对主condition进行操作
+     *     condition.....
+     * </pre>
      * <p>以上代码最终拼接字符串为</p>
      * <code>or (t.username = 'quickado' and t.password = '123456')</code>
      */
     Condition<T> or();
+
+    /**
+     * 添加or查询,具体映射规则请看此{@link cn.schoolwow.quickdao.dao.condition.Condition}
+     * @param or or查询语句,可使用?占位符
+     * @param parameterList  占位符参数值,无参数时可为null
+     */
+    Condition<T> or(String or, Object... parameterList);
 
     /**
      * 添加分组查询
@@ -222,7 +233,7 @@ public interface Condition<T> {
      * @param having having查询子句,可使用?占位符
      * @param parameterList  占位符参数值
      */
-    Condition<T> having(String having, List parameterList);
+    Condition<T> having(String having, Object... parameterList);
 
     /**
      * 关联表查询
@@ -340,11 +351,6 @@ public interface Condition<T> {
      * @see {@link cn.schoolwow.quickdao.dao.condition.Condition#joinTable(Class, String, String,String)} ()}
      */
     Condition<T> compositField();
-
-    /**
-     * 调用or()方法后返回主Condition
-     */
-    Condition<T> done();
 
     /**
      * 执行并返回Response实例
