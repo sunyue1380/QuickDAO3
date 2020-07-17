@@ -151,7 +151,7 @@ public class AbstractCondition<T> implements Condition<T>{
     @Override
     public Condition<T> addColumn(String... fields) {
         for(String field:fields){
-            query.columnBuilder.append(field+ ",");
+            query.columnBuilder.append(getColumnNameByFieldName(field)+ ",");
         }
         return this;
     }
@@ -296,7 +296,7 @@ public class AbstractCondition<T> implements Condition<T>{
             if(query.columnBuilder.length()==0){
                 query.groupByBuilder.append(query.tableAliasName+"." + query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + ",");
             }else{
-                query.groupByBuilder.append(field + ",");
+                query.groupByBuilder.append(getColumnNameByFieldName(field) + ",");
             }
         }
         return this;
@@ -379,7 +379,7 @@ public class AbstractCondition<T> implements Condition<T>{
             if(query.columnBuilder.length()==0){
                 query.orderByBuilder.append(query.tableAliasName+"."+query.quickDAOConfig.database.escape(getColumnNameByFieldName(field))+" asc,");
             }else{
-                query.orderByBuilder.append(field+" asc,");
+                query.orderByBuilder.append(getColumnNameByFieldName(field)+" asc,");
             }
         }
         return this;
@@ -391,7 +391,7 @@ public class AbstractCondition<T> implements Condition<T>{
             if(query.columnBuilder.length()==0){
                 query.orderByBuilder.append(query.tableAliasName+"."+query.quickDAOConfig.database.escape(getColumnNameByFieldName(field))+" desc,");
             }else{
-                query.orderByBuilder.append(field+" desc,");
+                query.orderByBuilder.append(getColumnNameByFieldName(field)+" desc,");
             }
         }
         return this;

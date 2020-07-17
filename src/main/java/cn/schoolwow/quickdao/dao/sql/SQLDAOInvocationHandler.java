@@ -2,6 +2,7 @@ package cn.schoolwow.quickdao.dao.sql;
 
 import cn.schoolwow.quickdao.dao.sql.dml.DMLDAO;
 import cn.schoolwow.quickdao.dao.sql.dql.DQLDAO;
+import cn.schoolwow.quickdao.dao.sql.transaction.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -20,13 +21,6 @@ public class SQLDAOInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if(!method.getDeclaringClass().getName().equals(DQLDAO.class.getName())
-                &&! method.getDeclaringClass().getName().equals(DMLDAO.class.getName())
-                &&! method.getDeclaringClass().getName().equals(SQLDAO.class.getName())
-        ){
-            Object result = method.invoke(abstractSQLDAO, args);
-            return result;
-        }
         try {
             if(null!=abstractSQLDAO.sqlBuilder.quickDAOConfig.reentrantLock){
                 abstractSQLDAO.sqlBuilder.quickDAOConfig.reentrantLock.lock();
