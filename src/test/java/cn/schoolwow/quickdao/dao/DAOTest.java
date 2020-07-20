@@ -139,9 +139,6 @@ public class DAOTest extends BaseDAOTest{
         }
         {
             Person person = dao.fetch(Person.class,"lastName","Gates");
-            System.out.println(person.getCreatedAt());
-            System.out.println(person.getUpdatedAt());
-            System.out.println(new Date());
             Assert.assertEquals(true,System.currentTimeMillis()-person.getCreatedAt().getTime()<1000);
             Assert.assertEquals(true,System.currentTimeMillis()-person.getUpdatedAt().getTime()<1000);
         }

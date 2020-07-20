@@ -46,65 +46,53 @@ public class AbstractCondition<T> implements Condition<T>{
 
     @Override
     public Condition<T> addNullQuery(String field) {
-        query.whereBuilder.append("("+query.tableAliasName+"." + query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " is null) and ");
+        query.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " is null) and ");
         return this;
     }
 
     @Override
     public Condition<T> addNotNullQuery(String field) {
-        query.whereBuilder.append("("+query.tableAliasName+"." + query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " is not null) and ");
+        query.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " is not null) and ");
         return this;
     }
 
     @Override
     public Condition<T> addEmptyQuery(String field) {
-        query.whereBuilder.append("("+query.tableAliasName+"." + query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " is not null and t." + query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " = '') and ");
+        query.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " is not null and " + getQueryColumnNameByFieldName(field) + " = '') and ");
         return this;
     }
 
     @Override
     public Condition<T> addNotEmptyQuery(String field) {
-        query.whereBuilder.append("("+query.tableAliasName+"." + query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " is not null and t." + query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " != '') and ");
+        query.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " is not null and " + getQueryColumnNameByFieldName(field) + " != '') and ");
         return this;
     }
 
     @Override
     public Condition<T> addInQuery(String field, Object... values) {
-        if (values == null || values.length == 0) {
-            return this;
-        }
         addInQuery(field, values, "in");
         return this;
     }
 
     @Override
     public Condition<T> addInQuery(String field, List values) {
-        if(null==values||values.isEmpty()){
-            return this;
-        }
         return addInQuery(field,values.toArray(new Object[0]));
     }
 
     @Override
     public Condition<T> addNotInQuery(String field, Object... values) {
-        if (values == null || values.length == 0) {
-            return this;
-        }
         addInQuery(field, values, "not in");
         return this;
     }
 
     @Override
     public Condition<T> addNotInQuery(String field, List values) {
-        if(null==values||values.isEmpty()){
-            return this;
-        }
         return addNotInQuery(field,values.toArray(new Object[0]));
     }
 
     @Override
     public Condition<T> addBetweenQuery(String field, Object start, Object end) {
-        query.whereBuilder.append("("+query.tableAliasName+"." + query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " between ? and ? ) and ");
+        query.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " between ? and ? ) and ");
         query.parameterList.add(start);
         query.parameterList.add(end);
         return this;
@@ -115,7 +103,7 @@ public class AbstractCondition<T> implements Condition<T>{
         if (value == null || value.toString().equals("")) {
             return this;
         }
-        query.whereBuilder.append("("+query.tableAliasName+"." + query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " like ?) and ");
+        query.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " like ?) and ");
         query.parameterList.add(value);
         return this;
     }
@@ -142,7 +130,7 @@ public class AbstractCondition<T> implements Condition<T>{
         }else if(value.toString().isEmpty()){
             addEmptyQuery(field);
         }else {
-            query.whereBuilder.append("("+query.tableAliasName+"." + query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " " + operator + " ?) and ");
+            query.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " " + operator + " ?) and ");
             query.parameterList.add(value);
         }
         return this;
@@ -158,7 +146,7 @@ public class AbstractCondition<T> implements Condition<T>{
 
     @Override
     public Condition<T> addUpdate(String field, Object value) {
-        query.setBuilder.append(query.tableAliasName+"." + query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + "=?,");
+        query.setBuilder.append(getColumnNameByFieldName(field) + " = ?,");
         query.updateParameterList.add(value);
         return this;
     }
@@ -293,11 +281,7 @@ public class AbstractCondition<T> implements Condition<T>{
     @Override
     public Condition<T> groupBy(String... fields) {
         for(String field:fields){
-            if(query.columnBuilder.length()==0){
-                query.groupByBuilder.append(query.tableAliasName+"." + query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + ",");
-            }else{
-                query.groupByBuilder.append(getColumnNameByFieldName(field) + ",");
-            }
+            query.groupByBuilder.append(getQueryColumnNameByFieldName(field) + ",");
         }
         return this;
     }
@@ -376,11 +360,7 @@ public class AbstractCondition<T> implements Condition<T>{
     @Override
     public Condition<T> orderBy(String... fields) {
         for(String field:fields){
-            if(query.columnBuilder.length()==0){
-                query.orderByBuilder.append(query.tableAliasName+"."+query.quickDAOConfig.database.escape(getColumnNameByFieldName(field))+" asc,");
-            }else{
-                query.orderByBuilder.append(getColumnNameByFieldName(field)+" asc,");
-            }
+            query.orderByBuilder.append(getQueryColumnNameByFieldName(field)+" asc,");
         }
         return this;
     }
@@ -388,11 +368,7 @@ public class AbstractCondition<T> implements Condition<T>{
     @Override
     public Condition<T> orderByDesc(String... fields) {
         for(String field:fields){
-            if(query.columnBuilder.length()==0){
-                query.orderByBuilder.append(query.tableAliasName+"."+query.quickDAOConfig.database.escape(getColumnNameByFieldName(field))+" desc,");
-            }else{
-                query.orderByBuilder.append(getColumnNameByFieldName(field)+" desc,");
-            }
+            query.orderByBuilder.append(getQueryColumnNameByFieldName(field)+" desc,");
         }
         return this;
     }
@@ -496,7 +472,11 @@ public class AbstractCondition<T> implements Condition<T>{
 
     /**添加in查询*/
     private void addInQuery(String field, Object[] values, String in) {
-        query.whereBuilder.append("(" + query.tableAliasName + "." + getColumnNameByFieldName(field) + " " + in + " (");
+        if (null == values || values.length == 0) {
+            query.whereBuilder.append("( 1 = 2 ) and ");
+            return;
+        }
+        query.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " " + in + " (");
         for (int i = 0; i < values.length; i++) {
             query.whereBuilder.append("?,");
         }
@@ -560,7 +540,26 @@ public class AbstractCondition<T> implements Condition<T>{
     }
 
     /**
-     * 根据字段名查询数据库列名
+     * 根据字段名查询数据库列名,返回表名加列名
+     * */
+    private String getQueryColumnNameByFieldName(String field) {
+        if(null==field||field.isEmpty()){
+            return field;
+        }
+        for(Property property:query.entity.properties){
+            if(field.equals(property.name)){
+                if(query.unionList.isEmpty()){
+                    return query.tableAliasName+"."+query.quickDAOConfig.database.escape(property.column);
+                }else{
+                    return query.quickDAOConfig.database.escape(property.column);
+                }
+            }
+        }
+        return field;
+    }
+
+    /**
+     * 根据字段名查询数据库列名,只返回列名
      * */
     private String getColumnNameByFieldName(String field) {
         if(null==field||field.isEmpty()){

@@ -139,6 +139,7 @@ public class DefaultTableDefiner implements TableDefiner{
                     property.unique = constraint.unique();
                     property.check = constraint.check();
                     property.defaultValue = constraint.defaultValue();
+                    property.unionUnique = constraint.unionUnique();
                 }
                 Id id = field.getDeclaredAnnotation(Id.class);
                 if(null!=id){
@@ -194,7 +195,7 @@ public class DefaultTableDefiner implements TableDefiner{
                 if(property.index){
                     indexPropertyList.add(property);
                 }
-                if(property.unique&&!property.id){
+                if(property.unique&&property.unionUnique){
                     uniquePropertyList.add(property);
                 }
                 if(null!=property.check&&!property.check.isEmpty()){
