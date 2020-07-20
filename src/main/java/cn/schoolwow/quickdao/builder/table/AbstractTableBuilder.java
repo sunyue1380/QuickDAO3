@@ -52,7 +52,11 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         ResultSet resultSet = connection.prepareStatement(executeSQL).executeQuery();
         while (resultSet.next()) {
             //判断是普通索引还是唯一性约束
-            String sql = resultSet.getString(1).toLowerCase();
+            String sql = resultSet.getString(1);
+            if(null==sql){
+                continue;
+            }
+            sql = sql.toLowerCase();
             String[] columns = sql.substring(sql.indexOf("(")+1,sql.indexOf(")")).toLowerCase().split(",");
             if(sql.contains("create unique index")){
                 for(String column:columns){
@@ -105,7 +109,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                 if (null!=property.check&&!property.check.isEmpty()) {
                     createTableBuilder.append(" check " + property.check);
                 }
-                if (property.id){
+                if (property.unique&&!property.unionUnique){
                     createTableBuilder.append(" unique ");
                 }
             }

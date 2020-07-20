@@ -41,65 +41,53 @@ public class AbstractSubCondition<T> implements SubCondition<T>{
 
     @Override
     public SubCondition<T> addNullQuery(String field) {
-        subQuery.whereBuilder.append("(" + subQuery.tableAliasName + "." + subQuery.query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " is null) and ");
+        subQuery.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " is null) and ");
         return this;
     }
 
     @Override
     public SubCondition<T> addNotNullQuery(String field) {
-        subQuery.whereBuilder.append("(" + subQuery.tableAliasName + "." + subQuery.query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " is not null) and ");
+        subQuery.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " is not null) and ");
         return this;
     }
 
     @Override
     public SubCondition<T> addEmptyQuery(String field) {
-        subQuery.whereBuilder.append("(" + subQuery.tableAliasName + "." + subQuery.query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " is not null and " + subQuery.tableAliasName + "." + subQuery.query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " = '') and ");
+        subQuery.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " is not null and " + getQueryColumnNameByFieldName(field) + " = '') and ");
         return this;
     }
 
     @Override
     public SubCondition<T> addNotEmptyQuery(String field) {
-        subQuery.whereBuilder.append("(" + subQuery.tableAliasName + "." + subQuery.query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " is not null and " + subQuery.tableAliasName + "." + subQuery.query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " != '') and ");
+        subQuery.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " is not null and " + getQueryColumnNameByFieldName(field) + " != '') and ");
         return this;
     }
 
     @Override
     public SubCondition<T> addInQuery(String field, Object... values) {
-        if (null == values || values.length == 0) {
-            return this;
-        }
         addInQuery(field,values,"in");
         return this;
     }
 
     @Override
     public SubCondition<T> addInQuery(String field, List values) {
-        if (null == values || values.isEmpty()) {
-            return this;
-        }
         return addInQuery(field, values.toArray(new Object[0]));
     }
 
     @Override
     public SubCondition<T> addNotInQuery(String field, Object... values) {
-        if (null == values || values.length == 0) {
-            return this;
-        }
         addInQuery(field,values,"not in");
         return this;
     }
 
     @Override
     public SubCondition<T> addNotInQuery(String field, List values) {
-        if (null == values || values.isEmpty()) {
-            return this;
-        }
         return addNotInQuery(field, values.toArray(new Object[0]));
     }
 
     @Override
     public SubCondition<T> addBetweenQuery(String field, Object start, Object end) {
-        subQuery.whereBuilder.append("("+subQuery.tableAliasName+"." + subQuery.query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " between ? and ? ) and ");
+        subQuery.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " between ? and ? ) and ");
         subQuery.parameterList.add(start);
         subQuery.parameterList.add(end);
         return this;
@@ -110,14 +98,8 @@ public class AbstractSubCondition<T> implements SubCondition<T>{
         if (value == null || value.toString().equals("")) {
             return this;
         }
-        subQuery.whereBuilder.append("("+subQuery.tableAliasName+"." + subQuery.query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " like ?) and ");
+        subQuery.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " like ?) and ");
         subQuery.parameterList.add(value);
-        return this;
-    }
-
-    @Override
-    public SubCondition<T> addQuery(String query) {
-        subQuery.whereBuilder.append("(" + query + ") and ");
         return this;
     }
 
@@ -134,8 +116,17 @@ public class AbstractSubCondition<T> implements SubCondition<T>{
         }else if(value.toString().isEmpty()){
             addEmptyQuery(field);
         }else {
-            subQuery.whereBuilder.append("("+subQuery.tableAliasName+"." + subQuery.query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " " + operator + " ?) and ");
+            subQuery.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " " + operator + " ?) and ");
             subQuery.parameterList.add(value);
+        }
+        return this;
+    }
+
+    @Override
+    public SubCondition<T> addQuery(String query, Object... parameterList) {
+        subQuery.whereBuilder.append("(" + query + ") and ");
+        if(null!=parameterList&&parameterList.length>0){
+            subQuery.parameterList.addAll(Arrays.asList(parameterList));
         }
         return this;
     }
@@ -156,7 +147,7 @@ public class AbstractSubCondition<T> implements SubCondition<T>{
     @Override
     public SubCondition<T> groupBy(String... fields) {
         for(String field:fields){
-            subQuery.query.groupByBuilder.append(subQuery.tableAliasName+"." + subQuery.query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + ",");
+            subQuery.query.groupByBuilder.append(getQueryColumnNameByFieldName(field) + ",");
         }
         return this;
     }
@@ -164,7 +155,7 @@ public class AbstractSubCondition<T> implements SubCondition<T>{
     @Override
     public SubCondition<T> orderBy(String... fields) {
         for(String field:fields){
-            subQuery.query.orderByBuilder.append(subQuery.tableAliasName + "." + subQuery.query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " asc,");
+            subQuery.query.orderByBuilder.append(getQueryColumnNameByFieldName(field) + " asc,");
         }
         return this;
     }
@@ -172,7 +163,7 @@ public class AbstractSubCondition<T> implements SubCondition<T>{
     @Override
     public SubCondition<T> orderByDesc(String... fields) {
         for(String field:fields){
-            subQuery.query.orderByBuilder.append(subQuery.tableAliasName + "." + subQuery.query.quickDAOConfig.database.escape(getColumnNameByFieldName(field)) + " desc,");
+            subQuery.query.orderByBuilder.append(getQueryColumnNameByFieldName(field) + " desc,");
         }
         return this;
     }
@@ -193,7 +184,11 @@ public class AbstractSubCondition<T> implements SubCondition<T>{
 
     /**添加in查询*/
     private void addInQuery(String field, Object[] values, String in) {
-        subQuery.whereBuilder.append("(" + subQuery.tableAliasName + "." + getColumnNameByFieldName(field) + " " + in + " (");
+        if (null == values || values.length == 0) {
+            subQuery.whereBuilder.append("( 1 = 2 ) and ");
+            return;
+        }
+        subQuery.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " " + in + " (");
         for (int i = 0; i < values.length; i++) {
             subQuery.whereBuilder.append("?,");
         }
@@ -205,13 +200,13 @@ public class AbstractSubCondition<T> implements SubCondition<T>{
     /**
      * 根据字段名查询数据库列名
      * */
-    private String getColumnNameByFieldName(String field) {
+    private String getQueryColumnNameByFieldName(String field) {
         if(null==field||field.isEmpty()){
             return field;
         }
         for(Property property:subQuery.entity.properties){
             if(field.equals(property.name)){
-                return property.column;
+                return subQuery.tableAliasName+"."+subQuery.query.quickDAOConfig.database.escape(property.column);
             }
         }
         return field;

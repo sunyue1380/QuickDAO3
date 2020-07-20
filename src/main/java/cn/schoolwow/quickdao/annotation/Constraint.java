@@ -19,4 +19,6 @@ public @interface Constraint {
     String check() default "";
     /**默认值*/
     String defaultValue() default "";
+    /**是否建立联合唯一约束*/
+    boolean unionUnique() default true;
 }

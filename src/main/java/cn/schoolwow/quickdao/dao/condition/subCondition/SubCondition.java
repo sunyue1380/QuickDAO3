@@ -82,19 +82,6 @@ public interface SubCondition<T>{
     SubCondition<T> addLikeQuery(String field, Object value);
 
     /**
-     * 添加自定义查询条件
-     * <p>调用此方法您需要知道以下几点
-     * <ol>
-     *     <li>实体类字段使用驼峰式命名映射到数据库中.例如字段<b>firstName</b>映射到数据库后字段名为<b>first_name</b></li>
-     *     <li>对于所有的查询语句,主表别名为t,使用join方法添加的表按照添加顺序依次为t1,t2,t3......</li>
-     *     <li>返回字段名称均为<b>表别名_字段名</b>.例如主表中的firstName字段,则对应数据库返回列名为<b>t_first_name</b></li>
-     *     <li>本方法的query参数将直接拼接到sql字符上,不会做任何转义操作,请注入SQL注入安全相关问题</li>
-     * </ol>
-     * </p>
-     * @param query 子查询条件
-     */
-    SubCondition<T> addQuery(String query);
-    /**
      * 添加字段查询
      * @param field 字段名
      * @param value 字段值
@@ -107,6 +94,20 @@ public interface SubCondition<T>{
      * @param value    字段值
      */
     SubCondition<T> addQuery(String field, String operator, Object value);
+
+    /**
+     * 添加自定义查询条件
+     * <p>调用此方法您需要知道以下几点
+     * <ol>
+     *     <li>实体类字段使用驼峰式命名映射到数据库中.例如字段<b>firstName</b>映射到数据库后字段名为<b>first_name</b></li>
+     *     <li>对于所有的查询语句,主表别名为t,使用join方法添加的表按照添加顺序依次为t1,t2,t3......</li>
+     *     <li>返回字段名称均为<b>表别名_字段名</b>.例如主表中的firstName字段,则对应数据库返回列名为<b>t_first_name</b></li>
+     *     <li>本方法的query参数将直接拼接到sql字符上,不会做任何转义操作,请注入SQL注入安全相关问题</li>
+     * </ol>
+     * </p>
+     * @param query 子查询条件
+     */
+    SubCondition<T> addQuery(String query, Object... parameterList);
 
     /**
      * 关联表查询,子表可再次关联子表

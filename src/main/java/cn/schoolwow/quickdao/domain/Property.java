@@ -44,6 +44,10 @@ public class Property {
      */
     public boolean unique;
     /**
+     * 是否是联合唯一索引
+     */
+    public boolean unionUnique;
+    /**
      * 是否非空
      */
     public boolean notNull;
