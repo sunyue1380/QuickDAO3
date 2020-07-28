@@ -55,7 +55,7 @@ Condition condition = dao.query(Person.class)
 您可以指定使用union或者union all方法进行连接
 
 ```java
-Response response = dao.query(Person.class)
+List<Person> personList = dao.query(Person.class)
                     .union(dao.query(Person.class)
                             .addQuery("lastName","Gates")
                             .addColumns("id","lastName","firstName"))
@@ -66,5 +66,6 @@ Response response = dao.query(Person.class)
                     .addColumns(new String[]{"id","lastName","firstName"})
                     .orderByDesc("id")
                     .page(1,10)
-                    .execute();
+                    .execute()
+                    .getList();
 ```
