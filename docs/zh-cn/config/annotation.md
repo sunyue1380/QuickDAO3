@@ -13,6 +13,18 @@ public class User{
 }
 ```
 
+### Id生成策略(v3.4新增)
+
+从3.4版本开始,@Id注解带有strategy属性,strategy的值为以下值之一
+
+* None(用户自己手动设置该Id属性)
+* AutoIncrement(设置为数据库自增,默认值)
+* IdGenerator(使用Id生成器,需要在配置DAO对象时手动指定Id生成器)
+
+每个实体类可以单独设置自己的Id生成策略,同时也可以在配置DAO对象时指定全局Id策略.@Id注解优先于全局策略.
+
+全局Id生成器策略请参阅[配置DAO](/configuration.md)
+
 ## @ColumnNamne
 
 映射字段名,作用于类字段上

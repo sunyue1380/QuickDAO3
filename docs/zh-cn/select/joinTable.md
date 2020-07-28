@@ -98,3 +98,9 @@ joinTable(User.class,"userId","id")
 .tableAliasName("u")
 ```
 后续涉及到手动编写SQL时就可以使用u表示User表了
+
+# 关联子查询(v3.4新增)
+
+新增接口 ``SubCondition<T> joinTable(Condition joinCondition, String primaryField, String joinConditionField);``
+
+您可以关联一个Condition对象,最终执行SQL语句会将joinCondition翻译为子查询语句.

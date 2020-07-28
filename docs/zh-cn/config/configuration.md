@@ -20,10 +20,10 @@ BasicDataSource mysqlDataSource = new BasicDataSource();
                 .packageName("cn.schoolwow.quickdao.entity","quickdao")
                 //指定扫描单个实体类(v3.2版本开始提供)
                 .entity(Person.class)
-                //是否自动新增表,默认开启
-                .autoCreateTable(true)
-                //是否自动新增字段,默认开启
-                .autoCreateProperty(true)
+                //是否自动新增表,默认关闭
+                .autoCreateTable(false)
+                //是否自动新增字段,默认关闭
+                .autoCreateProperty(false)
                 //是否建表时建立外键约束,默认关闭
                 .foreignKey(false)
                 //忽略指定实体类
@@ -52,6 +52,26 @@ DAO dao = QuickDAO.newInstance()
                 .build();
 ```
 
+## 指定全局Id策略
+
+> 此功能从v3.4版本新增
+
+您可以指定全局Id生成策略,该全局策略对所有使用@Id注解的字段起作用
+
+```java
+public class User{
+  @Id
+  private long id;
+}
+
+QuickDAO.newInstance()
+              //指定全局Id策略
+              .idStrategy(IdStrategy.IdGenerator)
+              .done();
+```
+
+> 若手动使用@Id注解设置了strategy属性,则使用@Id注解所设置的策略
+
 ## 指定id生成器
 
 > 此功能从v3.4版本新增
@@ -73,3 +93,4 @@ QuickDAO.newInstance()
 QuickDAO内置了SnowflakeIdGenerator生成器,您也可以通过实现IdGenerator接口自定义Id生成器
 
 > id生成器只对所有用@Id注解的属性起效果,请务必在id属性上添加@Id注解
+

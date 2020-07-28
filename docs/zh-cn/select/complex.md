@@ -13,14 +13,14 @@ Condition condition = dao.query(User.class)
     .addNotNullQuery("lastName")
     .addEmptyQuery("lastName")
     .addNotEmptyQuery("lastName")
-    .addInQuery("lastName",new String[]{"1","2"})
-    .addNotInQuery("lastName",new String[]{"3","4"})
+    .addInQuery("lastName","1","2")
+    .addNotInQuery("lastName","3","4")
     .addBetweenQuery("id",1,2)
     .addLikeQuery("lastName","a")
     .addQuery("lastName","=","a")
 ```
 
-这些方法名见名知意,同时也有详细的JavaDoc文档.所有的查询条件接口以``add``开头,您可以很方便的分辨出哪些是查询方法接口.
+这些方法名见名知义,同时也有详细的JavaDoc文档.所有的查询条件接口以``add``开头,您可以很方便的分辨出哪些是查询方法接口.
 
 ## Response 对象
 
