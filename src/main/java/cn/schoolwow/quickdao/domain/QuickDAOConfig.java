@@ -46,11 +46,11 @@ public class QuickDAOConfig {
     /**
      * 是否启动时自动建表
      */
-    public boolean autoCreateTable = true;
+    public boolean autoCreateTable = false;
     /**
      * 是否自动新增属性
      */
-    public boolean autoCreateProperty = true;
+    public boolean autoCreateProperty = false;
     /**
      * 全局Id生成策略
      */
