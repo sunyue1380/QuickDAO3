@@ -3,7 +3,6 @@ package cn.schoolwow.quickdao.builder.sql.dql;
 import cn.schoolwow.quickdao.builder.sql.AbstractSQLBuilder;
 import cn.schoolwow.quickdao.dao.condition.AbstractCondition;
 import cn.schoolwow.quickdao.domain.*;
-import cn.schoolwow.quickdao.util.StringUtil;
 import org.slf4j.MDC;
 
 import java.sql.PreparedStatement;
@@ -16,12 +15,12 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
 
     @Override
     public PreparedStatement fetchNull(Class clazz, String field) throws SQLException {
-        String key = "fetchNull_" + clazz.getName()+"_"+field+"_"+quickDAOConfig.database.getClass().getName();
-        Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
+        String key = "fetchNull_" + clazz.getName()+"_"+field+"_"+quickDAOConfig.database.getClass().getSimpleName();
         if (!sqlCache.containsKey(key)) {
+            Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
             StringBuilder builder = new StringBuilder("select ");
             builder.append(columns(entity,"t"));
-            builder.append(" from " + quickDAOConfig.database.escape(entity.tableName)+" as t where t."+ StringUtil.Camel2Underline(field) +" is null");
+            builder.append(" from " + quickDAOConfig.database.escape(entity.tableName) + " as t where t." + quickDAOConfig.database.escape(entity.getColumnNameByFieldName(field)) +" is null");
             sqlCache.put(key, builder.toString());
         }
         String sql = sqlCache.get(key);
@@ -39,12 +38,12 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
 
     @Override
     public PreparedStatement fetch(Class clazz, String field, Object value) throws SQLException {
-        String key = "fetch_" + clazz.getName()+"_"+field+"_"+quickDAOConfig.database.getClass().getName();
-        Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
+        String key = "fetch_" + clazz.getName()+"_"+field+"_"+quickDAOConfig.database.getClass().getSimpleName();
         if (!sqlCache.containsKey(key)) {
+            Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
             StringBuilder builder = new StringBuilder("select ");
             builder.append(columns(entity,"t"));
-            builder.append(" from " + quickDAOConfig.database.escape(entity.tableName)+" as t where t."+ StringUtil.Camel2Underline(field) +" = ?");
+            builder.append(" from " + quickDAOConfig.database.escape(entity.tableName) + " as t where t." + quickDAOConfig.database.escape(entity.getColumnNameByFieldName(field)) + " = ?");
             sqlCache.put(key, builder.toString());
         }
         String sql = sqlCache.get(key);

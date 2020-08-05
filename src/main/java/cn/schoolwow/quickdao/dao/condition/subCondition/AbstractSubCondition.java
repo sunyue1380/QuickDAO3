@@ -3,7 +3,6 @@ package cn.schoolwow.quickdao.dao.condition.subCondition;
 import cn.schoolwow.quickdao.dao.condition.Condition;
 import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.SubQuery;
-import cn.schoolwow.quickdao.util.StringUtil;
 
 import java.util.Arrays;
 import java.util.List;

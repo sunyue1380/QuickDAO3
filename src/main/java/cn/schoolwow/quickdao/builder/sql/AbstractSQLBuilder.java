@@ -36,8 +36,8 @@ public class AbstractSQLBuilder implements SQLBuilder{
     }
 
     @Override
-    public PreparedStatement selectById(Object instance) throws Exception {
-        String key = "selectById_" + instance.getClass().getName()+"_"+quickDAOConfig.database.getClass().getName();
+    public PreparedStatement selectCountById(Object instance) throws Exception {
+        String key = "selectCountById_" + instance.getClass().getName()+"_"+quickDAOConfig.database.getClass().getName();
         Entity entity = quickDAOConfig.entityMap.get(instance.getClass().getName());
         if (!sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder();
@@ -46,19 +46,19 @@ public class AbstractSQLBuilder implements SQLBuilder{
             sqlCache.put(key, builder.toString());
         }
         String sql = sqlCache.get(key);
-        StringBuilder builder = new StringBuilder(sql.replace("?", PLACEHOLDER));
         PreparedStatement ps = connection.prepareStatement(sql);
         Field field = instance.getClass().getDeclaredField(entity.id.name);
         field.setAccessible(true);
-        ps.setObject(1,field.get(instance));
+        Object value = field.get(instance);
+        ps.setObject(1,value);
         MDC.put("name","根据id查询");
-        MDC.put("sql",builder.toString());
+        MDC.put("sql",sql.replace("?",value==null?"":value.toString()));
         return ps;
     }
 
     @Override
-    public PreparedStatement selectByUniqueKey(Object instance) throws Exception {
-        String key = "selectByUniqueKey_" + instance.getClass().getName()+"_"+quickDAOConfig.database.getClass().getName();
+    public PreparedStatement selectCountByUniqueKey(Object instance) throws Exception {
+        String key = "selectCountByUniqueKey_" + instance.getClass().getName()+"_"+quickDAOConfig.database.getClass().getName();
         Entity entity = quickDAOConfig.entityMap.get(instance.getClass().getName());
         if (!sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder();

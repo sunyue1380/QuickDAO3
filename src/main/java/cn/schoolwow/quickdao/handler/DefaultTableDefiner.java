@@ -141,6 +141,10 @@ public class DefaultTableDefiner implements TableDefiner{
                     property.defaultValue = constraint.defaultValue();
                     property.unionUnique = constraint.unionUnique();
                 }
+                if(property.name.equals("id")){
+                    property.id = true;
+                    property.strategy = IdStrategy.AutoIncrement;
+                }
                 Id id = field.getDeclaredAnnotation(Id.class);
                 if(null!=id){
                     property.id = true;

@@ -7,8 +7,8 @@ import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
-import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
@@ -38,13 +38,15 @@ public class AbstractSQLDAO implements SQLDAO {
             Entity entity = abstractDAO.quickDAOConfig.entityMap.get(instance.getClass().getName());
             PreparedStatement ps = null;
             if(entity.uniqueKeyProperties.length>0){
-                ps = sqlBuilder.selectByUniqueKey(instance);
+                ps = sqlBuilder.selectCountByUniqueKey(instance);
             }else if(null!=entity.id){
-                ps = sqlBuilder.selectById(instance);
+                ps = sqlBuilder.selectCountById(instance);
             }
+            MDC.put("count","0");
             ResultSet resultSet = ps.executeQuery();
             if (resultSet.next()) {
                 result = resultSet.getLong(1)>0;
+                MDC.put("count","1");
             }
             resultSet.close();
             ps.close();

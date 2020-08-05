@@ -52,6 +52,21 @@ public class Entity {
      */
     public Field[] compositFields;
 
+    /**
+     * 根据字段名查询数据库列名,只返回列名
+     * */
+    public String getColumnNameByFieldName(String field) {
+        if(null==field||field.isEmpty()){
+            return field;
+        }
+        for(Property property:properties){
+            if(field.equals(property.name)){
+                return property.column;
+            }
+        }
+        return field;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

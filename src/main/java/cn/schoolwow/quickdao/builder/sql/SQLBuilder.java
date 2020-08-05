@@ -4,7 +4,7 @@ import java.sql.PreparedStatement;
 
 public interface SQLBuilder {
     /**根据唯一性约束查询*/
-    PreparedStatement selectById(Object instance) throws Exception;
+    PreparedStatement selectCountById(Object instance) throws Exception;
     /**根据唯一性约束查询*/
-    PreparedStatement selectByUniqueKey(Object instance) throws Exception;
+    PreparedStatement selectCountByUniqueKey(Object instance) throws Exception;
 }
