@@ -2,7 +2,6 @@ package cn.schoolwow.quickdao.dao.condition;
 
 import cn.schoolwow.quickdao.domain.PageVo;
 import cn.schoolwow.quickdao.domain.Query;
-import cn.schoolwow.quickdao.util.StringUtil;
 
 public class SQLServerCondition extends AbstractCondition{
 
@@ -15,7 +14,7 @@ public class SQLServerCondition extends AbstractCondition{
         if (value == null || value.toString().equals("")) {
             return this;
         }
-        query.whereBuilder.append("charindex(?,t."+query.quickDAOConfig.database.escape(StringUtil.Camel2Underline(field))+" ) >0 and ");
+        query.whereBuilder.append("charindex(?,t."+query.quickDAOConfig.database.escape(query.entity.getColumnNameByFieldName(field))+" ) >0 and ");
         query.parameterList.add(value.toString());
         return this;
     }

@@ -1,8 +1,5 @@
 package cn.schoolwow.quickdao.dao.sql;
 
-import cn.schoolwow.quickdao.dao.sql.dml.DMLDAO;
-import cn.schoolwow.quickdao.dao.sql.dql.DQLDAO;
-import cn.schoolwow.quickdao.dao.sql.transaction.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;

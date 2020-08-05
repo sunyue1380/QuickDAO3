@@ -5,7 +5,6 @@ import cn.schoolwow.quickdao.builder.sql.AbstractSQLBuilder;
 import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
-import cn.schoolwow.quickdao.util.StringUtil;
 import org.slf4j.MDC;
 
 import java.lang.reflect.Field;
@@ -108,11 +107,11 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
 
     @Override
     public PreparedStatement deleteByProperty(Class clazz, String property, Object value) throws SQLException {
-        String key = "deleteByProperty_" + clazz.getName()+"_"+property+"_"+quickDAOConfig.database.getClass().getName();
-        Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
+        String key = "deleteByProperty_" + clazz.getName()+"_"+property+"_"+quickDAOConfig.database.getClass().getSimpleName();
         if (!sqlCache.containsKey(key)) {
+            Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
             StringBuilder builder = new StringBuilder();
-            builder.append("delete from " + quickDAOConfig.database.escape(entity.tableName)+" where "+quickDAOConfig.database.escape(StringUtil.Camel2Underline(property))+" = ?");
+            builder.append("delete from " + quickDAOConfig.database.escape(entity.tableName) + " where " + quickDAOConfig.database.escape(entity.getColumnNameByFieldName(property)) + " = ?");
             sqlCache.put(key, builder.toString());
         }
         String sql = sqlCache.get(key);
@@ -125,7 +124,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
 
     @Override
     public PreparedStatement clear(Class clazz) throws SQLException {
-        String key = "clear_" + clazz.getName()+"_"+quickDAOConfig.database.getClass().getName();
+        String key = "clear_" + clazz.getName()+"_"+quickDAOConfig.database.getClass().getSimpleName();
         if (!sqlCache.containsKey(key)) {
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
             sqlCache.put(key, "delete from "+quickDAOConfig.database.escape(entity.tableName));
@@ -139,7 +138,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
      * @param clazz 实体类对象
      * */
     private String insert(Class clazz){
-        String key = "insert_" + clazz.getName()+"_"+quickDAOConfig.database.getClass().getName();
+        String key = "insert_" + clazz.getName()+"_"+quickDAOConfig.database.getClass().getSimpleName();
         if (!sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder();
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
@@ -200,7 +199,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
      * @param clazz 实例类对象
      * */
     private String updateByUniqueKey(Class clazz){
-        String key = "updateByUniqueKey_" + clazz.getName()+"_"+quickDAOConfig.database.getClass().getName();
+        String key = "updateByUniqueKey_" + clazz.getName()+"_"+quickDAOConfig.database.getClass().getSimpleName();
         if (!sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder();
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
@@ -218,7 +217,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             builder.append(" where ");
             for (Property property : entity.properties) {
                 if (property.unique&&!property.id) {
-                    builder.append(quickDAOConfig.database.escape(property.column) + "=? and ");
+                    builder.append(quickDAOConfig.database.escape(property.column) + " = ? and ");
                 }
             }
             builder.delete(builder.length() - 5, builder.length());
@@ -262,7 +261,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
      * @param clazz 实例类对象
      * */
     private String updateById(Class clazz){
-        String key = "updateById_" + clazz.getName()+"_"+quickDAOConfig.database.getClass().getName();
+        String key = "updateById_" + clazz.getName()+"_"+quickDAOConfig.database.getClass().getSimpleName();
         if (!sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder();
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());

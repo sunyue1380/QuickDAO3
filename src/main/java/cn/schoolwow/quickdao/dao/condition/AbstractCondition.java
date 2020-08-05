@@ -10,7 +10,6 @@ import cn.schoolwow.quickdao.dao.response.UnionType;
 import cn.schoolwow.quickdao.database.SQLiteDatabase;
 import cn.schoolwow.quickdao.domain.*;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
-import cn.schoolwow.quickdao.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -139,14 +138,14 @@ public class AbstractCondition<T> implements Condition<T>{
     @Override
     public Condition<T> addColumn(String... fields) {
         for(String field:fields){
-            query.columnBuilder.append(getColumnNameByFieldName(field)+ ",");
+            query.columnBuilder.append(query.entity.getColumnNameByFieldName(field)+ ",");
         }
         return this;
     }
 
     @Override
     public Condition<T> addUpdate(String field, Object value) {
-        query.setBuilder.append(getColumnNameByFieldName(field) + " = ?,");
+        query.setBuilder.append(query.entity.getColumnNameByFieldName(field) + " = ?,");
         query.updateParameterList.add(value);
         return this;
     }
@@ -305,7 +304,7 @@ public class AbstractCondition<T> implements Condition<T>{
         SubQuery subQuery = new SubQuery();
         subQuery.entity = query.quickDAOConfig.entityMap.get(clazz.getName());
         subQuery.tableAliasName = query.tableAliasName + (joinTableIndex++);
-        subQuery.primaryField = getColumnNameByFieldName(primaryField);
+        subQuery.primaryField = query.entity.getColumnNameByFieldName(primaryField);
         for(Property property:subQuery.entity.properties){
             if(property.name.equals(joinTableField)){
                 subQuery.joinTableField = property.column;
@@ -337,7 +336,7 @@ public class AbstractCondition<T> implements Condition<T>{
         subQuery.columnBuilder.append(joinQuery.columnBuilder.toString());
         subQuery.columnBuilder.deleteCharAt(subQuery.columnBuilder.length()-1);
         subQuery.tableAliasName = query.tableAliasName + (joinTableIndex++);
-        subQuery.primaryField = getColumnNameByFieldName(primaryField);
+        subQuery.primaryField = query.entity.getColumnNameByFieldName(primaryField);
         subQuery.joinTableField = joinConditionField;
         subQuery.whereBuilder.append(joinQuery.whereBuilder.toString().replace(joinQuery.tableAliasName+".",""));
         if(subQuery.whereBuilder.length()>0){
@@ -553,21 +552,6 @@ public class AbstractCondition<T> implements Condition<T>{
                 }else{
                     return query.quickDAOConfig.database.escape(property.column);
                 }
-            }
-        }
-        return field;
-    }
-
-    /**
-     * 根据字段名查询数据库列名,只返回列名
-     * */
-    private String getColumnNameByFieldName(String field) {
-        if(null==field||field.isEmpty()){
-            return field;
-        }
-        for(Property property:query.entity.properties){
-            if(field.equals(property.name)){
-                return property.column;
             }
         }
         return field;
