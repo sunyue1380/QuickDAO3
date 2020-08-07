@@ -213,6 +213,8 @@ public class QuickDAO {
      * @param sourcePath 源文件路径
      * */
     public void reverse(String sourcePath) throws SQLException {
+        quickDAOConfig.autoCreateTable = false;
+        quickDAOConfig.autoCreateProperty = false;
         //数据库类型对应表
         Map<String,String> mapping = new HashMap<>();
         mapping.put("varchar","String");

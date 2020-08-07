@@ -115,6 +115,7 @@ public class AbstractResponse<T> implements Response<T>{
                     array.add(o);
                 }
             }
+            MDC.put("count",array.size()+"");
             resultSet.close();
             ps.close();
         } catch (SQLException e) {
