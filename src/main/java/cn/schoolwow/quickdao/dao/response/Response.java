@@ -36,6 +36,13 @@ public interface Response<T> {
     <E> List<E> getSingleColumnList(Class<E> clazz);
 
     /**
+     * 返回查询结果的第一列
+     *
+     * @param clazz 返回字段类型
+     */
+    <E> E getSingleColumn(Class<E> clazz);
+
+    /**
      * 返回符合条件的数据库记录
      */
     List<T> getList();
