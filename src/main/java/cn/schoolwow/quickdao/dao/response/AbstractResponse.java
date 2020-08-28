@@ -82,6 +82,33 @@ public class AbstractResponse<T> implements Response<T>{
     }
 
     @Override
+    public <E> E getSingleColumn(Class<E> clazz) {
+        List<E> list = getSingleColumnList(clazz);
+        if (list == null || list.size() == 0) {
+            return null;
+        } else {
+            return list.get(0);
+        }
+    }
+
+    @Override
+    public List getSingleColumnList(Class clazz) {
+        try {
+            PreparedStatement ps = query.dqlsqlBuilder.getArray(query);
+            JSONArray array = new JSONArray((int) count());
+            ResultSet resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                array.add(resultSet.getString(1));
+            }
+            resultSet.close();
+            ps.close();
+            return array.toJavaList(clazz);
+        } catch (SQLException e) {
+            throw new SQLRuntimeException(e);
+        }
+    }
+
+    @Override
     public List getList() {
         return getArray().toJavaList(query.entity.clazz);
     }
@@ -122,23 +149,6 @@ public class AbstractResponse<T> implements Response<T>{
             throw new SQLRuntimeException(e);
         }
         return array;
-    }
-
-    @Override
-    public List getSingleColumnList(Class clazz) {
-        try {
-            PreparedStatement ps = query.dqlsqlBuilder.getArray(query);
-            JSONArray array = new JSONArray((int) count());
-            ResultSet resultSet = ps.executeQuery();
-            while (resultSet.next()) {
-                array.add(resultSet.getString(1));
-            }
-            resultSet.close();
-            ps.close();
-            return array.toJavaList(clazz);
-        } catch (SQLException e) {
-            throw new SQLRuntimeException(e);
-        }
     }
 
     @Override

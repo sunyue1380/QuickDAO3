@@ -218,14 +218,17 @@ public class QuickDAO {
         //数据库类型对应表
         Map<String,String> mapping = new HashMap<>();
         mapping.put("varchar","String");
+        mapping.put("longvarchar","String");
         mapping.put("text","String");
         mapping.put("mediumtext","String");
         mapping.put("longtext","String");
         mapping.put("boolean","boolean");
         mapping.put("tinyint","byte");
+        mapping.put("blob","byte[]");
         mapping.put("char","char");
         mapping.put("smallint","short");
         mapping.put("int","int");
+        mapping.put("integer","int");
         mapping.put("bigint","long");
         mapping.put("float","float");
         mapping.put("double","double");
@@ -265,7 +268,7 @@ public class QuickDAO {
                 if(property.columnType.contains("(")){
                     property.columnType = property.columnType.substring(0,property.columnType.indexOf("("));
                 }
-                property.className = mapping.get(property.columnType);
+                property.className = mapping.get(property.columnType.toLowerCase());
                 property.name = StringUtil.Underline2Camel(property.column);
                 builder.append("\tprivate "+property.className+" "+property.name+";\n\n");
             }
@@ -280,6 +283,7 @@ public class QuickDAO {
             ByteArrayInputStream bais = new ByteArrayInputStream(builder.toString().getBytes());
             Path target = Paths.get(sourcePath+"/"+ packageName.replace(".","/") + "/" + dbEntity.className+".java");
             try {
+                Files.createDirectories(target.getParent());
                 Files.copy(bais, target);
             } catch (IOException e) {
                 e.printStackTrace();
