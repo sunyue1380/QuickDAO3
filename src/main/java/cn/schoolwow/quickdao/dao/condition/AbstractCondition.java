@@ -546,7 +546,7 @@ public class AbstractCondition<T> implements Condition<T>{
             return field;
         }
         for(Property property:query.entity.properties){
-            if(field.equals(property.name)){
+            if(field.equals(property.name)||field.equals(property.column)){
                 if(query.unionList.isEmpty()){
                     return query.tableAliasName+"."+query.quickDAOConfig.database.escape(property.column);
                 }else{

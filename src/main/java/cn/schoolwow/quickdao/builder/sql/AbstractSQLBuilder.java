@@ -8,10 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.lang.reflect.Field;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -19,13 +17,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AbstractSQLBuilder implements SQLBuilder{
-    protected static Logger logger = LoggerFactory.getLogger(AbstractSQLBuilder.class);
+    protected final static Logger logger = LoggerFactory.getLogger(AbstractSQLBuilder.class);
+    /*格式化旧版本的Date类型**/
+    private final static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
     /**格式化日期参数*/
-    private static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
+    private final static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
     /**SQL参数占位符*/
-    protected static String PLACEHOLDER = "** NOT SPECIFIED **";
+    protected final static String PLACEHOLDER = "** NOT SPECIFIED **";
     /**SQL语句缓存*/
-    protected static ConcurrentHashMap<String,String> sqlCache = new ConcurrentHashMap();
+    protected final static ConcurrentHashMap<String,String> sqlCache = new ConcurrentHashMap();
     /**数据库信息对象*/
     public QuickDAOConfig quickDAOConfig;
     /**数据库连接对象*/
@@ -86,7 +86,41 @@ public class AbstractSQLBuilder implements SQLBuilder{
      * DQL查询操作设置参数
      */
     protected static void setParameter(Object parameter, PreparedStatement ps, int parameterIndex, StringBuilder sqlBuilder) throws SQLException {
-        ps.setObject(parameterIndex, parameter);
+        switch (parameter.getClass().getSimpleName().toLowerCase()) {
+            case "boolean": {
+                ps.setBoolean(parameterIndex, (Boolean) parameter);
+            }break;
+            case "int": {}
+            case "integer":{
+                ps.setInt(parameterIndex, (Integer) parameter);
+            };break;
+            case "float":{
+                ps.setFloat(parameterIndex, (Float) parameter);
+            };break;
+            case "long": {
+                ps.setLong(parameterIndex, (Long) parameter);
+            };break;
+            case "double": {
+                ps.setDouble(parameterIndex, (Double) parameter);
+            }break;
+            case "string": {
+                ps.setString(parameterIndex, (String) parameter);
+            }break;
+            case "date": {
+                if(parameter instanceof Date){
+                    ps.setDate(parameterIndex, (java.sql.Date) parameter);
+                }else{
+                    java.util.Date d = (java.util.Date) parameter;
+                    ps.setDate(parameterIndex, new Date(d.getTime()));
+                }
+            };break;
+            case "timestamp": {
+                ps.setTimestamp(parameterIndex, (Timestamp) parameter);
+            }break;
+            default:{
+                ps.setObject(parameterIndex,parameter);
+            }
+        }
         if(!logger.isDebugEnabled()){
             return;
         }
@@ -191,8 +225,9 @@ public class AbstractSQLBuilder implements SQLBuilder{
                 } else{
                     java.util.Date date = (java.util.Date) o;
                     ps.setTimestamp(parameterIndex, new Timestamp(date.getTime()));
-                    LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
-                    parameter = "'"+dateTimeFormatter.format(localDateTime)+"'";
+                    synchronized (simpleDateFormat){
+                        parameter = "'"+simpleDateFormat.format(date)+"'";
+                    }
                 }
             }break;
             case "localdate": {

@@ -12,6 +12,7 @@ import cn.schoolwow.quickdao.dao.sql.dql.DQLDAO;
 import cn.schoolwow.quickdao.dao.sql.transaction.AbstractTransaction;
 import cn.schoolwow.quickdao.dao.sql.transaction.Transaction;
 import cn.schoolwow.quickdao.database.*;
+import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class AbstractDAO implements DAO {
     private Logger logger = LoggerFactory.getLogger(DAO.class);
@@ -62,6 +64,12 @@ public class AbstractDAO implements DAO {
     public Condition query(Class clazz) {
         DQLDAO dqldao = createDQLDAO();
         return dqldao.query(clazz);
+    }
+
+    @Override
+    public Condition query(String tableName) {
+        DQLDAO dqldao = createDQLDAO();
+        return dqldao.query(tableName);
     }
 
     @Override
@@ -154,6 +162,22 @@ public class AbstractDAO implements DAO {
     }
 
     @Override
+    public boolean hasTable(String tableName) {
+        for(Map.Entry<String,Entity> entry:quickDAOConfig.entityMap.entrySet()){
+            if(entry.getValue().clazz.getSimpleName().equals(tableName)){
+                tableName = entry.getValue().tableName;
+                break;
+            }
+        }
+        for(Entity dbEntity:quickDAOConfig.dbEntityList){
+            if(dbEntity.tableName.equals(tableName)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public void create(Class clazz) {
         try {
             tableBuilder.createTable(this.quickDAOConfig.entityMap.get(clazz.getName()));
@@ -165,7 +189,16 @@ public class AbstractDAO implements DAO {
     @Override
     public void drop(Class clazz) {
         try {
-            tableBuilder.dropTable(this.quickDAOConfig.entityMap.get(clazz.getName()));
+            tableBuilder.dropTable(this.quickDAOConfig.entityMap.get(clazz.getName()).tableName);
+        } catch (SQLException e) {
+            throw new SQLRuntimeException(e);
+        }
+    }
+
+    @Override
+    public void drop(String tableName) {
+        try {
+            tableBuilder.dropTable(tableName);
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
@@ -178,6 +211,16 @@ public class AbstractDAO implements DAO {
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
+    }
+
+    @Override
+    public Map<String, Entity> getEntityMap() {
+        return quickDAOConfig.entityMap;
+    }
+
+    @Override
+    public Entity[] getDbEntityList() {
+        return quickDAOConfig.dbEntityList;
     }
 
     /**创建DMLDAO*/

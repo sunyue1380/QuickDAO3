@@ -204,7 +204,7 @@ public class AbstractSubCondition<T> implements SubCondition<T>{
             return field;
         }
         for(Property property:subQuery.entity.properties){
-            if(field.equals(property.name)){
+            if(field.equals(property.name)||field.equals(property.column)){
                 return subQuery.tableAliasName+"."+subQuery.query.quickDAOConfig.database.escape(property.column);
             }
         }

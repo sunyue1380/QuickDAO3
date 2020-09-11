@@ -36,7 +36,11 @@ public class MySQLTableBuilder extends AbstractTableBuilder {
                 while (propertiesRs.next()) {
                     Property property = new Property();
                     property.column = propertiesRs.getString("Field");
+                    //无符号填充0 => float unsigned zerofill
                     property.columnType = propertiesRs.getString("Type");
+                    if(property.columnType.contains(" ")){
+                        property.columnType = property.columnType.substring(0,property.columnType.indexOf(" "));
+                    }
                     property.notNull = "NO".equals(propertiesRs.getString("Null"));
                     property.unique = "UNI".equals(propertiesRs.getString("Key"));
                     if (null != propertiesRs.getString("Default")) {

@@ -15,7 +15,7 @@ import java.util.*;
 public abstract class AbstractTableBuilder implements TableBuilder{
     protected Logger logger = LoggerFactory.getLogger(TableBuilder.class);
     /**字段类型映射*/
-    protected Map<String, String> fieldMapping = new HashMap<String, String>();
+    protected final Map<String, String> fieldMapping = new HashMap<String, String>();
     /**数据库连接*/
     public Connection connection;
     /**数据库配置项*/
@@ -145,16 +145,16 @@ public abstract class AbstractTableBuilder implements TableBuilder{
     }
 
     @Override
-    public void dropTable(Entity entity) throws SQLException {
-        String sql = "drop table "+quickDAOConfig.database.escape(entity.tableName);
-        logger.debug("[删除表]类名:{},表名:{},执行SQL:{}", entity.className, entity.tableName, sql);
+    public void dropTable(String tableName) throws SQLException {
+        String sql = "drop table "+tableName;
+        logger.debug("[删除表]表名:{},执行SQL:{}", tableName, sql);
         connection.prepareStatement(sql).executeUpdate();
     }
 
     @Override
     public void rebuild(Entity entity) throws SQLException {
         if(hasTableExists(entity)){
-            dropTable(entity);
+            dropTable(entity.tableName);
         }
         createTable(entity);
         createIndex(entity,IndexType.Index);
@@ -221,8 +221,8 @@ public abstract class AbstractTableBuilder implements TableBuilder{
 
     public void autoBuildDatabase() throws SQLException {
         //对比实体类信息与数据库信息
-        Entity[] dbEntityList = getDatabaseEntity();
-        logger.debug("[获取数据库信息]数据库表个数:{}", dbEntityList.length);
+        quickDAOConfig.dbEntityList = getDatabaseEntity();
+        logger.debug("[获取数据库信息]数据库表个数:{}", quickDAOConfig.dbEntityList.length);
         //确定需要新增的表和更新的表
         Collection<Entity> entityList = quickDAOConfig.entityMap.values();
         List<Entity> newEntityList = new ArrayList<>();
@@ -239,7 +239,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                     }
                 }
             }
-            for (Entity dbEntity : dbEntityList) {
+            for (Entity dbEntity : quickDAOConfig.dbEntityList) {
                 if (entity.tableName.toLowerCase().equals(dbEntity.tableName.toLowerCase())) {
                     updateEntityList.add(entity);
                     break;
@@ -263,7 +263,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         if(quickDAOConfig.autoCreateProperty){
             //更新表
             for(Entity entity : updateEntityList){
-                for (Entity dbEntity : dbEntityList) {
+                for (Entity dbEntity : quickDAOConfig.dbEntityList) {
                     if (entity.tableName.equals(dbEntity.tableName)) {
                         compareEntityDatabase(entity,dbEntity);
                         break;

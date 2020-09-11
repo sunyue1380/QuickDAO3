@@ -24,6 +24,7 @@ import java.lang.reflect.Proxy;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -225,7 +226,7 @@ public class QuickDAO {
         mapping.put("boolean","boolean");
         mapping.put("tinyint","byte");
         mapping.put("blob","byte[]");
-        mapping.put("char","char");
+        mapping.put("char","String");
         mapping.put("smallint","short");
         mapping.put("int","int");
         mapping.put("integer","int");
@@ -258,10 +259,13 @@ public class QuickDAO {
             builder.append("import cn.schoolwow.quickdao.annotation.Comment;\n\n");
             builder.append("import cn.schoolwow.quickdao.annotation.ColumnType;\n\n");
             builder.append("import cn.schoolwow.quickdao.annotation.ColumnName;\n\n");
+            if(null!=dbEntity.comment){
+                builder.append("@Comment(\""+dbEntity.comment+"\")\n");
+            }
             builder.append("public class "+dbEntity.className+"{\n\n");
             for(Property property:dbEntity.properties){
                 if(null!=property.comment&&!property.comment.isEmpty()){
-                    builder.append("\t@Comment(\""+property.comment.replaceAll("\n","")+"\")\n");
+                    builder.append("\t@Comment(\""+property.comment.replaceAll("\r\n","")+"\")\n");
                 }
                 builder.append("\t@ColumnName(\""+property.column+"\")\n");
                 builder.append("\t@ColumnType(\""+property.columnType+"\")\n");
@@ -284,7 +288,7 @@ public class QuickDAO {
             Path target = Paths.get(sourcePath+"/"+ packageName.replace(".","/") + "/" + dbEntity.className+".java");
             try {
                 Files.createDirectories(target.getParent());
-                Files.copy(bais, target);
+                Files.copy(bais, target, StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -292,9 +296,6 @@ public class QuickDAO {
     }
 
     private AbstractTableBuilder getTableBuilder(){
-        if (quickDAOConfig.packageNameMap.isEmpty()) {
-            throw new IllegalArgumentException("请设置要扫描的实体类包名!");
-        }
         if(null==quickDAOConfig.dataSource){
             throw new IllegalArgumentException("请设置数据库连接池属性!");
         }
