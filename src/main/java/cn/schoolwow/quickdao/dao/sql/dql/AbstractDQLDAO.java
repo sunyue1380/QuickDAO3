@@ -66,8 +66,22 @@ public class AbstractDQLDAO extends AbstractSQLDAO implements DQLDAO {
 
     @Override
     public Condition query(Class clazz) {
+        return query(abstractDAO.quickDAOConfig.entityMap.get(clazz.getName()));
+    }
+
+    @Override
+    public Condition query(String tableName) {
+        for(Entity entity:abstractDAO.quickDAOConfig.dbEntityList){
+            if(entity.tableName.equals(tableName)){
+                return query(entity);
+            }
+        }
+        throw new IllegalArgumentException("不存在的表名:"+tableName+"!");
+    }
+
+    private Condition query(Entity entity){
         Query query = new Query();
-        query.entity = abstractDAO.quickDAOConfig.entityMap.get(clazz.getName());
+        query.entity = entity;
         query.quickDAOConfig = abstractDAO.quickDAOConfig;
         query.dqlsqlBuilder = this.dqlsqlBuilder;
         query.dao = abstractDAO;

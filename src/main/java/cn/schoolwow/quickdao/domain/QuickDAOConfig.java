@@ -69,6 +69,10 @@ public class QuickDAOConfig {
      * */
     public Map<String, Entity> entityMap = new HashMap<>();
     /**
+     * 数据库获取的表信息
+     * */
+    public Entity[] dbEntityList;
+    /**
      * 数据库信息
      * */
     public Database database;

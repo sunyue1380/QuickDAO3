@@ -35,4 +35,8 @@ public interface DQLDAO extends SQLDAO {
      * 复杂查询
      * */
     Condition query(Class clazz);
+    /**
+     * 复杂查询
+     * */
+    Condition query(String tableName);
 }

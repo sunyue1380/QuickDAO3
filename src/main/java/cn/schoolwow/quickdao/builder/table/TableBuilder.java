@@ -18,7 +18,7 @@ public interface TableBuilder{
     /**修改列*/
     void alterColumn(Property property) throws SQLException;
     /**删除表*/
-    void dropTable(Entity entity) throws SQLException;
+    void dropTable(String tableName) throws SQLException;
     /**重建表*/
     void rebuild(Entity entity) throws SQLException;
     /**判断索引是否已经存在*/
