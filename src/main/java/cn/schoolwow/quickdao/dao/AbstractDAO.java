@@ -18,6 +18,7 @@ import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
 import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -211,6 +212,11 @@ public class AbstractDAO implements DAO {
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
+    }
+
+    @Override
+    public DataSource getDataSource() {
+        return quickDAOConfig.dataSource;
     }
 
     @Override

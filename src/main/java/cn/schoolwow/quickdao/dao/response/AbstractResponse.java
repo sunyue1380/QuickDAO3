@@ -44,6 +44,20 @@ public class AbstractResponse<T> implements Response<T>{
     }
 
     @Override
+    public long insert() {
+        long count = 0;
+        try {
+            PreparedStatement ps = query.dqlsqlBuilder.insert(query);
+            count= ps.executeUpdate();
+            ps.close();
+        } catch (SQLException e) {
+            throw new SQLRuntimeException(e);
+        }
+        MDC.put("count",count+"");
+        return count;
+    }
+
+    @Override
     public long update() {
         long count = 0;
         try {
@@ -82,6 +96,16 @@ public class AbstractResponse<T> implements Response<T>{
     }
 
     @Override
+    public <E> E getOne(Class<E> clazz) {
+        List<E> list = getList(clazz);
+        if (list == null || list.size() == 0) {
+            return null;
+        } else {
+            return list.get(0);
+        }
+    }
+
+    @Override
     public <E> E getSingleColumn(Class<E> clazz) {
         List<E> list = getSingleColumnList(clazz);
         if (list == null || list.size() == 0) {
@@ -110,7 +134,12 @@ public class AbstractResponse<T> implements Response<T>{
 
     @Override
     public List getList() {
-        return getArray().toJavaList(query.entity.clazz);
+        return getList(query.entity.clazz);
+    }
+
+    @Override
+    public <E> List<E> getList(Class<E> clazz) {
+        return getArray().toJavaList(clazz);
     }
 
     @Override

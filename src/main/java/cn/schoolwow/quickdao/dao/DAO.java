@@ -5,6 +5,7 @@ import cn.schoolwow.quickdao.dao.sql.dql.DQLDAO;
 import cn.schoolwow.quickdao.dao.sql.transaction.Transaction;
 import cn.schoolwow.quickdao.domain.Entity;
 
+import javax.sql.DataSource;
 import java.util.Map;
 
 /**数据库操作接口*/
@@ -39,6 +40,11 @@ public interface DAO extends DQLDAO,DMLDAO {
      * 重建表
      */
     void rebuild(Class clazz);
+
+    /**
+     * 获取连接池
+     */
+    DataSource getDataSource();
 
     /**
      * 获取扫描的所有实体类信息

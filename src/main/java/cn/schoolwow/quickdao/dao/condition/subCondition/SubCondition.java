@@ -174,6 +174,20 @@ public interface SubCondition<T>{
      * @see {@link Condition#joinTable(Class, String, String, String)}
      */
     SubCondition<T> joinTable(Class clazz, String primaryField, String joinTableField, String compositField);
+    /**
+     * 关联表查询,手动指定子表关联字段
+     * <ul>
+     *     <li>主表,表别名为t</li>
+     *     <li>子表,依据关联顺序别名依次为t1,t2,t3......</li>
+     * </ul>
+     * <p>调用本方法将在sql语句中拼接如下字符串
+     * <b>join #{clazz} as t1 on t.primaryField = t1.joinTableField</b>
+     * </p>
+     * <p><b>注意:</b>需要返回关联实体类字段时,需要调用{@link Condition#compositField()}方法才会返回关联实体类对象</p>
+     * @param primaryField   <b>主表</b>关联字段
+     * @param joinTableField <b>子表</b>关联字段
+     */
+    SubCondition<T> joinTable(String tableName, String primaryField, String joinTableField);
 
     /**
      * 添加分组查询

@@ -68,6 +68,26 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
     }
 
     @Override
+    public PreparedStatement insert(Query query) throws SQLException {
+        StringBuilder builder = new StringBuilder("insert into "+query.quickDAOConfig.database.escape(query.entity.tableName)+"(");
+        builder.append(query.insertBuilder.toString()+") values(");
+        for(int i=0;i<query.insertParameterList.size();i++){
+            builder.append("?,");
+        }
+        builder.deleteCharAt(builder.length()-1);
+        builder.append(")");
+
+        PreparedStatement ps = connection.prepareStatement(builder.toString());
+        builder = new StringBuilder(builder.toString().replace("?",PLACEHOLDER));
+        for (Object parameter : query.insertParameterList) {
+            setParameter(parameter,ps,query.parameterIndex++,builder);
+        }
+        MDC.put("name","插入记录");
+        MDC.put("sql",builder.toString());
+        return ps;
+    }
+
+    @Override
     public PreparedStatement update(Query query) throws SQLException {
         StringBuilder builder = new StringBuilder("update "+query.quickDAOConfig.database.escape(query.entity.tableName)+" as t ");
         addJoinTableStatement(query,builder);

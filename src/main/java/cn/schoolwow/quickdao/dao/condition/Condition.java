@@ -132,6 +132,14 @@ public interface Condition<T> {
     Condition<T> addColumn(String... fields);
 
     /**
+     * 添加插入字段,用于{@link cn.schoolwow.quickdao.dao.response.Response#insert()}方法
+     *
+     * @param field 待更新的字段
+     * @param value 待更新字段的值
+     */
+    Condition<T> addInsert(String field, Object value);
+
+    /**
      * 添加更新字段,用于{@link cn.schoolwow.quickdao.dao.response.Response#update()}方法
      *
      * @param field 待更新的字段
@@ -314,6 +322,22 @@ public interface Condition<T> {
      * @param joinConditionField <b>子查询</b>关联字段
      */
     SubCondition<T> joinTable(Condition joinCondition, String primaryField, String joinConditionField);
+
+    /**
+     * 关联表查询
+     * <ul>
+     *     <li>主表,表别名为t</li>
+     *     <li>子表,依据关联顺序别名依次为t1,t2,t3......</li>
+     * </ul>
+     * <p>调用本方法将在sql语句中拼接如下字符串
+     * <b>join #{clazz} as t1 on t.primaryField = t1.joinTableField</b>
+     * </p>
+     * @param tableName 待关联的子表
+     * @param primaryField   <b>主表</b>关联字段
+     * @param joinTableField <b>子表</b>关联字段
+     */
+    SubCondition<T> joinTable(String tableName, String primaryField, String joinTableField);
+
     /**
      * 根据指定字段升序排列
      * <b>注意</b>若调用了addColumn方法,请将调用本方法放在addColumn方法之后

@@ -144,8 +144,15 @@ public class AbstractCondition<T> implements Condition<T>{
     }
 
     @Override
+    public Condition<T> addInsert(String field, Object value) {
+        query.insertBuilder.append(query.quickDAOConfig.database.escape(query.entity.getColumnNameByFieldName(field)) + ",");
+        query.insertParameterList.add(value);
+        return this;
+    }
+
+    @Override
     public Condition<T> addUpdate(String field, Object value) {
-        query.setBuilder.append(query.entity.getColumnNameByFieldName(field) + " = ?,");
+        query.setBuilder.append(query.quickDAOConfig.database.escape(query.entity.getColumnNameByFieldName(field)) + " = ?,");
         query.updateParameterList.add(value);
         return this;
     }
@@ -357,6 +364,34 @@ public class AbstractCondition<T> implements Condition<T>{
     }
 
     @Override
+    public SubCondition<T> joinTable(String tableName, String primaryField, String joinTableField) {
+        SubQuery subQuery = new SubQuery();
+        for(Entity entity:query.quickDAOConfig.dbEntityList){
+            if(entity.tableName.equals(tableName)){
+                subQuery.entity = entity;
+                break;
+            }
+        }
+        if(null==subQuery.entity){
+            throw new IllegalArgumentException("关联表不存在!表名:"+tableName);
+        }
+        subQuery.tableAliasName = query.tableAliasName + (joinTableIndex++);
+        subQuery.primaryField = query.entity.getColumnNameByFieldName(primaryField);
+        subQuery.joinTableField = joinTableField;
+        subQuery.query = query;
+        subQuery.condition = this;
+
+        AbstractSubCondition subCondition = null;
+        if(query.quickDAOConfig.database instanceof SQLiteDatabase){
+            subCondition = new SQLiteSubCondition(subQuery);
+        }else{
+            subCondition = new AbstractSubCondition(subQuery);
+        }
+        query.subQueryList.add(subQuery);
+        return subCondition;
+    }
+
+    @Override
     public Condition<T> orderBy(String... fields) {
         for(String field:fields){
             query.orderByBuilder.append(getQueryColumnNameByFieldName(field)+" asc,");
@@ -402,6 +437,9 @@ public class AbstractCondition<T> implements Condition<T>{
             if (query.setBuilder.length() > 0) {
                 query.setBuilder.deleteCharAt(query.setBuilder.length() - 1);
                 query.setBuilder.insert(0, "set ");
+            }
+            if (query.insertBuilder.length() > 0) {
+                query.insertBuilder.deleteCharAt(query.insertBuilder.length() - 1);
             }
             if (query.whereBuilder.length() > 0) {
                 query.whereBuilder.delete(query.whereBuilder.length() - 5, query.whereBuilder.length());

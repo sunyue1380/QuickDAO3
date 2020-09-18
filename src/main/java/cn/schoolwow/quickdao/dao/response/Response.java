@@ -12,6 +12,12 @@ public interface Response<T> {
     long count();
 
     /**
+     * <p>插入记录</p>
+     * <p><b>前置条件</b>:请先调用<b>{@link cn.schoolwow.quickdao.dao.condition.Condition#addInsert(String, Object)}</b>方法</p>
+     */
+    long insert();
+
+    /**
      * <p>更新符合条件的记录</p>
      * <p><b>前置条件</b>:请先调用<b>{@link cn.schoolwow.quickdao.dao.condition.Condition#addUpdate(String, Object)}</b>方法</p>
      */
@@ -27,6 +33,12 @@ public interface Response<T> {
      * <p>若无符合条件的数据库记录,返回Null</p>
      */
     T getOne();
+
+    /**
+     * <p>获取符合条件的数据库记录的第一条</p>
+     * <p>若无符合条件的数据库记录,返回Null</p>
+     */
+    <E> E getOne(Class<E> clazz);
 
     /**
      * 返回查询结果的第一列
@@ -46,6 +58,11 @@ public interface Response<T> {
      * 返回符合条件的数据库记录
      */
     List<T> getList();
+
+    /**
+     * 返回符合条件的数据库记录
+     */
+    <E> List<E> getList(Class<E> clazz);
 
     /**
      * 返回符合条件的分页数据库记录.
