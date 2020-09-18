@@ -1,5 +1,6 @@
 package cn.schoolwow.quickdao.builder.table;
 
+import cn.schoolwow.quickdao.annotation.IdStrategy;
 import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
@@ -22,16 +23,18 @@ public class MySQLTableBuilder extends AbstractTableBuilder {
 
     @Override
     public Entity[] getDatabaseEntity() throws SQLException {
-        PreparedStatement tablePs = connection.prepareStatement("show tables;");
+        PreparedStatement tablePs = connection.prepareStatement("select table_name,table_comment from information_schema.tables where table_schema = database()");
         ResultSet tableRs = tablePs.executeQuery();
         List<Entity> entityList = new ArrayList<>();
         while (tableRs.next()) {
             Entity entity = new Entity();
             entity.tableName = tableRs.getString(1);
+            entity.comment = tableRs.getString(2);
 
             List<Property> propertyList = new ArrayList<>();
             //获取所有列
             {
+                connection.getMetaData().getUserName();
                 ResultSet propertiesRs = connection.prepareStatement("show full columns from " + quickDAOConfig.database.escape(entity.tableName)).executeQuery();
                 while (propertiesRs.next()) {
                     Property property = new Property();
@@ -42,7 +45,16 @@ public class MySQLTableBuilder extends AbstractTableBuilder {
                         property.columnType = property.columnType.substring(0,property.columnType.indexOf(" "));
                     }
                     property.notNull = "NO".equals(propertiesRs.getString("Null"));
-                    property.unique = "UNI".equals(propertiesRs.getString("Key"));
+                    String key = propertiesRs.getString("Key");
+                    if(null!=key){
+                        switch(key){
+                            case "PRI":{property.id = true;}break;
+                            case "UNI":{property.unique = true;}break;
+                        }
+                    }
+                    if("auto_increment".equals(propertiesRs.getString("Extra"))){
+                        property.strategy = IdStrategy.AutoIncrement;
+                    }
                     if (null != propertiesRs.getString("Default")) {
                         property.defaultValue = propertiesRs.getString("Default");
                     }

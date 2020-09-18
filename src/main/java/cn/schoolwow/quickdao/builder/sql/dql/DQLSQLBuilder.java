@@ -21,6 +21,11 @@ public interface DQLSQLBuilder {
     PreparedStatement count(Query query) throws SQLException;
 
     /**
+     * 插入记录
+     */
+    PreparedStatement insert(Query query) throws SQLException;
+
+    /**
      * 更新符合条件的记录
      */
     PreparedStatement update(Query query) throws SQLException;

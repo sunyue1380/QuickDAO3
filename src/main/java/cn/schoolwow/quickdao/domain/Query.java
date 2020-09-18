@@ -30,6 +30,10 @@ public class Query implements Serializable {
      */
     public StringBuilder columnBuilder = new StringBuilder();
     /**
+     * 字段插入
+     */
+    public StringBuilder insertBuilder = new StringBuilder();
+    /**
      * 字段更新
      */
     public StringBuilder setBuilder = new StringBuilder();
@@ -77,6 +81,10 @@ public class Query implements Serializable {
      * 查询参数
      */
     public List parameterList = new ArrayList();
+    /**
+     * 插入参数
+     */
+    public List insertParameterList = new ArrayList();
     /**
      * 更新参数
      */

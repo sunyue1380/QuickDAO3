@@ -144,6 +144,14 @@ public class AbstractSubCondition<T> implements SubCondition<T>{
     }
 
     @Override
+    public SubCondition<T> joinTable(String tableName, String primaryField, String joinTableField) {
+        AbstractSubCondition abstractSubCondition = (AbstractSubCondition) subQuery.condition.joinTable(tableName, primaryField, joinTableField);
+        abstractSubCondition.subQuery.parentSubQuery = this.subQuery;
+        abstractSubCondition.subQuery.parentSubCondition = this;
+        return abstractSubCondition;
+    }
+
+    @Override
     public SubCondition<T> groupBy(String... fields) {
         for(String field:fields){
             subQuery.query.groupByBuilder.append(getQueryColumnNameByFieldName(field) + ",");

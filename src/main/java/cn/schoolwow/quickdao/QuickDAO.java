@@ -267,6 +267,13 @@ public class QuickDAO {
                 if(null!=property.comment&&!property.comment.isEmpty()){
                     builder.append("\t@Comment(\""+property.comment.replaceAll("\r\n","")+"\")\n");
                 }
+                if(property.id){
+                    if(property.strategy.equals(IdStrategy.AutoIncrement)){
+                        builder.append("\t@Id\n");
+                    }else{
+                        builder.append("\t@Id(strategy = IdStrategy.None)\n");
+                    }
+                }
                 builder.append("\t@ColumnName(\""+property.column+"\")\n");
                 builder.append("\t@ColumnType(\""+property.columnType+"\")\n");
                 if(property.columnType.contains("(")){
