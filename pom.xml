@@ -6,7 +6,7 @@
 
     <groupId>cn.schoolwow</groupId>
     <artifactId>QuickDAO</artifactId>
-    <version>3.5-SNAPSHOT</version>
+    <version>3.5</version>
 
     <name>QuickDAO</name>
     <url>https://github.com/sunyue1380/QuickDAO3</url>
