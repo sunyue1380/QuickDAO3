@@ -1,5 +1,9 @@
 # 更新日志
 
+## v3.5
+* \[新增]Condition接口添加addInsert方法以及Response接口添加insert方法,支持动态数据
+* \[新增]添加query(String tableName)和joinTable(String tableName....)方法,支持无实体类查询和关联查询操作
+
 ## v3.4
 * \[新增]joinTable支持连接子查询
 * \[新增]支持自定义Id生成器

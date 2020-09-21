@@ -36,7 +36,7 @@ QuickDAO基于JDBC,为提高效率,默认只支持数据库连接池.
 <dependency>
   <groupId>cn.schoolwow</groupId>
   <artifactId>QuickDAO</artifactId>
-  <version>3.3</version>
+  <version>3.5</version>
 </dependency>
 ```
 
