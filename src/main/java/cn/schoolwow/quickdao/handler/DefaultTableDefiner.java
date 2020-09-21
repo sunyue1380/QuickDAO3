@@ -268,7 +268,7 @@ public class DefaultTableDefiner implements TableDefiner{
                             String jarEntryName = jarEntry.getName();
                             if (jarEntryName.contains(packageNamePath) && jarEntryName.endsWith(".class")) { //是否是类,是类进行加载
                                 String className = jarEntryName.substring(0, jarEntryName.lastIndexOf(".")).replaceAll("/", ".");
-                                classList.add(Class.forName(className));
+                                classList.add(classLoader.loadClass(className));
                             }
                         }
                     }
@@ -297,7 +297,7 @@ public class DefaultTableDefiner implements TableDefiner{
             Field[] fields = tempClass.getDeclaredFields();
             Field.setAccessible(fields, true);
             for (Field field : fields) {
-                if(Modifier.isStatic(field.getModifiers())||Modifier.isFinal(field.getModifiers())){
+                if(Modifier.isStatic(field.getModifiers())||Modifier.isFinal(field.getModifiers())|| Modifier.isTransient(field.getModifiers())){
                     logger.debug("[跳过常量或静态变量]{},该属性被static或者final修饰!", field.getName());
                     continue;
                 }
