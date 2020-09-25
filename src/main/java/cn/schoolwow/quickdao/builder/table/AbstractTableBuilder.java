@@ -146,7 +146,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
 
     @Override
     public void dropTable(String tableName) throws SQLException {
-        String sql = "drop table "+tableName;
+        String sql = "drop table "+quickDAOConfig.database.escape(tableName);
         logger.debug("[删除表]表名:{},执行SQL:{}", tableName, sql);
         connection.prepareStatement(sql).executeUpdate();
     }

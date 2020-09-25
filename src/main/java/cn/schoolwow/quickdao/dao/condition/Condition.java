@@ -271,7 +271,7 @@ public interface Condition<T> {
      * @param primaryField   <b>主表</b>关联字段
      * @param joinTableField <b>子表</b>关联字段
      */
-    SubCondition<T> joinTable(Class clazz, String primaryField, String joinTableField);
+    <E> SubCondition<E> joinTable(Class<E> clazz, String primaryField, String joinTableField);
 
     /**
      * 关联表查询
@@ -305,7 +305,7 @@ public interface Condition<T> {
      * @param joinTableField <b>子表</b>关联字段
      * @param compositField <b>子表</b>实体类成员变量名
      */
-    SubCondition<T> joinTable(Class clazz, String primaryField, String joinTableField, String compositField);
+    <E> SubCondition<E> joinTable(Class<E> clazz, String primaryField, String joinTableField, String compositField);
 
     /**
      * 关联子查询
@@ -321,7 +321,7 @@ public interface Condition<T> {
      * @param primaryField   <b>主表</b>关联字段
      * @param joinConditionField <b>子查询</b>关联字段
      */
-    SubCondition<T> joinTable(Condition joinCondition, String primaryField, String joinConditionField);
+    <E> SubCondition<E> joinTable(Condition<E> joinCondition, String primaryField, String joinConditionField);
 
     /**
      * 关联表查询
@@ -336,7 +336,7 @@ public interface Condition<T> {
      * @param primaryField   <b>主表</b>关联字段
      * @param joinTableField <b>子表</b>关联字段
      */
-    SubCondition<T> joinTable(String tableName, String primaryField, String joinTableField);
+    SubCondition joinTable(String tableName, String primaryField, String joinTableField);
 
     /**
      * 根据指定字段升序排列

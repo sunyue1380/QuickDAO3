@@ -1,5 +1,6 @@
 package cn.schoolwow.quickdao.dao.sql.dml;
 
+import cn.schoolwow.quickdao.annotation.IdStrategy;
 import cn.schoolwow.quickdao.builder.sql.SQLBuilder;
 import cn.schoolwow.quickdao.builder.sql.dml.AbstractDMLSQLBuilder;
 import cn.schoolwow.quickdao.dao.AbstractDAO;
@@ -34,7 +35,8 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
         try {
             PreparedStatement ps = dmlsqlBuilder.insert(instance);
             effect = ps.executeUpdate();
-            if (effect>0&&null==dmlsqlBuilder.quickDAOConfig.idGenerator) {
+            Entity entity = dmlsqlBuilder.quickDAOConfig.entityMap.get(instance.getClass().getName());
+            if (effect>0&&null!=entity.id&&entity.id.strategy.equals(IdStrategy.AutoIncrement)) {
                 Property property = dmlsqlBuilder.quickDAOConfig.entityMap.get(instance.getClass().getName()).id;
                 if(null!=property){
                     ResultSet rs = ps.getGeneratedKeys();
