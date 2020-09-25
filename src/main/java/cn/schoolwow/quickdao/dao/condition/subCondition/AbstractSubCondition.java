@@ -131,12 +131,12 @@ public class AbstractSubCondition<T> implements SubCondition<T>{
     }
 
     @Override
-    public SubCondition<T> joinTable(Class clazz, String primaryField, String joinTableField) {
+    public <E> SubCondition<E> joinTable(Class<E> clazz, String primaryField, String joinTableField) {
         return joinTable(clazz,primaryField,joinTableField,subQuery.condition.getUniqueCompositFieldInMainClass(subQuery.entity.clazz,clazz));
     }
 
     @Override
-    public SubCondition<T> joinTable(Class clazz, String primaryField, String joinTableField, String compositField) {
+    public <E> SubCondition<E> joinTable(Class<E> clazz, String primaryField, String joinTableField, String compositField) {
         AbstractSubCondition abstractSubCondition = (AbstractSubCondition) subQuery.condition.joinTable(clazz, primaryField, joinTableField, compositField);
         abstractSubCondition.subQuery.parentSubQuery = this.subQuery;
         abstractSubCondition.subQuery.parentSubCondition = this;
@@ -144,7 +144,7 @@ public class AbstractSubCondition<T> implements SubCondition<T>{
     }
 
     @Override
-    public SubCondition<T> joinTable(String tableName, String primaryField, String joinTableField) {
+    public SubCondition joinTable(String tableName, String primaryField, String joinTableField) {
         AbstractSubCondition abstractSubCondition = (AbstractSubCondition) subQuery.condition.joinTable(tableName, primaryField, joinTableField);
         abstractSubCondition.subQuery.parentSubQuery = this.subQuery;
         abstractSubCondition.subQuery.parentSubCondition = this;

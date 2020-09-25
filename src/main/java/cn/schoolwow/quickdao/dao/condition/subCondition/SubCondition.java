@@ -139,7 +139,7 @@ public interface SubCondition<T>{
      * @param joinTableField <b>子表</b>关联字段
      * @see {@link Condition#joinTable(Class, String, String)}
      */
-    SubCondition<T> joinTable(Class clazz, String primaryField, String joinTableField);
+    <E> SubCondition<E> joinTable(Class<E> clazz, String primaryField, String joinTableField);
     /**
      * 关联表查询,手动指定子表关联字段
      * <ul>
@@ -173,7 +173,7 @@ public interface SubCondition<T>{
      * @param compositField <b>子表</b>实体类成员变量名
      * @see {@link Condition#joinTable(Class, String, String, String)}
      */
-    SubCondition<T> joinTable(Class clazz, String primaryField, String joinTableField, String compositField);
+    <E> SubCondition<E> joinTable(Class<E> clazz, String primaryField, String joinTableField, String compositField);
     /**
      * 关联表查询,手动指定子表关联字段
      * <ul>
@@ -187,7 +187,7 @@ public interface SubCondition<T>{
      * @param primaryField   <b>主表</b>关联字段
      * @param joinTableField <b>子表</b>关联字段
      */
-    SubCondition<T> joinTable(String tableName, String primaryField, String joinTableField);
+    SubCondition joinTable(String tableName, String primaryField, String joinTableField);
 
     /**
      * 添加分组查询

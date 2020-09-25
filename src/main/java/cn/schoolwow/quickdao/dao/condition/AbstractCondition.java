@@ -302,12 +302,12 @@ public class AbstractCondition<T> implements Condition<T>{
     }
 
     @Override
-    public SubCondition joinTable(Class clazz, String primaryField, String joinTableField) {
+    public <E> SubCondition<E> joinTable(Class<E> clazz, String primaryField, String joinTableField) {
         return joinTable(clazz,primaryField,joinTableField,getUniqueCompositFieldInMainClass(query.entity.clazz, clazz));
     }
 
     @Override
-    public SubCondition joinTable(Class clazz, String primaryField, String joinTableField, String compositField) {
+    public <E> SubCondition<E> joinTable(Class<E> clazz, String primaryField, String joinTableField, String compositField) {
         SubQuery subQuery = new SubQuery();
         subQuery.entity = query.quickDAOConfig.entityMap.get(clazz.getName());
         subQuery.tableAliasName = query.tableAliasName + (joinTableIndex++);
@@ -336,7 +336,7 @@ public class AbstractCondition<T> implements Condition<T>{
     }
 
     @Override
-    public SubCondition<T> joinTable(Condition joinCondition, String primaryField, String joinConditionField) {
+    public <E> SubCondition<E> joinTable(Condition<E> joinCondition, String primaryField, String joinConditionField) {
         Query joinQuery = ((AbstractCondition) joinCondition).query;
         SubQuery subQuery = new SubQuery();
         subQuery.entity = joinQuery.entity;
