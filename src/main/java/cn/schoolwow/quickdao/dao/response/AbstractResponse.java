@@ -44,8 +44,8 @@ public class AbstractResponse<T> implements Response<T>{
     }
 
     @Override
-    public long insert() {
-        long count = 0;
+    public int insert() {
+        int count = 0;
         try {
             PreparedStatement ps = query.dqlsqlBuilder.insert(query);
             count= ps.executeUpdate();
@@ -58,8 +58,8 @@ public class AbstractResponse<T> implements Response<T>{
     }
 
     @Override
-    public long update() {
-        long count = 0;
+    public int update() {
+        int count = 0;
         try {
             PreparedStatement ps = query.dqlsqlBuilder.update(query);
             count= ps.executeUpdate();
@@ -72,8 +72,8 @@ public class AbstractResponse<T> implements Response<T>{
     }
 
     @Override
-    public long delete() {
-        long count = 0;
+    public int delete() {
+        int count = 0;
         try {
             PreparedStatement ps = query.dqlsqlBuilder.delete(query);
             count= ps.executeUpdate();

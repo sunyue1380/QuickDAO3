@@ -64,6 +64,10 @@ public class Property {
      */
     public String comment;
     /**
+     * 字段函数
+     */
+    public String function;
+    /**
      * 是否填充插入时间
      */
     public boolean createdAt;

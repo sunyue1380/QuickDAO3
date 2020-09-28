@@ -9,6 +9,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TableField {
+    /**字段函数*/
+    String function() default "";
     /**是否填充插入时间*/
     boolean createdAt() default false;
     /**是否填充更新时间*/

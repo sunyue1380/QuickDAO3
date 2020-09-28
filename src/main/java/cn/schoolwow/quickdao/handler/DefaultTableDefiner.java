@@ -152,6 +152,9 @@ public class DefaultTableDefiner implements TableDefiner{
                 }
                 TableField tableField = field.getDeclaredAnnotation(TableField.class);
                 if(null!=tableField){
+                    if(!tableField.function().isEmpty()){
+                        property.function = tableField.function().replace("#{"+property.name+"}","?");
+                    }
                     property.createdAt = tableField.createdAt();
                     property.updateAt = tableField.updatedAt();
                 }

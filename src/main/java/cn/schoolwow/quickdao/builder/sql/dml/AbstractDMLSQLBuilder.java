@@ -155,7 +155,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
                 if (property.id&&property.strategy==IdStrategy.AutoIncrement) {
                     continue;
                 }
-                builder.append("?,");
+                builder.append((null==property.function?"?":property.function)+",");
             }
             builder.deleteCharAt(builder.length() - 1);
             builder.append(")");
@@ -211,7 +211,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
                 if(property.createdAt){
                     continue;
                 }
-                builder.append(quickDAOConfig.database.escape(property.column) + " = ?,");
+                builder.append(quickDAOConfig.database.escape(property.column) + " = "+(null==property.function?"?":property.function)+",");
             }
             builder.deleteCharAt(builder.length() - 1);
             builder.append(" where ");

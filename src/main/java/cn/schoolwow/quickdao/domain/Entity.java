@@ -56,15 +56,23 @@ public class Entity {
      * 根据字段名查询数据库列名,只返回列名
      * */
     public String getColumnNameByFieldName(String field) {
+        Property property = getPropertyByFieldName(field);
+        return null==property?field:property.column;
+    }
+
+    /**
+     * 根据字段名返回对应属性
+     * */
+    public Property getPropertyByFieldName(String field) {
         if(null==field||field.isEmpty()){
-            return field;
+            return null;
         }
         for(Property property:properties){
             if(field.equals(property.name)){
-                return property.column;
+                return property;
             }
         }
-        return field;
+        return null;
     }
 
     @Override

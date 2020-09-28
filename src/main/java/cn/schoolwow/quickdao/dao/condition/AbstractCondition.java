@@ -129,7 +129,8 @@ public class AbstractCondition<T> implements Condition<T>{
         }else if(value.toString().isEmpty()){
             addEmptyQuery(field);
         }else {
-            query.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " " + operator + " ?) and ");
+            Property property = query.entity.getPropertyByFieldName(field);
+            query.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " " + operator + " "+(null==property||null==property.function?"?":property.function)+") and ");
             query.parameterList.add(value);
         }
         return this;
@@ -580,18 +581,15 @@ public class AbstractCondition<T> implements Condition<T>{
      * 根据字段名查询数据库列名,返回表名加列名
      * */
     private String getQueryColumnNameByFieldName(String field) {
-        if(null==field||field.isEmpty()){
+        Property property = query.entity.getPropertyByFieldName(field);
+        if(null==property){
             return field;
         }
-        for(Property property:query.entity.properties){
-            if(field.equals(property.name)||field.equals(property.column)){
-                if(query.unionList.isEmpty()){
-                    return query.tableAliasName+"."+query.quickDAOConfig.database.escape(property.column);
-                }else{
-                    return query.quickDAOConfig.database.escape(property.column);
-                }
-            }
+        if(query.unionList.isEmpty()){
+            return query.tableAliasName+"."+query.quickDAOConfig.database.escape(property.column);
+        }else{
+            return query.quickDAOConfig.database.escape(property.column);
         }
-        return field;
     }
+
 }
