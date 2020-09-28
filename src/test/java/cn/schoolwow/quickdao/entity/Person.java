@@ -2,13 +2,16 @@ package cn.schoolwow.quickdao.entity;
 
 import cn.schoolwow.quickdao.annotation.*;
 
-import java.sql.Timestamp;
 import java.util.Date;
 
 @Comment("人")
 public class Person {
-    @Id
+    @Id(strategy = IdStrategy.AutoIncrement)
     private long id;
+    @ColumnType("varchar(32)")
+    @Constraint(notNull = true)
+    @TableField(function = "md5(concat('salt#',#{password}))")
+    private String password;
     @ColumnType("varchar(64)")
     @Constraint(notNull = true,unique = true)
     private String lastName;
@@ -33,6 +36,14 @@ public class Person {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getLastName() {

@@ -43,7 +43,8 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
             StringBuilder builder = new StringBuilder("select ");
             builder.append(columns(entity,"t"));
-            builder.append(" from " + quickDAOConfig.database.escape(entity.tableName) + " as t where t." + quickDAOConfig.database.escape(entity.getColumnNameByFieldName(field)) + " = ?");
+            Property property = entity.getPropertyByFieldName(field);
+            builder.append(" from " + quickDAOConfig.database.escape(entity.tableName) + " as t where t." + quickDAOConfig.database.escape(entity.getColumnNameByFieldName(field)) + " = "+(null==property||null==property.function?"?":property.function)+"");
             sqlCache.put(key, builder.toString());
         }
         String sql = sqlCache.get(key);

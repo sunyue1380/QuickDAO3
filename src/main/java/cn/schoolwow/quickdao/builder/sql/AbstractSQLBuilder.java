@@ -42,7 +42,7 @@ public class AbstractSQLBuilder implements SQLBuilder{
         if (!sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder();
             builder.append("select count(1) from " + quickDAOConfig.database.escape(entity.tableName)+" where ");
-            builder.append(entity.id.column+" = ? ");
+            builder.append(entity.id.column+" = "+(null==entity.id.function?"?":entity.id.function)+" ");
             sqlCache.put(key, builder.toString());
         }
         String sql = sqlCache.get(key);
@@ -64,7 +64,7 @@ public class AbstractSQLBuilder implements SQLBuilder{
             StringBuilder builder = new StringBuilder();
             builder.append("select count(1) from " + quickDAOConfig.database.escape(entity.tableName)+" where ");
             for(Property property:entity.uniqueKeyProperties){
-                builder.append(quickDAOConfig.database.escape(property.column)+ "=? and ");
+                builder.append(quickDAOConfig.database.escape(property.column)+ "= "+(null==property.function?"?":property.function)+" and ");
             }
             builder.delete(builder.length()-5,builder.length());
             sqlCache.put(key, builder.toString());

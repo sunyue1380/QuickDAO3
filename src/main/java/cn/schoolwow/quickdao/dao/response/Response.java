@@ -15,18 +15,18 @@ public interface Response<T> {
      * <p>插入记录</p>
      * <p><b>前置条件</b>:请先调用<b>{@link cn.schoolwow.quickdao.dao.condition.Condition#addInsert(String, Object)}</b>方法</p>
      */
-    long insert();
+    int insert();
 
     /**
      * <p>更新符合条件的记录</p>
      * <p><b>前置条件</b>:请先调用<b>{@link cn.schoolwow.quickdao.dao.condition.Condition#addUpdate(String, Object)}</b>方法</p>
      */
-    long update();
+    int update();
 
     /**
      * 删除符合条件的数据库记录
      */
-    long delete();
+    int delete();
 
     /**
      * <p>获取符合条件的数据库记录的第一条</p>

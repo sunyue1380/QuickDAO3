@@ -5,10 +5,11 @@ import cn.schoolwow.quickdao.dao.response.Response;
 import cn.schoolwow.quickdao.dao.response.UnionType;
 import cn.schoolwow.quickdao.dao.sql.transaction.Transaction;
 import cn.schoolwow.quickdao.domain.PageVo;
-import cn.schoolwow.quickdao.entity.Product;
 import cn.schoolwow.quickdao.entity.Order;
 import cn.schoolwow.quickdao.entity.Person;
+import cn.schoolwow.quickdao.entity.Product;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,6 +55,7 @@ public class DAOTest extends BaseDAOTest{
         Transaction transaction = dao.startTransaction();
         {
             Person person = new Person();
+            person.setPassword("123456");
             person.setFirstName("Bill");
             person.setLastName("Gates");
             person.setAddress("Xuanwumen 10");
@@ -73,6 +75,7 @@ public class DAOTest extends BaseDAOTest{
     private void singleInsert() {
         {
             Person person = new Person();
+            person.setPassword("123456");
             person.setFirstName("Bill");
             person.setLastName("Gates");
             person.setAddress("Xuanwumen 10");
@@ -95,16 +98,27 @@ public class DAOTest extends BaseDAOTest{
             Assert.assertTrue(dao.exist(product));
             Assert.assertTrue(product.getId()>0);
         }
+        {
+            int effect = dao.query("product")
+                    .addInsert("id","123456789")
+                    .addInsert("name","平板电脑")
+                    .addInsert("publish_time",new Date())
+                    .execute()
+                    .insert();
+            Assert.assertEquals(1, effect);
+        }
     }
 
     private void multiInsert() {
         Person person1 = new Person();
+        person1.setPassword("123456");
         person1.setFirstName("Thomas");
         person1.setLastName("Carter");
         person1.setAddress("Changan Street");
         person1.setCity("Beijing");
 
         Person person2 = new Person();
+        person2.setPassword("123456");
         person2.setLastName("Wilson");
         person2.setAddress("Champs-Elysees");
 
@@ -115,12 +129,14 @@ public class DAOTest extends BaseDAOTest{
 
     private void multiUpdate() {
         Person person1 = new Person();
+        person1.setPassword("123456");
         person1.setFirstName("Thomas");
         person1.setLastName("Carter");
         person1.setAddress("Changan Street 10");
         person1.setCity("Beijing");
 
         Person person2 = new Person();
+        person2.setPassword("123456");
         person2.setLastName("Wilson");
         person2.setAddress("Champs-Elysees 10");
 
@@ -132,15 +148,20 @@ public class DAOTest extends BaseDAOTest{
     private void updateByUniqueKey() {
         {
             Person person = new Person();
+            person.setPassword("123456");
             person.setLastName("Gates");
             person.setAddress("Xuanwumen 11");
             int effect = dao.update(person);
             Assert.assertEquals(1, effect);
         }
         {
-            Person person = dao.fetch(Person.class,"lastName","Gates");
-            Assert.assertEquals(true,System.currentTimeMillis()-person.getCreatedAt().getTime()<1000);
-            Assert.assertEquals(true,System.currentTimeMillis()-person.getUpdatedAt().getTime()<1000);
+            int effect = dao.query("person")
+                    .addQuery("last_name","Gates")
+                    .addUpdate("password","654321")
+                    .addUpdate("address","Xuanwumen 11")
+                    .execute()
+                    .update();
+            Assert.assertEquals(1, effect);
         }
     }
 
@@ -159,6 +180,7 @@ public class DAOTest extends BaseDAOTest{
     private void save() {
         {
             Person person = new Person();
+            person.setPassword("123456");
             person.setFirstName("John");
             person.setLastName("Adams");
             person.setAddress("Oxford Street");
@@ -169,6 +191,7 @@ public class DAOTest extends BaseDAOTest{
 
         {
             Person person = new Person();
+            person.setPassword("123456");
             person.setFirstName("Bill");
             person.setLastName("Gates");
             person.setAddress("Xuanwumen 100");
@@ -277,7 +300,6 @@ public class DAOTest extends BaseDAOTest{
             Condition condition = dao.query(Person.class)
                     .addQuery("lastName","Gates")
                     .addUpdate("address","Xuanwumen 11")
-                    .groupBy("id")
                     .orderBy("lastName")
                     .page(1,10);
             Response response = condition.execute();
@@ -307,16 +329,17 @@ public class DAOTest extends BaseDAOTest{
         }
         //聚合查询
         {
+
             Response response = dao.query(Person.class)
-                    .addColumn("COUNT(ID)")
-                    .addColumn("max(id) as `M(ID)`")
+                    .addColumn("COUNT(ID) as count")
+                    .addColumn("max(id) as \"M(ID)\"")
                     .groupBy("id")
                     .having("count(id) = 1",null)
                     .orderByDesc("max(id)")
                     .execute();
             JSONArray array = response.getArray();
             //H2数据库所有返回的列名都是全大写
-            Assert.assertEquals(1,array.getJSONObject(0).getInteger("COUNT(ID)").intValue());
+            Assert.assertEquals(1,array.getJSONObject(0).getInteger("count").intValue());
             Assert.assertEquals(1,array.getJSONObject(0).getInteger("M(ID)").intValue());
         }
         //聚合查询
@@ -362,9 +385,9 @@ public class DAOTest extends BaseDAOTest{
         {
             Response response = dao.query(Person.class)
                     .joinTable(dao.query(Order.class)
-                            .addColumn("id","order_no","person_id pId")
+                            .addColumn("id","order_no","person_id pid")
                             .addQuery("orderNo",1),
-                            "id","pId")
+                            "id","pid")
                     .orderByDesc("id")
                     .done()
                     .compositField()
@@ -414,7 +437,12 @@ public class DAOTest extends BaseDAOTest{
                     .execute();
             JSONArray array = response.getArray();
             Assert.assertEquals(1,array.size());
-            Assert.assertEquals(1,array.getJSONObject(0).getIntValue("M"));
+            JSONObject o = array.getJSONObject(0);
+            if(o.containsKey("M")){
+                Assert.assertEquals(1,o.getIntValue("M"));
+            }else if(o.containsKey("m")){
+                Assert.assertEquals(1,o.getIntValue("m"));
+            }
         }
         //删除
         {
