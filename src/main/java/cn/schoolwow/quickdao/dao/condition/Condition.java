@@ -5,7 +5,7 @@ import cn.schoolwow.quickdao.dao.response.Response;
 import cn.schoolwow.quickdao.dao.response.UnionType;
 import com.alibaba.fastjson.JSONObject;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * 查询接口
@@ -72,7 +72,7 @@ public interface Condition<T> {
      * @param field  字段名
      * @param values 指明在该范围内的值
      */
-    Condition<T> addInQuery(String field, List values);
+    Condition<T> addInQuery(String field, Collection values);
 
     /**
      * 添加范围查询语句
@@ -86,7 +86,7 @@ public interface Condition<T> {
      * @param field  字段名
      * @param values 指明在不该范围内的值
      */
-    Condition<T> addNotInQuery(String field, List values);
+    Condition<T> addNotInQuery(String field, Collection values);
 
     /**
      * 添加between语句
@@ -108,7 +108,7 @@ public interface Condition<T> {
      * @param query 子查询条件,可使用?占位符
      * @param parameterList 占位符参数列表,可为null
      */
-    Condition<T> addQuery(String query, Object... parameterList);
+    Condition<T> addRawQuery(String query, Object... parameterList);
 
     /**
      * 添加字段查询

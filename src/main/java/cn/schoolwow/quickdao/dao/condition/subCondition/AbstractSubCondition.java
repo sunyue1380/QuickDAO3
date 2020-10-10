@@ -122,7 +122,7 @@ public class AbstractSubCondition<T> implements SubCondition<T>{
     }
 
     @Override
-    public SubCondition<T> addQuery(String query, Object... parameterList) {
+    public SubCondition<T> addRawQuery(String query, Object... parameterList) {
         subQuery.whereBuilder.append("(" + query + ") and ");
         if(null!=parameterList&&parameterList.length>0){
             subQuery.parameterList.addAll(Arrays.asList(parameterList));

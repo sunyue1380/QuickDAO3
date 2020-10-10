@@ -1,6 +1,5 @@
 package cn.schoolwow.quickdao.dao.sql;
 
-import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -46,13 +45,10 @@ public class SQLDAOInvocationHandler implements InvocationHandler {
             }
             return result;
         }catch (InvocationTargetException e){
-            Throwable targetException = e.getTargetException();
-            if(targetException instanceof SQLRuntimeException){
-                if(null!=MDC.get("name")){
-                    logger.debug("[{}]原始SQL:{}",MDC.get("name"),MDC.get("sql"));
-                }
+            if(null!=MDC.get("name")){
+                logger.debug("[{}]原始SQL:{}",MDC.get("name"),MDC.get("sql"));
             }
-            throw targetException;
+            throw e.getTargetException();
         }finally {
             if(null!=abstractSQLDAO.sqlBuilder.quickDAOConfig.reentrantLock){
                 abstractSQLDAO.sqlBuilder.quickDAOConfig.reentrantLock.unlock();
