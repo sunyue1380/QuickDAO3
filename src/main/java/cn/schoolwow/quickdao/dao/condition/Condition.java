@@ -5,6 +5,7 @@ import cn.schoolwow.quickdao.dao.response.Response;
 import cn.schoolwow.quickdao.dao.response.UnionType;
 import com.alibaba.fastjson.JSONObject;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
@@ -25,7 +26,7 @@ import java.util.Collection;
  * </ol>
  * </p>
  */
-public interface Condition<T> {
+public interface Condition<T> extends Serializable {
     /**
      * 手动设置主表别名
      * @param tableAliasName 主表别名
@@ -380,4 +381,9 @@ public interface Condition<T> {
      * 执行并返回Response实例
      */
     Response<T> execute();
+
+    /**
+     * 执行并返回Response实例
+     */
+    Condition<T> clone();
 }

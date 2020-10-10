@@ -15,7 +15,7 @@ public class SubQuery<T> implements Serializable {
     /**
      * 关联实体
      */
-    public Entity entity;
+    public transient Entity entity;
     /**
      * 关联表自定义列名
      */
@@ -55,11 +55,11 @@ public class SubQuery<T> implements Serializable {
     /**
      * 父表
      */
-    public transient SubCondition parentSubCondition;
+    public SubCondition parentSubCondition;
     /**
      * 主表
      */
-    public Query query;
+    public transient Query query;
     /**
      * 主表
      */

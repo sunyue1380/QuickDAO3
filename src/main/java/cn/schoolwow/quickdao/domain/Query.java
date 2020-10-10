@@ -16,7 +16,7 @@ public class Query implements Serializable {
     /**
      * 关联Entity
      */
-    public Entity entity;
+    public transient Entity entity;
     /**
      * 关联表计数
      * */
@@ -68,7 +68,7 @@ public class Query implements Serializable {
     /**
      * union类型
      * */
-    public UnionType unionType;
+    public transient UnionType unionType;
     /**
      * union语句列表
      * */
@@ -108,13 +108,13 @@ public class Query implements Serializable {
     /**
      * 关联QuickDAOConfig
      * */
-    public QuickDAOConfig quickDAOConfig;
+    public transient QuickDAOConfig quickDAOConfig;
     /**
      * 关联DAO
      * */
-    public DAO dao;
+    public transient DAO dao;
     /**
      * DQL查询语句构建
      * */
-    public DQLSQLBuilder dqlsqlBuilder;
+    public transient DQLSQLBuilder dqlsqlBuilder;
 }

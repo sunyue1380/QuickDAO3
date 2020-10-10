@@ -2,10 +2,11 @@ package cn.schoolwow.quickdao.dao.condition.subCondition;
 
 import cn.schoolwow.quickdao.dao.condition.Condition;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**子表查询接口*/
-public interface SubCondition<T>{
+public interface SubCondition<T> extends Serializable {
     /**
      * 手动设置表别名
      */
