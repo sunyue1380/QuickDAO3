@@ -246,8 +246,8 @@ public class DAOTest extends BaseDAOTest{
                     .joinTable(Order.class,"id","personId")
                     .addNullQuery("orderNo")
                     .addNotNullQuery("orderNo")
-                    .addInQuery("orderNo",new Integer[]{1,2})
-                    .addNotInQuery("orderNo",new Integer[]{1,2})
+                    .addInQuery("orderNo",1,2)
+                    .addNotInQuery("orderNo",1,2)
                     .addBetweenQuery("orderNo",1,2)
                     .addQuery("orderNo","=",1)
                     .done()
@@ -280,6 +280,7 @@ public class DAOTest extends BaseDAOTest{
     private void response(){
         {
             Person person = new Person();
+            person.setPassword("123456");
             person.setFirstName("Bill");
             person.setLastName("Gates");
             person.setAddress("Xuanwumen 10");

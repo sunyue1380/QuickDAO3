@@ -68,7 +68,7 @@ public class Entity {
             return null;
         }
         for(Property property:properties){
-            if(field.equals(property.name)){
+            if(field.equals(property.name)||field.equals(property.column)){
                 return property;
             }
         }

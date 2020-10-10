@@ -1,7 +1,6 @@
 package cn.schoolwow.quickdao.dao.response;
 
 import cn.schoolwow.quickdao.builder.sql.AbstractSQLBuilder;
-import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -32,13 +31,10 @@ public class ResponseInvocationHandler implements InvocationHandler {
             }
             return result;
         }catch (InvocationTargetException e){
-            Throwable targetException = e.getTargetException();
-            if(targetException instanceof SQLRuntimeException){
-                if(null!=MDC.get("name")){
-                    logger.warn("[{}]原始SQL:{}",MDC.get("name"),MDC.get("sql"));
-                }
+            if(null!=MDC.get("name")){
+                logger.warn("[{}]原始SQL:{}",MDC.get("name"),MDC.get("sql"));
             }
-            throw targetException;
+            throw e.getTargetException();
         }finally {
             abstractResponse.query.parameterIndex = 1;
             abstractResponse.connection.close();

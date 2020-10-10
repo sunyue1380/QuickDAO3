@@ -107,7 +107,7 @@ public interface SubCondition<T>{
      * </p>
      * @param query 子查询条件
      */
-    SubCondition<T> addQuery(String query, Object... parameterList);
+    SubCondition<T> addRawQuery(String query, Object... parameterList);
 
     /**
      * 关联表查询,子表可再次关联子表

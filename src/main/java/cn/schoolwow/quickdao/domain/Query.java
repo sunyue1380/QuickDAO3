@@ -18,6 +18,10 @@ public class Query implements Serializable {
      */
     public Entity entity;
     /**
+     * 关联表计数
+     * */
+    public int joinTableIndex = 1;
+    /**
      * 主表别名
      */
     public String tableAliasName = "t";

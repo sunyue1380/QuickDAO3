@@ -16,16 +16,12 @@ import com.alibaba.fastjson.JSONObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 import java.util.Stack;
 
 public class AbstractCondition<T> implements Condition<T>{
     //查询对象
     public Query query;
-    //关联表计数
-    private int joinTableIndex = 1;
-    //是否已经执行过
-    private boolean hasExecute = false;
 
     public AbstractCondition(Query query) {
         this.query = query;
@@ -74,7 +70,7 @@ public class AbstractCondition<T> implements Condition<T>{
     }
 
     @Override
-    public Condition<T> addInQuery(String field, List values) {
+    public Condition<T> addInQuery(String field, Collection values) {
         return addInQuery(field,values.toArray(new Object[0]));
     }
 
@@ -85,7 +81,7 @@ public class AbstractCondition<T> implements Condition<T>{
     }
 
     @Override
-    public Condition<T> addNotInQuery(String field, List values) {
+    public Condition<T> addNotInQuery(String field, Collection values) {
         return addNotInQuery(field,values.toArray(new Object[0]));
     }
 
@@ -108,7 +104,7 @@ public class AbstractCondition<T> implements Condition<T>{
     }
 
     @Override
-    public Condition<T> addQuery(String query, Object... parameterList) {
+    public Condition<T> addRawQuery(String query, Object... parameterList) {
         this.query.whereBuilder.append("(" + query + ") and ");
         if(null!=parameterList&&parameterList.length>0){
             this.query.parameterList.addAll(Arrays.asList(parameterList));
@@ -311,7 +307,7 @@ public class AbstractCondition<T> implements Condition<T>{
     public <E> SubCondition<E> joinTable(Class<E> clazz, String primaryField, String joinTableField, String compositField) {
         SubQuery subQuery = new SubQuery();
         subQuery.entity = query.quickDAOConfig.entityMap.get(clazz.getName());
-        subQuery.tableAliasName = query.tableAliasName + (joinTableIndex++);
+        subQuery.tableAliasName = query.tableAliasName + (query.joinTableIndex++);
         subQuery.primaryField = query.entity.getColumnNameByFieldName(primaryField);
         for(Property property:subQuery.entity.properties){
             if(property.name.equals(joinTableField)){
@@ -343,7 +339,7 @@ public class AbstractCondition<T> implements Condition<T>{
         subQuery.entity = joinQuery.entity;
         subQuery.columnBuilder.append(joinQuery.columnBuilder.toString());
         subQuery.columnBuilder.deleteCharAt(subQuery.columnBuilder.length()-1);
-        subQuery.tableAliasName = query.tableAliasName + (joinTableIndex++);
+        subQuery.tableAliasName = query.tableAliasName + (query.joinTableIndex++);
         subQuery.primaryField = query.entity.getColumnNameByFieldName(primaryField);
         subQuery.joinTableField = joinConditionField;
         subQuery.whereBuilder.append(joinQuery.whereBuilder.toString().replace(joinQuery.tableAliasName+".",""));
@@ -376,7 +372,7 @@ public class AbstractCondition<T> implements Condition<T>{
         if(null==subQuery.entity){
             throw new IllegalArgumentException("关联表不存在!表名:"+tableName);
         }
-        subQuery.tableAliasName = query.tableAliasName + (joinTableIndex++);
+        subQuery.tableAliasName = query.tableAliasName + (query.joinTableIndex++);
         subQuery.primaryField = query.entity.getColumnNameByFieldName(primaryField);
         subQuery.joinTableField = joinTableField;
         subQuery.query = query;
@@ -431,50 +427,46 @@ public class AbstractCondition<T> implements Condition<T>{
 
     @Override
     public Response<T> execute() {
-        if(!hasExecute){
-            if (query.columnBuilder.length() > 0) {
-                query.columnBuilder.deleteCharAt(query.columnBuilder.length() - 1);
-            }
-            if (query.setBuilder.length() > 0) {
-                query.setBuilder.deleteCharAt(query.setBuilder.length() - 1);
-                query.setBuilder.insert(0, "set ");
-            }
-            if (query.insertBuilder.length() > 0) {
-                query.insertBuilder.deleteCharAt(query.insertBuilder.length() - 1);
-            }
-            if (query.whereBuilder.length() > 0) {
-                query.whereBuilder.delete(query.whereBuilder.length() - 5, query.whereBuilder.length());
-                query.whereBuilder.insert(0, "where ");
-            }
-            if (query.groupByBuilder.length() > 0) {
-                query.groupByBuilder.deleteCharAt(query.groupByBuilder.length()-1);
-                query.groupByBuilder.insert(0, "group by ");
-            }
-            if (query.havingBuilder.length() > 0) {
-                query.havingBuilder.delete(query.havingBuilder.length() - 5, query.havingBuilder.length());
-                query.havingBuilder.insert(0, "having ");
-            }
-            if (query.orderByBuilder.length() > 0) {
-                query.orderByBuilder.deleteCharAt(query.orderByBuilder.length() - 1);
-                query.orderByBuilder.insert(0, "order by ");
-            }
-            //处理所有子查询的where语句
-            for (SubQuery subQuery : query.subQueryList) {
-                if (subQuery.whereBuilder.length() > 0) {
-                    subQuery.whereBuilder.delete(subQuery.whereBuilder.length() - 5, subQuery.whereBuilder.length());
-                }
-            }
-            //处理所有union
-            for(AbstractCondition condition:query.unionList){
-                condition.execute();
-            }
-            for(AbstractCondition condition:query.orList){
-                condition.execute();
-                condition.query.whereBuilder.delete(0,5);
-            }
-            hasExecute = true;
+        if (query.columnBuilder.length() > 0) {
+            query.columnBuilder.deleteCharAt(query.columnBuilder.length() - 1);
         }
-
+        if (query.setBuilder.length() > 0) {
+            query.setBuilder.deleteCharAt(query.setBuilder.length() - 1);
+            query.setBuilder.insert(0, "set ");
+        }
+        if (query.insertBuilder.length() > 0) {
+            query.insertBuilder.deleteCharAt(query.insertBuilder.length() - 1);
+        }
+        if (query.whereBuilder.length() > 0) {
+            query.whereBuilder.delete(query.whereBuilder.length() - 5, query.whereBuilder.length());
+            query.whereBuilder.insert(0, "where ");
+        }
+        if (query.groupByBuilder.length() > 0) {
+            query.groupByBuilder.deleteCharAt(query.groupByBuilder.length()-1);
+            query.groupByBuilder.insert(0, "group by ");
+        }
+        if (query.havingBuilder.length() > 0) {
+            query.havingBuilder.delete(query.havingBuilder.length() - 5, query.havingBuilder.length());
+            query.havingBuilder.insert(0, "having ");
+        }
+        if (query.orderByBuilder.length() > 0) {
+            query.orderByBuilder.deleteCharAt(query.orderByBuilder.length() - 1);
+            query.orderByBuilder.insert(0, "order by ");
+        }
+        //处理所有子查询的where语句
+        for (SubQuery subQuery : query.subQueryList) {
+            if (subQuery.whereBuilder.length() > 0) {
+                subQuery.whereBuilder.delete(subQuery.whereBuilder.length() - 5, subQuery.whereBuilder.length());
+            }
+        }
+        //处理所有union
+        for(AbstractCondition condition:query.unionList){
+            condition.execute();
+        }
+        for(AbstractCondition condition:query.orList){
+            condition.execute();
+            condition.query.whereBuilder.delete(0,5);
+        }
         AbstractResponse abstractResponse = new AbstractResponse(query);
         ResponseInvocationHandler invocationHandler = new ResponseInvocationHandler(abstractResponse);
         return (Response) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),new Class<?>[]{Response.class},invocationHandler);
