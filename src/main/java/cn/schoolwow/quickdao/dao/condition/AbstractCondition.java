@@ -13,13 +13,14 @@ import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Stack;
 
-public class AbstractCondition<T> implements Condition<T>{
+public class AbstractCondition<T> implements Condition<T>, Serializable {
     //查询对象
     public Query query;
 
@@ -470,6 +471,35 @@ public class AbstractCondition<T> implements Condition<T>{
         AbstractResponse abstractResponse = new AbstractResponse(query);
         ResponseInvocationHandler invocationHandler = new ResponseInvocationHandler(abstractResponse);
         return (Response) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),new Class<?>[]{Response.class},invocationHandler);
+    }
+
+    @Override
+    public Condition<T> clone(){
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(query);
+            oos.close();
+
+            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            Query query = (Query) ois.readObject();
+            AbstractCondition abstractCondition = new AbstractCondition(query);
+            query.entity = this.query.entity;
+            query.unionType = this.query.unionType;
+            query.quickDAOConfig = this.query.quickDAOConfig;
+            query.dao = this.query.dao;
+            query.dqlsqlBuilder = this.query.dqlsqlBuilder;
+            for(int i=0;i<query.subQueryList.size();i++){
+                query.subQueryList.get(i).entity = this.query.subQueryList.get(i).entity;
+                query.subQueryList.get(i).query = query;
+                query.subQueryList.get(i).condition = abstractCondition;
+            }
+            return abstractCondition;
+        } catch (IOException |ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**

@@ -39,6 +39,7 @@ public class DAOTest extends BaseDAOTest{
         save();
         delete();
         fetch();
+        cloneTest();
     }
 
     @Test
@@ -225,6 +226,18 @@ public class DAOTest extends BaseDAOTest{
         {
             List<Person> personList = dao.fetchList(Person.class,"city","Beijing");
             Assert.assertEquals(1,personList.size());
+        }
+    }
+
+    private void cloneTest() {
+        Condition<Person> condition = dao.query(Person.class).addQuery("password","123456");
+        {
+            Person person = condition.clone().addQuery("lastName","Carter").execute().getOne();
+            Assert.assertEquals("Beijing",person.getCity());
+        }
+        {
+            Person person = condition.clone().addQuery("lastName","Adams").execute().getOne();
+            Assert.assertEquals("London",person.getCity());
         }
     }
 
