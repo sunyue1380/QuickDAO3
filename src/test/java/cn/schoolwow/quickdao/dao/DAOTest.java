@@ -73,6 +73,72 @@ public class DAOTest extends BaseDAOTest{
         }
     }
 
+    @Test
+    public void testSubQuery(){
+        dao.rebuild(Product.class);
+        Transaction transaction = dao.startTransaction();
+        String[] productNames = new String[]{"笔记本电脑","冰箱","电视机","智能音箱"};
+        String[] types = new String[]{"电器","电器","电器","数码"};
+        int[] prices = new int[]{4000,600,3000,1000};
+        for(int i=0;i<productNames.length;i++){
+            Product product = new Product();
+            product.setName(productNames[i]);
+            product.setType(types[i]);
+            product.setPrice(prices[i]);
+            product.setPublishTime(new Date());
+            transaction.insert(product);
+        }
+        transaction.commit();
+
+        testWhereSubQuery();
+        testHavingSubQuery();
+        testFromSubQuery();
+        testSelectSubQuery();
+    }
+
+    private void testSelectSubQuery(){
+        Condition selectCondition = dao.query("dual")
+                .addColumn("name");
+        List<String> productNameList = dao.query(Product.class)
+                .addColumn(selectCondition)
+                .execute()
+                .getSingleColumnList(String.class);
+        Assert.assertEquals(4,productNameList.size());
+    }
+
+    private void testFromSubQuery(){
+        Condition<Product> fromCondition = dao.query(Product.class)
+                .groupBy("type")
+                .addColumn("type")
+                .addColumn("avg(price) avgPrice");
+        JSONArray array = dao.query(fromCondition)
+                .addQuery("avgPrice",">=",2000)
+                .addColumn("type","avgPrice")
+                .execute()
+                .getArray();
+        Assert.assertEquals(1,array.size());
+    }
+
+    private void testHavingSubQuery(){
+        Condition havingCondition = dao.query("dual")
+                .addColumn("1");
+        long count = (long) dao.query(Product.class)
+                .groupBy("type")
+                .having("count(type)",">",havingCondition)
+                .addColumn("count(type) count")
+                .execute()
+                .getSingleColumn(Long.class);
+        Assert.assertEquals(3,count);
+    }
+
+    private void testWhereSubQuery(){
+        long count = dao.query(Product.class)
+                .addSubQuery("price","<",dao.query(Product.class).addColumn("avg(price)"))
+                .execute()
+                .count();
+        Assert.assertEquals(2,count);
+    }
+
     private void singleInsert() {
         {
             Person person = new Person();
@@ -397,15 +463,17 @@ public class DAOTest extends BaseDAOTest{
         }
         //关联查询
         {
+            Condition joinCondition = dao.query(Order.class)
+                    .addColumn("person_id","count(person_id) count")
+                    .groupBy("personId")
+                    .having("count(person_id) > 0");
             Response response = dao.query(Person.class)
-                    .joinTable(dao.query(Order.class)
-                            .addColumn("id","order_no","person_id pid")
-                            .addQuery("orderNo",1),
-                            "id","pid")
-                    .orderByDesc("id")
+                    .joinTable(joinCondition,
+                            "id","person_id")
                     .done()
-                    .compositField()
+                    .orderByDesc("id")
                     .execute();
+            System.out.println(response.getArray());
             Assert.assertEquals(1,response.count());
         }
         //部分查询

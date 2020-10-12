@@ -105,15 +105,6 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public Condition<T> addRawQuery(String query, Object... parameterList) {
-        this.query.whereBuilder.append("(" + query + ") and ");
-        if(null!=parameterList&&parameterList.length>0){
-            this.query.parameterList.addAll(Arrays.asList(parameterList));
-        }
-        return this;
-    }
-
-    @Override
     public Condition<T> addQuery(String field, Object value) {
         addQuery(field, "=", value);
         return this;
@@ -134,10 +125,37 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
+    public Condition<T> addRawQuery(String query, Object... parameterList) {
+        this.query.whereBuilder.append("(" + query + ") and ");
+        if(null!=parameterList&&parameterList.length>0){
+            this.query.parameterList.addAll(Arrays.asList(parameterList));
+        }
+        return this;
+    }
+
+    @Override
+    public Condition<T> addSubQuery(String field, String operator, Condition subQuery) {
+        subQuery.execute();
+        AbstractCondition abstractCondition = (AbstractCondition) subQuery;
+        query.whereBuilder.append(getQueryColumnNameByFieldName(field) + " " + operator + " ("+query.dqlsqlBuilder.getArraySQL(abstractCondition.query)+") and ");
+        this.query.parameterList.addAll(abstractCondition.query.parameterList);
+        return this;
+    }
+
+    @Override
     public Condition<T> addColumn(String... fields) {
         for(String field:fields){
             query.columnBuilder.append(query.entity.getColumnNameByFieldName(field)+ ",");
         }
+        return this;
+    }
+
+    @Override
+    public Condition<T> addColumn(Condition subQuery) {
+        subQuery.execute();
+        Query selectQuery = ((AbstractCondition)subQuery).query;
+        query.columnBuilder.append("( " + query.dqlsqlBuilder.getArraySQL(selectQuery) + " ),");
+        query.parameterList.addAll(selectQuery.parameterList);
         return this;
     }
 
@@ -300,6 +318,15 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
+    public Condition<T> having(String field, String operator, Condition subQuery) {
+        subQuery.execute();
+        AbstractCondition abstractCondition = (AbstractCondition) subQuery;
+        query.havingBuilder.append(getQueryColumnNameByFieldName(field) + " " + operator + " ("+query.dqlsqlBuilder.getArraySQL(abstractCondition.query)+") and ");
+        this.query.parameterList.addAll(abstractCondition.query.parameterList);
+        return this;
+    }
+
+    @Override
     public <E> SubCondition<E> joinTable(Class<E> clazz, String primaryField, String joinTableField) {
         return joinTable(clazz,primaryField,joinTableField,getUniqueCompositFieldInMainClass(query.entity.clazz, clazz));
     }
@@ -335,19 +362,16 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
 
     @Override
     public <E> SubCondition<E> joinTable(Condition<E> joinCondition, String primaryField, String joinConditionField) {
+        joinCondition.execute();
         Query joinQuery = ((AbstractCondition) joinCondition).query;
         SubQuery subQuery = new SubQuery();
         subQuery.entity = joinQuery.entity;
-        subQuery.columnBuilder.append(joinQuery.columnBuilder.toString());
-        subQuery.columnBuilder.deleteCharAt(subQuery.columnBuilder.length()-1);
+        subQuery.subQuerySQLBuilder = joinQuery.dqlsqlBuilder.getArraySQL(joinQuery);
+
         subQuery.tableAliasName = query.tableAliasName + (query.joinTableIndex++);
         subQuery.primaryField = query.entity.getColumnNameByFieldName(primaryField);
         subQuery.joinTableField = joinConditionField;
-        subQuery.whereBuilder.append(joinQuery.whereBuilder.toString().replace(joinQuery.tableAliasName+".",""));
-        if(subQuery.whereBuilder.length()>0){
-            subQuery.whereBuilder.insert(0, "where ");
-        }
-        subQuery.parameterList = joinQuery.parameterList;
+        subQuery.parameterList.addAll(joinQuery.parameterList);
         subQuery.condition = this;
         subQuery.query = query;
 

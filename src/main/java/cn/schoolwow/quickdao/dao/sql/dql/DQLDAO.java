@@ -31,12 +31,22 @@ public interface DQLDAO extends SQLDAO {
      * @param value 指字段值
      */
     <T> List<T> fetchList(Class<T> clazz, String field, Object value);
+
     /**
      * 复杂查询
+     * @param clazz 实体类表
      * */
     Condition query(Class clazz);
+
     /**
      * 复杂查询
+     * @param tableName 指定表名
      * */
     Condition query(String tableName);
+
+    /**
+     * 添加FROM子查询
+     * @param condition 子查询
+     * */
+    Condition query(Condition condition);
 }

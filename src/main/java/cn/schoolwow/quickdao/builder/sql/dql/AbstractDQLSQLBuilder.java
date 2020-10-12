@@ -195,23 +195,16 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         return builder;
     }
 
-    private StringBuilder getSubQueryArraySQL(SubQuery subQuery) {
-        StringBuilder builder = new StringBuilder("select "+subQuery.columnBuilder.toString());
-        builder.append(" from "+quickDAOConfig.database.escape(subQuery.entity.tableName));
-        builder.append(" "+ subQuery.whereBuilder.toString());
-        return builder;
-    }
-
     /**
      * 添加外键关联查询条件
      */
     private void addJoinTableStatement(Query query,StringBuilder sqlBuilder) {
         for (SubQuery subQuery : query.subQueryList) {
             sqlBuilder.append(" " + subQuery.join + " ");
-            if(subQuery.columnBuilder.length()==0){
+            if(null==subQuery.subQuerySQLBuilder){
                 sqlBuilder.append(query.quickDAOConfig.database.escape(subQuery.entity.tableName));
             }else{
-                sqlBuilder.append("(" + getSubQueryArraySQL(subQuery) + ")");
+                sqlBuilder.append("(" + subQuery.subQuerySQLBuilder.toString() + ")");
             }
             sqlBuilder.append(" as " + subQuery.tableAliasName + " on ");
             if (subQuery.parentSubQuery == null) {

@@ -49,6 +49,10 @@ public class SubQuery<T> implements Serializable {
      */
     public List parameterList = new ArrayList();
     /**
+     * 关联子查询
+     * */
+    public StringBuilder subQuerySQLBuilder;
+    /**
      * 父表
      */
     public SubQuery parentSubQuery;

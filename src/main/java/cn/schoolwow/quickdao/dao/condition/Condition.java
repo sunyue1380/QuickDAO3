@@ -105,13 +105,6 @@ public interface Condition<T> extends Serializable {
     Condition<T> addLikeQuery(String field, Object value);
 
     /**
-     * 自定义查询语句,具体映射规则请看此{@link cn.schoolwow.quickdao.dao.condition.Condition}
-     * @param query 子查询条件,可使用?占位符
-     * @param parameterList 占位符参数列表,可为null
-     */
-    Condition<T> addRawQuery(String query, Object... parameterList);
-
-    /**
      * 添加字段查询
      * @param field 字段名
      * @param value 字段值
@@ -127,10 +120,31 @@ public interface Condition<T> extends Serializable {
     Condition<T> addQuery(String field, String operator, Object value);
 
     /**
+     * 自定义查询语句,具体映射规则请看此{@link cn.schoolwow.quickdao.dao.condition.Condition}
+     * @param query 子查询条件,可使用?占位符
+     * @param parameterList 占位符参数列表,可为null
+     */
+    Condition<T> addRawQuery(String query, Object... parameterList);
+
+    /**
+     * 添加where子查询
+     * @param field    字段名
+     * @param operator 操作符,可为<b>></b>,<b>>=</b>,<b>=</b>,<b><</b><b><=</b>
+     * @param subQuery 子查询语句
+     */
+    Condition<T> addSubQuery(String field, String operator, Condition subQuery);
+
+    /**
      * 添加自定义字段,具体映射规则请看此{@link cn.schoolwow.quickdao.dao.condition.Condition}
      * @param fields 自定义查询列
      */
     Condition<T> addColumn(String... fields);
+
+    /**
+     * 添加select子查询
+     * @param subQuery 子查询
+     */
+    Condition<T> addColumn(Condition subQuery);
 
     /**
      * 添加插入字段,用于{@link cn.schoolwow.quickdao.dao.response.Response#insert()}方法
@@ -243,6 +257,14 @@ public interface Condition<T> extends Serializable {
      * @param parameterList  占位符参数值
      */
     Condition<T> having(String having, Object... parameterList);
+
+    /**
+     * 添加having子查询
+     * @param field    字段名
+     * @param operator 操作符,可为<b>></b>,<b>>=</b>,<b>=</b>,<b><</b><b><=</b>
+     * @param subQuery 子查询语句
+     */
+    Condition<T> having(String field, String operator, Condition subQuery);
 
     /**
      * 关联表查询

@@ -74,6 +74,12 @@ public class AbstractDAO implements DAO {
     }
 
     @Override
+    public Condition query(Condition condition) {
+        DQLDAO dqldao = createDQLDAO();
+        return dqldao.query(condition);
+    }
+
+    @Override
     public int insert(Object instance) {
         DMLDAO dmldao = createDMLDAO();
         return dmldao.insert(instance);
