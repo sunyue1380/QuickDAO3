@@ -14,6 +14,12 @@ public class Product {
     @Comment("商品名称")
     private String name;
 
+    @Comment("商品类别")
+    private String type;
+
+    @Comment("商品价格")
+    private int price;
+
     @TableField(createdAt = true)
     private Date publishTime;
 
@@ -31,6 +37,22 @@ public class Product {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
     }
 
     public Date getPublishTime() {

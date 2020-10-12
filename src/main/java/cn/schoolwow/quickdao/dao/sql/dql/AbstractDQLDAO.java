@@ -8,6 +8,7 @@ import cn.schoolwow.quickdao.dao.response.AbstractResponse;
 import cn.schoolwow.quickdao.dao.sql.AbstractSQLDAO;
 import cn.schoolwow.quickdao.database.*;
 import cn.schoolwow.quickdao.domain.Entity;
+import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.Query;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import com.alibaba.fastjson.JSONArray;
@@ -81,6 +82,18 @@ public class AbstractDQLDAO extends AbstractSQLDAO implements DQLDAO {
             }
         }
         throw new IllegalArgumentException("不存在的表名:"+tableName+"!");
+    }
+
+    @Override
+    public Condition query(Condition condition) {
+        condition.execute();
+        Query fromQuery = ((AbstractCondition) condition).query;
+        Entity entity = new Entity();
+        entity.clazz = Entity.class;
+        entity.tableName = "( " + dqlsqlBuilder.getArraySQL(fromQuery).toString() +" )";
+        entity.escapeTableName = entity.tableName;
+        entity.properties = new Property[0];
+        return query(entity);
     }
 
     private Condition query(Entity entity){
