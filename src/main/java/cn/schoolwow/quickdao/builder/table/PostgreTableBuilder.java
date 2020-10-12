@@ -23,7 +23,7 @@ public class PostgreTableBuilder extends AbstractTableBuilder {
     }
 
     @Override
-    public Entity[] getDatabaseEntity() throws SQLException {
+    public List<Entity> getDatabaseEntity() throws SQLException {
         PreparedStatement tablePs = connection.prepareStatement("select tablename from pg_tables where schemaname='public';");
         ResultSet tableRs = tablePs.executeQuery();
         List<Entity> entityList = new ArrayList<>();
@@ -53,7 +53,7 @@ public class PostgreTableBuilder extends AbstractTableBuilder {
         }
         tableRs.close();
         tablePs.close();
-        return entityList.toArray(new Entity[0]);
+        return entityList;
     }
 
     @Override

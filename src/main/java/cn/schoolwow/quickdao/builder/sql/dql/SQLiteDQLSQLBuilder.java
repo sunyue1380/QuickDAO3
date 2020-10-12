@@ -15,7 +15,7 @@ public class SQLiteDQLSQLBuilder extends AbstractDQLSQLBuilder{
 
     @Override
     public PreparedStatement update(Query query) throws SQLException {
-        StringBuilder builder = new StringBuilder("update "+query.quickDAOConfig.database.escape(query.entity.tableName)+" ");
+        StringBuilder builder = new StringBuilder("update " + query.entity.escapeTableName + " ");
         builder.append(query.setBuilder.toString());
         builder.append(" " + query.whereBuilder.toString());
 

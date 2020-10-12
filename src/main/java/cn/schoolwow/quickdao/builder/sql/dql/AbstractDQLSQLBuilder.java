@@ -20,7 +20,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
             StringBuilder builder = new StringBuilder("select ");
             builder.append(columns(entity,"t"));
-            builder.append(" from " + quickDAOConfig.database.escape(entity.tableName) + " as t where t." + quickDAOConfig.database.escape(entity.getColumnNameByFieldName(field)) +" is null");
+            builder.append(" from " + entity.escapeTableName + " as t where t." + quickDAOConfig.database.escape(entity.getColumnNameByFieldName(field)) +" is null");
             sqlCache.put(key, builder.toString());
         }
         String sql = sqlCache.get(key);
@@ -44,7 +44,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
             StringBuilder builder = new StringBuilder("select ");
             builder.append(columns(entity,"t"));
             Property property = entity.getPropertyByFieldName(field);
-            builder.append(" from " + quickDAOConfig.database.escape(entity.tableName) + " as t where t." + quickDAOConfig.database.escape(entity.getColumnNameByFieldName(field)) + " = "+(null==property||null==property.function?"?":property.function)+"");
+            builder.append(" from " + entity.escapeTableName + " as t where t." + quickDAOConfig.database.escape(entity.getColumnNameByFieldName(field)) + " = "+(null==property||null==property.function?"?":property.function)+"");
             sqlCache.put(key, builder.toString());
         }
         String sql = sqlCache.get(key);
@@ -57,7 +57,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
 
     @Override
     public PreparedStatement count(Query query) throws SQLException {
-        StringBuilder builder = new StringBuilder("select count(1) from "+query.quickDAOConfig.database.escape(query.entity.tableName)+" as "+query.tableAliasName);
+        StringBuilder builder = new StringBuilder("select count(1) from " + query.entity.escapeTableName + " as "+query.tableAliasName);
         addJoinTableStatement(query,builder);
         addWhereStatement(query,builder);
 
@@ -70,7 +70,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
 
     @Override
     public PreparedStatement insert(Query query) throws SQLException {
-        StringBuilder builder = new StringBuilder("insert into "+query.quickDAOConfig.database.escape(query.entity.tableName)+"(");
+        StringBuilder builder = new StringBuilder("insert into " + query.entity.escapeTableName + "(");
         builder.append(query.insertBuilder.toString()+") values(");
         for(int i=0;i<query.insertParameterList.size();i++){
             builder.append("?,");
@@ -90,7 +90,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
 
     @Override
     public PreparedStatement update(Query query) throws SQLException {
-        StringBuilder builder = new StringBuilder("update "+query.quickDAOConfig.database.escape(query.entity.tableName)+" as t ");
+        StringBuilder builder = new StringBuilder("update " + query.entity.escapeTableName + " as t ");
         addJoinTableStatement(query,builder);
         builder.append(query.setBuilder.toString());
         addWhereStatement(query,builder);
@@ -110,7 +110,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
 
     @Override
     public PreparedStatement delete(Query query) throws SQLException {
-        StringBuilder builder = new StringBuilder("delete t from "+query.quickDAOConfig.database.escape(query.entity.tableName)+" as t");
+        StringBuilder builder = new StringBuilder("delete t from " + query.entity.escapeTableName + " as t");
         addJoinTableStatement(query,builder);
         addWhereStatement(query,builder);
 
@@ -169,7 +169,8 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         return ps;
     }
 
-    private StringBuilder getArraySQL(Query query) {
+    @Override
+    public StringBuilder getArraySQL(Query query) {
         StringBuilder builder = new StringBuilder("select " + query.distinct + " ");
         //如果有指定列,则添加指定列
         if(query.columnBuilder.length()>0){
@@ -184,7 +185,10 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
                 }
             }
         }
-        builder.append(" from "+quickDAOConfig.database.escape(query.entity.tableName) + " as " + query.tableAliasName + " ");
+        builder.append(" from " + query.entity.escapeTableName);
+        if(null!=query.entity.clazz){
+            builder.append(" as " + query.tableAliasName);
+        }
         addJoinTableStatement(query,builder);
         addWhereStatement(query,builder);
         builder.append(" " + query.groupByBuilder.toString() + " " + query.havingBuilder.toString());

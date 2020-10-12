@@ -41,7 +41,7 @@ public class AbstractSQLBuilder implements SQLBuilder{
         Entity entity = quickDAOConfig.entityMap.get(instance.getClass().getName());
         if (!sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder();
-            builder.append("select count(1) from " + quickDAOConfig.database.escape(entity.tableName)+" where ");
+            builder.append("select count(1) from " + entity.escapeTableName + " where ");
             builder.append(entity.id.column+" = "+(null==entity.id.function?"?":entity.id.function)+" ");
             sqlCache.put(key, builder.toString());
         }
@@ -62,7 +62,7 @@ public class AbstractSQLBuilder implements SQLBuilder{
         Entity entity = quickDAOConfig.entityMap.get(instance.getClass().getName());
         if (!sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder();
-            builder.append("select count(1) from " + quickDAOConfig.database.escape(entity.tableName)+" where ");
+            builder.append("select count(1) from " + entity.escapeTableName + " where ");
             for(Property property:entity.uniqueKeyProperties){
                 builder.append(quickDAOConfig.database.escape(property.column)+ "= "+(null==property.function?"?":property.function)+" and ");
             }

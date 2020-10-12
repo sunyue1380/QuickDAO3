@@ -22,7 +22,7 @@ public class MySQLTableBuilder extends AbstractTableBuilder {
     }
 
     @Override
-    public Entity[] getDatabaseEntity() throws SQLException {
+    public List<Entity> getDatabaseEntity() throws SQLException {
         PreparedStatement tablePs = connection.prepareStatement("select table_name,table_comment from information_schema.tables where table_schema = database()");
         ResultSet tableRs = tablePs.executeQuery();
         List<Entity> entityList = new ArrayList<>();
@@ -86,7 +86,7 @@ public class MySQLTableBuilder extends AbstractTableBuilder {
             entityList.add(entity);
         }
         tableRs.close();
-        return entityList.toArray(new Entity[0]);
+        return entityList;
     }
 
     @Override

@@ -39,4 +39,8 @@ public interface DQLSQLBuilder {
      * 返回符合条件的数据库记录
      */
     PreparedStatement getArray(Query query) throws SQLException;
+    /**
+     * 获取query对应的SQL语句
+     * */
+    StringBuilder getArraySQL(Query query);
 }
