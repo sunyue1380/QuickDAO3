@@ -27,10 +27,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class QuickDAO {
@@ -241,8 +238,8 @@ public class QuickDAO {
 
         AbstractTableBuilder tableBuilder = getTableBuilder();
         //对比实体类信息与数据库信息
-        Entity[] dbEntityList = tableBuilder.getDatabaseEntity();
-        logger.debug("[获取数据库信息]数据库表个数:{}", dbEntityList.length);
+        List<Entity> dbEntityList = tableBuilder.getDatabaseEntity();
+        logger.debug("[获取数据库信息]数据库表个数:{}", dbEntityList.size());
         //确定需要新增的表和更新的表
         Collection<Entity> entityList = quickDAOConfig.entityMap.values();
         StringBuilder builder = new StringBuilder();
@@ -306,15 +303,6 @@ public class QuickDAO {
         if(null==quickDAOConfig.dataSource){
             throw new IllegalArgumentException("请设置数据库连接池属性!");
         }
-        if(quickDAOConfig.entityMap.isEmpty()){
-            try {
-                quickDAOConfig.defaultTableDefiner.getEntityMap();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        quickDAOConfig.defaultTableDefiner.handleEntityMap();
         //自动建表
         try {
             Connection connection = quickDAOConfig.dataSource.getConnection();
@@ -341,6 +329,14 @@ public class QuickDAO {
                 throw new IllegalArgumentException("不支持的数据库类型!");
             }
             tableBuilder.connection = connection;
+            if(quickDAOConfig.entityMap.isEmpty()){
+                try {
+                    quickDAOConfig.defaultTableDefiner.getEntityMap();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            quickDAOConfig.defaultTableDefiner.handleEntityMap();
             return tableBuilder;
         }catch (SQLException e){
             throw new SQLRuntimeException(e);

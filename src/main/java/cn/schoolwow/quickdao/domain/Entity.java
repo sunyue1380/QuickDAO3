@@ -12,9 +12,13 @@ public class Entity {
      */
     public Class clazz;
     /**
-     * 实体类表名
+     * 原始表名
      */
     public String tableName;
+    /**
+     * 转义后表名
+     */
+    public String escapeTableName;
     /**
      * 实体类名
      */

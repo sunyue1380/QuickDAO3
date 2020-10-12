@@ -41,7 +41,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         fieldMapping.put("timestamp", "timestamp");
     }
 
-    public abstract Entity[] getDatabaseEntity() throws SQLException;
+    public abstract List<Entity> getDatabaseEntity() throws SQLException;
 
     /**
      * 更新字段索引信息
@@ -87,7 +87,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
 
     @Override
     public void createTable(Entity entity) throws SQLException {
-        StringBuilder createTableBuilder = new StringBuilder("create table " + quickDAOConfig.database.escape(entity.tableName) + "(");
+        StringBuilder createTableBuilder = new StringBuilder("create table " + entity.escapeTableName + "(");
         Property[] properties = entity.properties;
         for (Property property : properties) {
             if(null==property.columnType||property.columnType.isEmpty()){
@@ -175,7 +175,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                 if (null == entity.indexProperties || entity.indexProperties.length == 0) {
                     return;
                 }
-                StringBuilder indexBuilder = new StringBuilder("create index " + quickDAOConfig.database.escape(indexName)+" on " + quickDAOConfig.database.escape(entity.tableName) + " (");
+                StringBuilder indexBuilder = new StringBuilder("create index " + quickDAOConfig.database.escape(indexName)+" on " + entity.escapeTableName + " (");
                 for (Property property : entity.indexProperties) {
                     indexBuilder.append(quickDAOConfig.database.escape(property.column)+",");
                 }
@@ -188,7 +188,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                 if (null == entity.uniqueKeyProperties || entity.uniqueKeyProperties.length == 0) {
                     return;
                 }
-                StringBuilder indexUniqueBuilder = new StringBuilder("create unique index " + quickDAOConfig.database.escape(indexName)+" on " + quickDAOConfig.database.escape(entity.tableName) + " (");
+                StringBuilder indexUniqueBuilder = new StringBuilder("create unique index " + quickDAOConfig.database.escape(indexName)+" on " + entity.escapeTableName + " (");
                 for (Property property : entity.uniqueKeyProperties) {
                     indexUniqueBuilder.append(quickDAOConfig.database.escape(property.column)+",");
                 }
@@ -221,8 +221,8 @@ public abstract class AbstractTableBuilder implements TableBuilder{
 
     public void autoBuildDatabase() throws SQLException {
         //对比实体类信息与数据库信息
-        quickDAOConfig.dbEntityList = getDatabaseEntity();
-        logger.debug("[获取数据库信息]数据库表个数:{}", quickDAOConfig.dbEntityList.length);
+        List<Entity> dbEntityList = getDatabaseEntity();
+        logger.debug("[获取数据库信息]数据库表个数:{}", dbEntityList.size());
         //确定需要新增的表和更新的表
         Collection<Entity> entityList = quickDAOConfig.entityMap.values();
         List<Entity> newEntityList = new ArrayList<>();
@@ -239,7 +239,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                     }
                 }
             }
-            for (Entity dbEntity : quickDAOConfig.dbEntityList) {
+            for (Entity dbEntity : dbEntityList) {
                 if (entity.tableName.toLowerCase().equals(dbEntity.tableName.toLowerCase())) {
                     updateEntityList.add(entity);
                     break;
@@ -263,7 +263,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         if(quickDAOConfig.autoCreateProperty){
             //更新表
             for(Entity entity : updateEntityList){
-                for (Entity dbEntity : quickDAOConfig.dbEntityList) {
+                for (Entity dbEntity : dbEntityList) {
                     if (entity.tableName.equals(dbEntity.tableName)) {
                         compareEntityDatabase(entity,dbEntity);
                         break;
@@ -271,6 +271,19 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                 }
             }
         }
+        for(Entity dbEntity:dbEntityList){
+            dbEntity.escapeTableName = quickDAOConfig.database.escape(dbEntity.tableName);
+            dbEntity.clazz = Entity.class;
+        }
+        //添加虚拟表
+        {
+            Entity entity = new Entity();
+            entity.tableName = "dual";
+            entity.escapeTableName = "dual";
+            entity.properties = new Property[0];
+            dbEntityList.add(entity);
+        }
+        quickDAOConfig.dbEntityList = dbEntityList.toArray(new Entity[0]);
     }
 
     /**

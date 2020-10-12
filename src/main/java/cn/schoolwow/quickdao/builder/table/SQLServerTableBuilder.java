@@ -21,7 +21,7 @@ public class SQLServerTableBuilder extends AbstractTableBuilder{
     }
 
     @Override
-    public Entity[] getDatabaseEntity() throws SQLException {
+    public List<Entity> getDatabaseEntity() throws SQLException {
         PreparedStatement tablePs = connection.prepareStatement("select name from sysobjects where xtype='u' order by name;");
         ResultSet tableRs = tablePs.executeQuery();
         List<Entity> entityList = new ArrayList<>();
@@ -46,7 +46,7 @@ public class SQLServerTableBuilder extends AbstractTableBuilder{
             propertyPs.close();
         }
         tableRs.close();
-        return entityList.toArray(new Entity[0]);
+        return entityList;
     }
 
     @Override

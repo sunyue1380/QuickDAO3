@@ -111,7 +111,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
         if (!sqlCache.containsKey(key)) {
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
             StringBuilder builder = new StringBuilder();
-            builder.append("delete from " + quickDAOConfig.database.escape(entity.tableName) + " where " + quickDAOConfig.database.escape(entity.getColumnNameByFieldName(property)) + " = ?");
+            builder.append("delete from " + entity.escapeTableName + " where " + quickDAOConfig.database.escape(entity.getColumnNameByFieldName(property)) + " = ?");
             sqlCache.put(key, builder.toString());
         }
         String sql = sqlCache.get(key);
@@ -127,7 +127,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
         String key = "clear_" + clazz.getName()+"_"+quickDAOConfig.database.getClass().getSimpleName();
         if (!sqlCache.containsKey(key)) {
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
-            sqlCache.put(key, "delete from "+quickDAOConfig.database.escape(entity.tableName));
+            sqlCache.put(key, "delete from "+entity.escapeTableName);
         }
         PreparedStatement preparedStatement = connection.prepareStatement(sqlCache.get(key));
         return preparedStatement;
@@ -142,7 +142,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
         if (!sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder();
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
-            builder.append("insert into " + quickDAOConfig.database.escape(entity.tableName) + "(");
+            builder.append("insert into " + entity.escapeTableName + "(");
             for (Property property : entity.properties) {
                 if (property.id&&property.strategy==IdStrategy.AutoIncrement) {
                     continue;
@@ -203,7 +203,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
         if (!sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder();
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
-            builder.append("update " + quickDAOConfig.database.escape(entity.tableName) + " set ");
+            builder.append("update " + entity.escapeTableName + " set ");
             for (Property property : entity.properties) {
                 if (property.id || property.unique) {
                     continue;
@@ -265,7 +265,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
         if (!sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder();
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
-            builder.append("update " + quickDAOConfig.database.escape(entity.tableName) + " set ");
+            builder.append("update " + entity.escapeTableName + " set ");
             for (Property property : entity.properties) {
                 if (property.id) {
                     continue;

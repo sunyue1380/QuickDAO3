@@ -4,11 +4,12 @@ import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.Property;
 
 import java.sql.SQLException;
+import java.util.List;
 
 /**负责数据库表创建*/
 public interface TableBuilder{
     /**获取数据库信息*/
-    Entity[] getDatabaseEntity() throws SQLException;
+    List<Entity> getDatabaseEntity() throws SQLException;
     /**创建自增列SQL语句*/
     String getAutoIncrementSQL(Property property) throws SQLException;
     /**判断表是否已经存在*/

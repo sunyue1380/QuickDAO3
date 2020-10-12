@@ -20,7 +20,7 @@ public class H2TableBuilder extends MySQLTableBuilder{
     }
 
     @Override
-    public Entity[] getDatabaseEntity() throws SQLException {
+    public List<Entity> getDatabaseEntity() throws SQLException {
         PreparedStatement tablePs = connection.prepareStatement("show tables;");
         ResultSet tableRs = tablePs.executeQuery();
         List<Entity> entityList = new ArrayList<>();
@@ -51,7 +51,7 @@ public class H2TableBuilder extends MySQLTableBuilder{
             entityList.add(entity);
         }
         tableRs.close();
-        return entityList.toArray(new Entity[0]);
+        return entityList;
     }
 
     @Override

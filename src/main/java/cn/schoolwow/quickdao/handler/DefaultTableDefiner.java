@@ -91,6 +91,7 @@ public class DefaultTableDefiner implements TableDefiner{
                     String prefix = c.getName().substring(packageName.length() + 1, c.getName().lastIndexOf(".")).replace(".", "_");
                     entity.tableName = quickDAOConfig.packageNameMap.get(packageName)+prefix + "@" + StringUtil.Camel2Underline(c.getSimpleName());
                 }
+                entity.escapeTableName = quickDAOConfig.database.escape(entity.tableName);
                 entity.clazz = c;
                 quickDAOConfig.entityMap.put(c.getName(), entity);
             }
