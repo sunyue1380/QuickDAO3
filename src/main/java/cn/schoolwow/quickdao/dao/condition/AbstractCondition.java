@@ -339,6 +339,52 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
+    public <E> SubCondition<E> crossJoinTable(Class<E> clazz) {
+        SubQuery subQuery = new SubQuery();
+        subQuery.entity = query.quickDAOConfig.entityMap.get(clazz.getName());
+        subQuery.tableAliasName = query.tableAliasName + (query.joinTableIndex++);
+        subQuery.join = "cross join";
+        subQuery.query = query;
+        subQuery.condition = this;
+
+        AbstractSubCondition subCondition = null;
+        if(query.quickDAOConfig.database instanceof SQLiteDatabase){
+            subCondition = new SQLiteSubCondition(subQuery);
+        }else{
+            subCondition = new AbstractSubCondition(subQuery);
+        }
+        query.subQueryList.add(subQuery);
+        return subCondition;
+    }
+
+    @Override
+    public <E> SubCondition<E> crossJoinTable(String tableName) {
+        SubQuery subQuery = new SubQuery();
+        for(Entity entity:query.quickDAOConfig.dbEntityList){
+            if(entity.tableName.equals(tableName)){
+                subQuery.entity = entity;
+                break;
+            }
+        }
+        if(null==subQuery.entity){
+            throw new IllegalArgumentException("关联表不存在!表名:"+tableName);
+        }
+        subQuery.tableAliasName = query.tableAliasName + (query.joinTableIndex++);
+        subQuery.join = "cross join";
+        subQuery.query = query;
+        subQuery.condition = this;
+
+        AbstractSubCondition subCondition = null;
+        if(query.quickDAOConfig.database instanceof SQLiteDatabase){
+            subCondition = new SQLiteSubCondition(subQuery);
+        }else{
+            subCondition = new AbstractSubCondition(subQuery);
+        }
+        query.subQueryList.add(subQuery);
+        return subCondition;
+    }
+
+    @Override
     public <E> SubCondition<E> joinTable(Class<E> clazz, String primaryField, String joinTableField) {
         return joinTable(clazz,primaryField,joinTableField,getUniqueCompositFieldInMainClass(query.entity.clazz, clazz));
     }

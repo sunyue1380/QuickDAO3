@@ -46,6 +46,7 @@ public class DAOTest extends BaseDAOTest{
     public void testQuery() {
         dao.rebuild(Person.class);
         dao.rebuild(Order.class);
+        dao.rebuild(Product.class);
         query();
         response();
     }
@@ -486,8 +487,26 @@ public class DAOTest extends BaseDAOTest{
                     .done()
                     .orderByDesc("id")
                     .execute();
-            System.out.println(response.getArray());
             Assert.assertEquals(1,response.count());
+        }
+        //cross join查询
+        {
+            List<Person> personList = dao.query(Person.class)
+                    .crossJoinTable(Order.class)
+                    .addQuery("id",">",0)
+                    .done()
+                    .addRawQuery("t.id = t1.person_id")
+                    .execute()
+                    .getList();
+            Assert.assertEquals(0,personList.size());
+            personList = dao.query("person")
+                    .crossJoinTable("order")
+                    .addQuery("id",">",0)
+                    .done()
+                    .addRawQuery("t.id = t1.person_id")
+                    .execute()
+                    .getList();
+            Assert.assertEquals(0,personList.size());
         }
         //部分查询
         {
