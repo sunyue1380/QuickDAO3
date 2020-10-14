@@ -206,11 +206,14 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
             }else{
                 sqlBuilder.append("(" + subQuery.subQuerySQLBuilder.toString() + ")");
             }
-            sqlBuilder.append(" as " + subQuery.tableAliasName + " on ");
-            if (subQuery.parentSubQuery == null) {
-                sqlBuilder.append(query.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.primaryField) + " = " + subQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.joinTableField) + " ");
-            }else{
-                sqlBuilder.append(subQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.joinTableField) + " = " + subQuery.parentSubQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.primaryField) + " ");
+            sqlBuilder.append(" as " + subQuery.tableAliasName);
+            if(null!=subQuery.primaryField&&null!=subQuery.joinTableField){
+                sqlBuilder.append(" on ");
+                if (subQuery.parentSubQuery == null) {
+                    sqlBuilder.append(query.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.primaryField) + " = " + subQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.joinTableField) + " ");
+                }else{
+                    sqlBuilder.append(subQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.joinTableField) + " = " + subQuery.parentSubQuery.tableAliasName + "." + query.quickDAOConfig.database.escape(subQuery.primaryField) + " ");
+                }
             }
         }
     }
