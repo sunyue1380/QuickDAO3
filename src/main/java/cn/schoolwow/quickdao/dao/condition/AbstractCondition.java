@@ -137,8 +137,20 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     public Condition<T> addSubQuery(String field, String operator, Condition subQuery) {
         subQuery.execute();
         AbstractCondition abstractCondition = (AbstractCondition) subQuery;
-        query.whereBuilder.append(getQueryColumnNameByFieldName(field) + " " + operator + " ("+query.dqlsqlBuilder.getArraySQL(abstractCondition.query)+") and ");
+        query.whereBuilder.append(getQueryColumnNameByFieldName(field) + " " + operator + " (" + query.dqlsqlBuilder.getArraySQL(abstractCondition.query) + ") and ");
         this.query.parameterList.addAll(abstractCondition.query.parameterList);
+        return this;
+    }
+
+    @Override
+    public Condition<T> addExistSubQuery(Condition subQuery) {
+        addExistSubQuery(subQuery,"exists");
+        return this;
+    }
+
+    @Override
+    public Condition<T> addNotExistSubQuery(Condition subQuery) {
+        addExistSubQuery(subQuery,"not exists");
         return this;
     }
 
@@ -567,6 +579,14 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
         query.whereBuilder.deleteCharAt(query.whereBuilder.length() - 1);
         query.whereBuilder.append(") ) and ");
         query.parameterList.addAll(Arrays.asList(values));
+    }
+
+    /**添加exist查询*/
+    private void addExistSubQuery(Condition subQuery, String exist) {
+        subQuery.execute();
+        AbstractCondition abstractCondition = (AbstractCondition) subQuery;
+        query.whereBuilder.append(exist +" (" + query.dqlsqlBuilder.getArraySQL(abstractCondition.query) + ") and ");
+        this.query.parameterList.addAll(abstractCondition.query.parameterList);
     }
 
     /**

@@ -186,8 +186,13 @@ public class AbstractDAO implements DAO {
 
     @Override
     public void create(Class clazz) {
+        create(this.quickDAOConfig.entityMap.get(clazz.getName()));
+    }
+
+    @Override
+    public void create(Entity entity) {
         try {
-            tableBuilder.createTable(this.quickDAOConfig.entityMap.get(clazz.getName()));
+            tableBuilder.createTable(entity);
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }

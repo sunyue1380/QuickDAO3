@@ -135,6 +135,18 @@ public interface Condition<T> extends Serializable {
     Condition<T> addSubQuery(String field, String operator, Condition subQuery);
 
     /**
+     * 添加exist子查询
+     * @param subQuery 子查询语句
+     */
+    Condition<T> addExistSubQuery(Condition subQuery);
+
+    /**
+     * 添加not exist子查询
+     * @param subQuery 子查询语句
+     */
+    Condition<T> addNotExistSubQuery(Condition subQuery);
+
+    /**
      * 添加自定义字段,具体映射规则请看此{@link cn.schoolwow.quickdao.dao.condition.Condition}
      * @param fields 自定义查询列
      */

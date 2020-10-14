@@ -73,6 +73,10 @@ public class QuickDAOConfig {
      * */
     public Entity[] dbEntityList;
     /**
+     * 虚拟表(dual等)
+     * */
+    public Entity[] visualTableList;
+    /**
      * 数据库信息
      * */
     public Database database;

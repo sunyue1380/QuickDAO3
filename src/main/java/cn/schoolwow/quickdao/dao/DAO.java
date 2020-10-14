@@ -27,6 +27,11 @@ public interface DAO extends DQLDAO,DMLDAO {
     void create(Class clazz);
 
     /**
+     * 建表
+     */
+    void create(Entity entity);
+
+    /**
      * 删表
      */
     void drop(Class clazz);

@@ -281,7 +281,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
             entity.tableName = "dual";
             entity.escapeTableName = "dual";
             entity.properties = new Property[0];
-            dbEntityList.add(entity);
+            quickDAOConfig.visualTableList = new Entity[]{entity};
         }
         quickDAOConfig.dbEntityList = dbEntityList.toArray(new Entity[0]);
     }

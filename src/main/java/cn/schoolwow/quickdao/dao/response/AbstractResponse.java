@@ -204,6 +204,10 @@ public class AbstractResponse<T> implements Response<T>{
         JSONObject subObject = new JSONObject();
         for (Property property : entity.properties) {
             String columnName = tableAliasName + "_" + property.column;
+            if(null==property.simpleTypeName){
+                subObject.put(property.name, resultSet.getString(columnName));
+                continue;
+            }
             switch (property.simpleTypeName) {
                 case "boolean": {
                     subObject.put(property.name, resultSet.getBoolean(columnName));
