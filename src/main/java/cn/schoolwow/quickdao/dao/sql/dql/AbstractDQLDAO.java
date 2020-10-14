@@ -81,6 +81,11 @@ public class AbstractDQLDAO extends AbstractSQLDAO implements DQLDAO {
                 return query(entity);
             }
         }
+        for(Entity entity:abstractDAO.quickDAOConfig.visualTableList){
+            if(entity.tableName.equals(tableName)){
+                return query(entity);
+            }
+        }
         throw new IllegalArgumentException("不存在的表名:"+tableName+"!");
     }
 

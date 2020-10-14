@@ -94,6 +94,19 @@ public class DAOTest extends BaseDAOTest{
         testHavingSubQuery();
         testFromSubQuery();
         testSelectSubQuery();
+        testExistSubQuery();
+    }
+
+    private void testExistSubQuery(){
+        List<String> productNameList = dao.query(Product.class)
+                .addExistSubQuery(
+                        dao.query(Product.class)
+                                .addQuery("price",">=",5000)
+                                .addColumn("id")
+                )
+                .execute()
+                .getSingleColumnList(String.class);
+        Assert.assertEquals(0,productNameList.size());
     }
 
     private void testSelectSubQuery(){
