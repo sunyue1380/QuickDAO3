@@ -54,6 +54,8 @@ public class MySQLTableBuilder extends AbstractTableBuilder {
                     }
                     if("auto_increment".equals(propertiesRs.getString("Extra"))){
                         property.strategy = IdStrategy.AutoIncrement;
+                    }else{
+                        property.strategy = IdStrategy.None;
                     }
                     if (null != propertiesRs.getString("Default")) {
                         property.defaultValue = propertiesRs.getString("Default");
