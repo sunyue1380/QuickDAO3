@@ -191,6 +191,13 @@ public interface Condition<T> extends Serializable {
     Condition<T> addColumn(Condition subQuery);
 
     /**
+     * 添加select子查询
+     * @param subQuery 子查询
+     * @param columnNameAlias 指定子查询返回列名的别名
+     */
+    Condition<T> addColumn(Condition subQuery, String columnNameAlias);
+
+    /**
      * 添加插入字段,用于{@link cn.schoolwow.quickdao.dao.response.Response#insert()}方法
      *
      * @param field 待更新的字段

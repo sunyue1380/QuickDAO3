@@ -172,6 +172,15 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
+    public Condition<T> addColumn(Condition subQuery, String columnNameAlias) {
+        subQuery.execute();
+        Query selectQuery = ((AbstractCondition)subQuery).query;
+        query.columnBuilder.append("( " + query.dqlsqlBuilder.getArraySQL(selectQuery) + ") "+columnNameAlias+",");
+        query.parameterList.addAll(selectQuery.parameterList);
+        return this;
+    }
+
+    @Override
     public Condition<T> addInsert(String field, Object value) {
         query.insertBuilder.append(query.quickDAOConfig.database.escape(query.entity.getColumnNameByFieldName(field)) + ",");
         query.insertParameterList.add(value);
@@ -590,6 +599,9 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
      * @param fieldClass 主类里需要查找的成员变量类型
      */
     public String getUniqueCompositFieldInMainClass(Class mainClass, Class fieldClass) {
+        if(!query.quickDAOConfig.entityMap.containsKey(mainClass.getName())){
+            throw new IllegalArgumentException("实体类不存在或者未被扫描!实体类名:"+mainClass.getName());
+        }
         Entity entity = query.quickDAOConfig.entityMap.get(mainClass.getName());
         Field[] fields = entity.compositFields;
         if (fields == null || fields.length == 0) {

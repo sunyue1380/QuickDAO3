@@ -114,7 +114,7 @@ public class DAOTest extends BaseDAOTest{
         Condition selectCondition = dao.query("dual")
                 .addColumn("name");
         List<String> productNameList = dao.query(Product.class)
-                .addColumn(selectCondition)
+                .addColumn(selectCondition,"nameAlias")
                 .execute()
                 .getSingleColumnList(String.class);
         Assert.assertEquals(4,productNameList.size());
