@@ -60,4 +60,10 @@ public interface DAO extends DQLDAO,DMLDAO {
      * 获取数据库信息
      */
     Entity[] getDbEntityList();
+
+    /**
+     * 生成entity的java文件
+     * @param tableNames 指定需要生成实体类的对应的表名
+     */
+    void generateEntityFile(String sourcePath, String[] tableNames);
 }

@@ -275,6 +275,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
             dbEntity.escapeTableName = quickDAOConfig.database.escape(dbEntity.tableName);
             dbEntity.clazz = Entity.class;
         }
+        quickDAOConfig.dbEntityList = dbEntityList.toArray(new Entity[0]);
         //添加虚拟表
         {
             Entity entity = new Entity();
@@ -283,7 +284,6 @@ public abstract class AbstractTableBuilder implements TableBuilder{
             entity.properties = new Property[0];
             quickDAOConfig.visualTableList = new Entity[]{entity};
         }
-        quickDAOConfig.dbEntityList = dbEntityList.toArray(new Entity[0]);
     }
 
     /**

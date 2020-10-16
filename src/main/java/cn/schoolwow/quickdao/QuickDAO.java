@@ -7,27 +7,18 @@ import cn.schoolwow.quickdao.dao.DAO;
 import cn.schoolwow.quickdao.dao.SQLiteDAO;
 import cn.schoolwow.quickdao.dao.sql.dml.IDGenerator;
 import cn.schoolwow.quickdao.database.*;
-import cn.schoolwow.quickdao.domain.Entity;
-import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import cn.schoolwow.quickdao.handler.DefaultTableDefiner;
 import cn.schoolwow.quickdao.handler.TableDefiner;
-import cn.schoolwow.quickdao.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.lang.reflect.Proxy;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.function.Predicate;
 
 public class QuickDAO {
@@ -185,131 +176,16 @@ public class QuickDAO {
     }
 
     public DAO build(){
-        try {
-            AbstractTableBuilder tableBuilder = getTableBuilder();
-            tableBuilder.autoBuildDatabase();
-            tableBuilder.connection.commit();
-            tableBuilder.connection.close();
-            TableBuilderInvocationHandler invocationHandler = new TableBuilderInvocationHandler(tableBuilder);
-            TableBuilder tableBuilderProxy = (TableBuilder) Proxy.newProxyInstance(Thread.currentThread()
-                    .getContextClassLoader(), new Class<?>[]{TableBuilder.class},invocationHandler);
-
-            AbstractDAO dao = null;
-            if(quickDAOConfig.database instanceof SQLiteDatabase){
-                dao = new SQLiteDAO(tableBuilderProxy,quickDAOConfig);
-            }else{
-                dao = new AbstractDAO(tableBuilderProxy,quickDAOConfig);
-            }
-            return dao;
-        } catch (SQLException e) {
-            throw new SQLRuntimeException(e);
-        }
-    }
-
-    /**
-     * 反向生成实体类
-     * @param sourcePath 源文件路径
-     * */
-    public void reverse(String sourcePath) throws SQLException {
-        quickDAOConfig.autoCreateTable = false;
-        quickDAOConfig.autoCreateProperty = false;
-        //数据库类型对应表
-        Map<String,String> mapping = new HashMap<>();
-        mapping.put("varchar","String");
-        mapping.put("longvarchar","String");
-        mapping.put("text","String");
-        mapping.put("mediumtext","String");
-        mapping.put("longtext","String");
-        mapping.put("boolean","boolean");
-        mapping.put("tinyint","byte");
-        mapping.put("blob","byte[]");
-        mapping.put("char","String");
-        mapping.put("smallint","short");
-        mapping.put("int","int");
-        mapping.put("integer","int");
-        mapping.put("bigint","long");
-        mapping.put("float","float");
-        mapping.put("double","double");
-        mapping.put("decimal","double");
-        mapping.put("date","java.util.Date");
-        mapping.put("time","java.util.Time");
-        mapping.put("datetime","java.util.Date");
-        mapping.put("timestamp","java.sql.Timestamp");
-
-        AbstractTableBuilder tableBuilder = getTableBuilder();
-        //对比实体类信息与数据库信息
-        List<Entity> dbEntityList = tableBuilder.getDatabaseEntity();
-        logger.debug("[获取数据库信息]数据库表个数:{}", dbEntityList.size());
-        //确定需要新增的表和更新的表
-        Collection<Entity> entityList = quickDAOConfig.entityMap.values();
-        StringBuilder builder = new StringBuilder();
-        String packageName = quickDAOConfig.packageNameMap.keySet().iterator().next();
-        for(Entity dbEntity:dbEntityList){
-            if(entityList.contains(dbEntity)){
-                continue;
-            }
-            dbEntity.className = StringUtil.Underline2Camel(dbEntity.tableName);
-            dbEntity.className = dbEntity.className.toUpperCase().charAt(0)+dbEntity.className.substring(1);
-            builder.setLength(0);
-            //新建Java类
-            builder.append("package "+packageName+";\n");
-            builder.append("import cn.schoolwow.quickdao.annotation.Comment;\n\n");
-            builder.append("import cn.schoolwow.quickdao.annotation.ColumnType;\n\n");
-            builder.append("import cn.schoolwow.quickdao.annotation.ColumnName;\n\n");
-            if(null!=dbEntity.comment){
-                builder.append("@Comment(\""+dbEntity.comment+"\")\n");
-            }
-            builder.append("public class "+dbEntity.className+"{\n\n");
-            for(Property property:dbEntity.properties){
-                if(null!=property.comment&&!property.comment.isEmpty()){
-                    builder.append("\t@Comment(\""+property.comment.replaceAll("\r\n","")+"\")\n");
-                }
-                if(property.id){
-                    if(property.strategy.equals(IdStrategy.AutoIncrement)){
-                        builder.append("\t@Id\n");
-                    }else{
-                        builder.append("\t@Id(strategy = IdStrategy.None)\n");
-                    }
-                }
-                builder.append("\t@ColumnName(\""+property.column+"\")\n");
-                builder.append("\t@ColumnType(\""+property.columnType+"\")\n");
-                if(property.columnType.contains("(")){
-                    property.columnType = property.columnType.substring(0,property.columnType.indexOf("("));
-                }
-                property.className = mapping.get(property.columnType.toLowerCase());
-                property.name = StringUtil.Underline2Camel(property.column);
-                builder.append("\tprivate "+property.className+" "+property.name+";\n\n");
-            }
-
-            for(Property property:dbEntity.properties){
-                builder.append("\tpublic "+ property.className +" get" +StringUtil.firstLetterUpper(property.name)+"(){\n\t\treturn this."+property.name+";\n\t}\n");
-                builder.append("\tpublic void set" +StringUtil.firstLetterUpper(property.name)+"("+property.className+" "+property.name+"){\n\t\tthis."+property.name+"= "+property.name+";\n\t}\n");
-            }
-
-            builder.append("};");
-
-            ByteArrayInputStream bais = new ByteArrayInputStream(builder.toString().getBytes());
-            Path target = Paths.get(sourcePath+"/"+ packageName.replace(".","/") + "/" + dbEntity.className+".java");
-            try {
-                Files.createDirectories(target.getParent());
-                Files.copy(bais, target, StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private AbstractTableBuilder getTableBuilder(){
         if(null==quickDAOConfig.dataSource){
             throw new IllegalArgumentException("请设置数据库连接池属性!");
         }
         //自动建表
+        AbstractTableBuilder tableBuilder = null;
         try {
             Connection connection = quickDAOConfig.dataSource.getConnection();
             connection.setAutoCommit(false);
             String url = connection.getMetaData().getURL();
             logger.info("[数据源地址]{}",url);
-            AbstractTableBuilder tableBuilder = null;
             if(url.contains("jdbc:h2")){
                 quickDAOConfig.database = new H2Database();
                 tableBuilder = new H2TableBuilder(quickDAOConfig);
@@ -337,7 +213,20 @@ public class QuickDAO {
                 }
             }
             quickDAOConfig.defaultTableDefiner.handleEntityMap();
-            return tableBuilder;
+            tableBuilder.autoBuildDatabase();
+            tableBuilder.connection.commit();
+            tableBuilder.connection.close();
+            TableBuilderInvocationHandler invocationHandler = new TableBuilderInvocationHandler(tableBuilder);
+            TableBuilder tableBuilderProxy = (TableBuilder) Proxy.newProxyInstance(Thread.currentThread()
+                    .getContextClassLoader(), new Class<?>[]{TableBuilder.class},invocationHandler);
+
+            AbstractDAO dao = null;
+            if(quickDAOConfig.database instanceof SQLiteDatabase){
+                dao = new SQLiteDAO(tableBuilderProxy,quickDAOConfig);
+            }else{
+                dao = new AbstractDAO(tableBuilderProxy,quickDAOConfig);
+            }
+            return dao;
         }catch (SQLException e){
             throw new SQLRuntimeException(e);
         }

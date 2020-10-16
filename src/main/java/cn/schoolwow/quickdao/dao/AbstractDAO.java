@@ -1,5 +1,6 @@
 package cn.schoolwow.quickdao.dao;
 
+import cn.schoolwow.quickdao.annotation.IdStrategy;
 import cn.schoolwow.quickdao.builder.sql.dml.AbstractDMLSQLBuilder;
 import cn.schoolwow.quickdao.builder.sql.dql.*;
 import cn.schoolwow.quickdao.builder.table.TableBuilder;
@@ -13,17 +14,22 @@ import cn.schoolwow.quickdao.dao.sql.transaction.AbstractTransaction;
 import cn.schoolwow.quickdao.dao.sql.transaction.Transaction;
 import cn.schoolwow.quickdao.database.*;
 import cn.schoolwow.quickdao.domain.Entity;
+import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
+import cn.schoolwow.quickdao.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.lang.reflect.Proxy;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class AbstractDAO implements DAO {
     private Logger logger = LoggerFactory.getLogger(DAO.class);
@@ -238,6 +244,105 @@ public class AbstractDAO implements DAO {
     @Override
     public Entity[] getDbEntityList() {
         return quickDAOConfig.dbEntityList;
+    }
+
+    @Override
+    public void generateEntityFile(String sourcePath, String[] tableNames) {
+        quickDAOConfig.autoCreateTable = false;
+        quickDAOConfig.autoCreateProperty = false;
+        //数据库类型对应表
+        Map<String,String> mapping = new HashMap<>();
+        mapping.put("varchar","String");
+        mapping.put("longvarchar","String");
+        mapping.put("text","String");
+        mapping.put("mediumtext","String");
+        mapping.put("longtext","String");
+        mapping.put("boolean","boolean");
+        mapping.put("tinyint","byte");
+        mapping.put("blob","byte[]");
+        mapping.put("char","String");
+        mapping.put("smallint","short");
+        mapping.put("int","int");
+        mapping.put("integer","int");
+        mapping.put("bigint","long");
+        mapping.put("float","float");
+        mapping.put("double","double");
+        mapping.put("decimal","double");
+        mapping.put("date","java.util.Date");
+        mapping.put("time","java.util.Time");
+        mapping.put("datetime","java.util.Date");
+        mapping.put("timestamp","java.sql.Timestamp");
+
+        List<Entity> dbEntityList;
+        if(null==tableNames||tableNames.length==0){
+            dbEntityList = Arrays.asList(quickDAOConfig.dbEntityList);
+        }else{
+            dbEntityList = new ArrayList<>(tableNames.length);
+            for(String tableName:tableNames){
+                for(Entity dbEntity:quickDAOConfig.dbEntityList){
+                    if(dbEntity.tableName.equals(tableName)){
+                        dbEntityList.add(dbEntity);
+                        break;
+                    }
+                }
+            }
+        }
+        StringBuilder builder = new StringBuilder();
+        String packageName = quickDAOConfig.packageNameMap.keySet().iterator().next();
+        for(Entity dbEntity:dbEntityList){
+            dbEntity.className = StringUtil.Underline2Camel(dbEntity.tableName);
+            dbEntity.className = dbEntity.className.toUpperCase().charAt(0)+dbEntity.className.substring(1);
+
+            Path target = Paths.get(sourcePath+"/"+ packageName.replace(".","/") + "/" + dbEntity.className+".java");
+            if(Files.exists(target)){
+                logger.warn("[实体类文件已经存在]{}",target);
+                continue;
+            }
+
+            builder.setLength(0);
+            //新建Java类
+            builder.append("package "+packageName+";\n");
+            builder.append("import cn.schoolwow.quickdao.annotation.*;\n\n");
+            if(null!=dbEntity.comment){
+                builder.append("@Comment(\""+dbEntity.comment+"\")\n");
+            }
+            builder.append("public class "+dbEntity.className+"{\n\n");
+            for(Property property:dbEntity.properties){
+                if(null!=property.comment&&!property.comment.isEmpty()){
+                    builder.append("\t@Comment(\""+property.comment.replaceAll("\r\n","")+"\")\n");
+                }
+                if(property.id){
+                    if(property.strategy.equals(IdStrategy.AutoIncrement)){
+                        builder.append("\t@Id\n");
+                    }else{
+                        builder.append("\t@Id(strategy = IdStrategy.None)\n");
+                    }
+                }
+                builder.append("\t@ColumnName(\""+property.column+"\")\n");
+                builder.append("\t@ColumnType(\""+property.columnType+"\")\n");
+                if(property.columnType.contains("(")){
+                    property.columnType = property.columnType.substring(0,property.columnType.indexOf("("));
+                }
+                property.className = mapping.get(property.columnType.toLowerCase());
+                property.name = StringUtil.Underline2Camel(property.column);
+                builder.append("\tprivate "+property.className+" "+property.name+";\n\n");
+            }
+
+            for(Property property:dbEntity.properties){
+                builder.append("\tpublic "+ property.className +" get" +StringUtil.firstLetterUpper(property.name)+"(){\n\t\treturn this."+property.name+";\n\t}\n\n");
+                builder.append("\tpublic void set" +StringUtil.firstLetterUpper(property.name)+"("+property.className+" "+property.name+"){\n\t\tthis."+property.name+"= "+property.name+";\n\t}\n\n");
+            }
+
+            builder.append("};");
+
+            ByteArrayInputStream bais = new ByteArrayInputStream(builder.toString().getBytes());
+            try {
+                Files.createDirectories(target.getParent());
+                Files.copy(bais, target);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**创建DMLDAO*/
