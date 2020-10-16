@@ -156,7 +156,7 @@ public class AbstractResponse<T> implements Response<T>{
                     columnNames[i - 1] = metaData.getColumnLabel(i);
                 }
                 while (resultSet.next()) {
-                    JSONObject o = new JSONObject();
+                    JSONObject o = new JSONObject(true);
                     for (int i = 1; i <= columnNames.length; i++) {
                         o.put(columnNames[i - 1], resultSet.getString(i));
                     }
@@ -201,7 +201,7 @@ public class AbstractResponse<T> implements Response<T>{
      * 获取子对象属性值
      */
     public static JSONObject getObject(Entity entity, String tableAliasName, ResultSet resultSet) throws SQLException {
-        JSONObject subObject = new JSONObject();
+        JSONObject subObject = new JSONObject(true);
         for (Property property : entity.properties) {
             String columnName = tableAliasName + "_" + property.column;
             if(null==property.simpleTypeName){
