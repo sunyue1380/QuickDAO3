@@ -438,7 +438,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
         subQuery.tableAliasName = query.tableAliasName + (query.joinTableIndex++);
         subQuery.primaryField = query.entity.getColumnNameByFieldName(primaryField);
         subQuery.joinTableField = joinConditionField;
-        subQuery.parameterList.addAll(joinQuery.parameterList);
+        subQuery.parameterList = joinQuery.parameterList;
         subQuery.condition = this;
         subQuery.query = query;
 

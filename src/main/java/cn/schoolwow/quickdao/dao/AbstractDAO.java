@@ -306,6 +306,9 @@ public class AbstractDAO implements DAO {
             if(null!=dbEntity.comment){
                 builder.append("@Comment(\""+dbEntity.comment+"\")\n");
             }
+            if(null!=dbEntity.tableName){
+                builder.append("@TableName(\""+dbEntity.tableName+"\")\n");
+            }
             builder.append("public class "+dbEntity.className+"{\n\n");
             for(Property property:dbEntity.properties){
                 if(null!=property.comment&&!property.comment.isEmpty()){
