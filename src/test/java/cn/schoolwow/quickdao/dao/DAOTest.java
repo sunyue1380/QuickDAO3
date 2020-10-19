@@ -11,6 +11,7 @@ import cn.schoolwow.quickdao.entity.Product;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -26,11 +27,15 @@ public class DAOTest extends BaseDAOTest{
         super(dao);
     }
 
-    @Test
-    public void testSQLDAO() {
+    @Before
+    public void before(){
         dao.rebuild(Person.class);
         dao.rebuild(Order.class);
         dao.rebuild(Product.class);
+    }
+
+    @Test
+    public void testSQLDAO() {
         singleInsert();
         multiInsert();
         multiUpdate();
@@ -44,9 +49,6 @@ public class DAOTest extends BaseDAOTest{
 
     @Test
     public void testQuery() {
-        dao.rebuild(Person.class);
-        dao.rebuild(Order.class);
-        dao.rebuild(Product.class);
         query();
         response();
     }
@@ -485,6 +487,7 @@ public class DAOTest extends BaseDAOTest{
                     .joinTable(joinCondition,
                             "id","person_id")
                     .done()
+                    .addQuery("person_id",1)
                     .orderByDesc("id")
                     .execute();
             Assert.assertEquals(1,response.count());
@@ -493,20 +496,20 @@ public class DAOTest extends BaseDAOTest{
         {
             List<Person> personList = dao.query(Person.class)
                     .crossJoinTable(Order.class)
-                    .addQuery("id",">",0)
+                    .addQuery("orderNo",">",0)
                     .done()
                     .addRawQuery("t.id = t1.person_id")
                     .execute()
                     .getList();
-            Assert.assertEquals(0,personList.size());
+            Assert.assertEquals(1,personList.size());
             personList = dao.query("person")
                     .crossJoinTable("order")
-                    .addQuery("id",">",0)
+                    .addQuery("order_no",">",0)
                     .done()
                     .addRawQuery("t.id = t1.person_id")
                     .execute()
                     .getList();
-            Assert.assertEquals(0,personList.size());
+            Assert.assertEquals(1,personList.size());
         }
         //部分查询
         {
