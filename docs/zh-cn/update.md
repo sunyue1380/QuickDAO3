@@ -1,5 +1,9 @@
 # 更新日志
 
+## v3.6
+* \[新增]全部支持子查询功能
+* \[新增]SQL执行失败时会打印原始SQL语句
+
 ## v3.5
 * \[新增]Condition接口添加addInsert方法以及Response接口添加insert方法,支持动态数据
 * \[新增]添加query(String tableName)和joinTable(String tableName....)方法,支持无实体类查询和关联查询操作

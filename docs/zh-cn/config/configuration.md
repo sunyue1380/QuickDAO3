@@ -6,7 +6,7 @@ QuickDAO通过配置信息生成DAO对象以便对数据库进行操作.用户�
 
 ```java
 //QuickDAO需要传递DataSource实现对象,您可以自由选择市面上的任意DataSource实现,本例采用dbcp
-BasicDataSource mysqlDataSource = new BasicDataSource();
+        BasicDataSource mysqlDataSource = new BasicDataSource();
         mysqlDataSource.setDriverClassName("com.mysql.jdbc.Driver");
         mysqlDataSource.setUrl("jdbc:mysql://127.0.0.1:3306/quickdao");
         mysqlDataSource.setUsername("root");
@@ -24,6 +24,8 @@ BasicDataSource mysqlDataSource = new BasicDataSource();
                 .autoCreateTable(false)
                 //是否自动新增字段,默认关闭
                 .autoCreateProperty(false)
+                //指定全局Id策略(v3.4版本开始提供)
+                .idStrategy(IdStrategy.IdGenerator)
                 //是否建表时建立外键约束,默认关闭
                 .foreignKey(false)
                 //忽略指定实体类
@@ -71,24 +73,6 @@ QuickDAO.newInstance()
 ```
 
 > 若手动使用@Id注解设置了strategy属性,则使用@Id注解所设置的策略
-
-## 指定id生成器
-
-> 此功能从v3.4版本新增
-
-QuickDAO支持指定ID生成器策略.实例如下:
-
-```java
-public class User{
-  @Id
-  private long id;
-}
-
-QuickDAO.newInstance()
-              //指定雪花算法Id生成器
-              .idGenerator(new SnowflakeIdGenerator())
-              .done();
-```
 
 QuickDAO内置了SnowflakeIdGenerator生成器,您也可以通过实现IdGenerator接口自定义Id生成器
 
