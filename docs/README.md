@@ -2,11 +2,11 @@
 
 QuickDAO是一个简单易用方便的Java ORM框架.具有以下优势:
 
-* 只需要注入一个DAO即可完成初始化操作
+* 所有对数据库的操作只需要注入一个DAO对象即可完成
 * 自动建表,自动新增数据库字段
 * API层面支持外键关联查询,支持复杂的外键关联查询
 * 内置数据库方言支持
-* 实体类注解,支持自定义字段名称,类型,是否建立索引,建立外键关联
+* 实体类注解,支持自定义字段名称,类型,是否建立索引,是否建立外键关联等等
 
 # 支持数据库
 
@@ -32,7 +32,7 @@ QuickDAO基于JDBC,为提高效率,默认只支持数据库连接池.
 <dependency>
   <groupId>cn.schoolwow</groupId>
   <artifactId>QuickDAO</artifactId>
-  <version>3.3</version>
+  <version>3.6</version>
 </dependency>
 ```
 

@@ -107,6 +107,7 @@ public class DAOTest extends BaseDAOTest{
                                 .addQuery("price",">=",5000)
                                 .addColumn("id")
                 )
+                .addColumn("name")
                 .execute()
                 .getSingleColumnList(String.class);
         Assert.assertEquals(0,productNameList.size());

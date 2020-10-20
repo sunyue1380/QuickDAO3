@@ -91,7 +91,6 @@ public class DefaultTableDefiner implements TableDefiner{
                     String prefix = c.getName().substring(packageName.length() + 1, c.getName().lastIndexOf(".")).replace(".", "_");
                     entity.tableName = quickDAOConfig.packageNameMap.get(packageName)+prefix + "@" + StringUtil.Camel2Underline(c.getSimpleName());
                 }
-                entity.escapeTableName = quickDAOConfig.database.escape(entity.tableName);
                 entity.clazz = c;
                 quickDAOConfig.entityMap.put(c.getName(), entity);
             }
@@ -111,6 +110,7 @@ public class DefaultTableDefiner implements TableDefiner{
         }
         for (Class c : classList) {
             Entity entity = quickDAOConfig.entityMap.get(c.getName());
+            entity.escapeTableName = quickDAOConfig.database.escape(entity.tableName);
             entity.className = c.getSimpleName();
             if (c.getDeclaredAnnotation(Comment.class) != null) {
                 Comment comment = (Comment) c.getDeclaredAnnotation(Comment.class);

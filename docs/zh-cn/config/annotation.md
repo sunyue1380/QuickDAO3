@@ -13,7 +13,9 @@ public class User{
 }
 ```
 
-### Id生成策略(v3.4新增)
+> 此注解v3.4版本新增strategy属性
+
+### Id生成策略
 
 从3.4版本开始,@Id注解带有strategy属性,strategy的值为以下值之一
 
@@ -23,7 +25,7 @@ public class User{
 
 每个实体类可以单独设置自己的Id生成策略,同时也可以在配置DAO对象时指定全局Id策略.@Id注解优先于全局策略.
 
-全局Id生成器策略请参阅[配置DAO](/configuration.md)
+全局Id生成器策略请参阅[配置DAO](/zh-cn/config/configuration.md)
 
 ## @ColumnNamne
 
@@ -90,10 +92,26 @@ public class User{
 * check check约束,默认为空
 * defaultValue 默认值,默认为为空
 
+> unionUnique属性从v3.3版本开始提供
+
+* unionUnique 是否建立联合唯一约束,默认为true
+
+建立唯一约束时,会将所有unionUnique属性为true的字段建立一个联合唯一约束.
+对于unionUnique为false的字段会单独建立唯一约束
+
 ```java
-public class User{ 
+public class User{
+    //userId属性id必须大于0
+    @Constraint(check = "#{userId} > 0")
+    private String userId;
+ 
+    //设置username属性非空且唯一
     @Constraint(notNull=true, unique=true)
     private String username;
+
+    //年龄默认设置为5岁
+    @Constraint(defaultValue="5")
+    private int age;
 }
 ```
 
@@ -129,6 +147,17 @@ private Date createdAt;
 private Date updatedAt;
 ```
 
+> v3.5新增function属性
+
+指定了function属性后,在查询,新增和更新操作时,会自动用指定的function值替换对应的SQL语句部分.
+
+场景举例: 密码字段使用md5函数加密
+
+```java
+//以下注解会使得在查询,插入,更新此字段时都会自动执行md5函数
+@TableField(function = "md5(concat('salt#',#{password}))")
+private String password;
+```
 ## @Ignore
 
 忽略该类/忽略该字段,作用于类和类字段上
@@ -150,12 +179,12 @@ public class Address{
 }
 ```
 
-> QuickDAO会自动忽略实体类中集合类成员变量以及实体类成员变量
+> 默认情况下QuickDAO会自动忽略实体类中集合类成员变量以及实体类成员变量,除非您调用了Condition类的compositField方法
 
 ```java
 public class User{
     private Address address;
     private List<Long> userIds;
-    //以上属性均为自动被QuickDAO所忽略
+    //默认情况下上述属性均会自动被QuickDAO所忽略
 }
 ```

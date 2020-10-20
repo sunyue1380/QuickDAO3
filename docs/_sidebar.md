@@ -4,6 +4,7 @@
   - [配置DAO](zh-cn/config/configuration.md)
   - [打印日志](zh-cn/config/log.md)
   - [实体类表名映射](zh-cn/config/mapping.md)
+  - [Id生成器策略](zh-cn/config/idStrategy.md)
   
 - 查询操作
 
@@ -12,6 +13,8 @@
   - [关联查询](zh-cn/select/joinTable.md)
   - [特殊查询](zh-cn/select/special.md)
   - [分页排序](zh-cn/select/page.md)
+  - [虚拟查询](zh-cn/select/virtual.md)
+  - [子查询](zh-cn/select/subquery.md)
 
 - 更新操作
 
@@ -23,6 +26,10 @@
 
   - [事务操作](zh-cn/transaction/transaction.md)
 
+- 实体类生成
+
+  - [实体类生成](zh-cn/generate/generateEntity.md)
+  
 - 更新日志
 
   - [更新日志](zh-cn/update.md)

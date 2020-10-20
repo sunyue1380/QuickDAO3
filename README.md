@@ -18,7 +18,7 @@ QuickDAO是一个简单易用方便的Java ORM框架.具有以下优势:
 
 # 更新日志
 
-[点此访问](https://sunyue1380.github.io/QuickDAO3/#/zh-cn/update)
+[点此访问](http://quickdao.schoolwow.cn/)
 
 # 快速入门
 
@@ -36,7 +36,7 @@ QuickDAO基于JDBC,为提高效率,默认只支持数据库连接池.
 <dependency>
   <groupId>cn.schoolwow</groupId>
   <artifactId>QuickDAO</artifactId>
-  <version>3.5</version>
+  <version>3.6</version>
 </dependency>
 ```
 
