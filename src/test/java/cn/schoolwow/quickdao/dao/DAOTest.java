@@ -55,7 +55,6 @@ public class DAOTest extends BaseDAOTest{
 
     @Test
     public void testTransaction() {
-        dao.rebuild(Person.class);
         Transaction transaction = dao.startTransaction();
         {
             Person person = new Person();
@@ -78,7 +77,6 @@ public class DAOTest extends BaseDAOTest{
 
     @Test
     public void testSubQuery(){
-        dao.rebuild(Product.class);
         Transaction transaction = dao.startTransaction();
         String[] productNames = new String[]{"笔记本电脑","冰箱","电视机","智能音箱"};
         String[] types = new String[]{"电器","电器","电器","数码"};
