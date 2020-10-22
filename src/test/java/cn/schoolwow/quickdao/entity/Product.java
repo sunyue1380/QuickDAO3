@@ -1,9 +1,6 @@
 package cn.schoolwow.quickdao.entity;
 
-import cn.schoolwow.quickdao.annotation.Comment;
-import cn.schoolwow.quickdao.annotation.Id;
-import cn.schoolwow.quickdao.annotation.IdStrategy;
-import cn.schoolwow.quickdao.annotation.TableField;
+import cn.schoolwow.quickdao.annotation.*;
 
 import java.util.Date;
 
@@ -20,8 +17,15 @@ public class Product {
     @Comment("商品价格")
     private int price;
 
+    @Comment("所属人")
+    @ForeignKey(table = Person.class)
+    @Constraint(notNull = true,check = "#{personId} > 0",defaultValue = "1")
+    private long personId;
+
     @TableField(createdAt = true)
     private Date publishTime;
+
+    private Person person;
 
     public long getId() {
         return id;
@@ -55,11 +59,27 @@ public class Product {
         this.price = price;
     }
 
+    public long getPersonId() {
+        return personId;
+    }
+
+    public void setPersonId(long personId) {
+        this.personId = personId;
+    }
+
     public Date getPublishTime() {
         return publishTime;
     }
 
     public void setPublishTime(Date publishTime) {
         this.publishTime = publishTime;
+    }
+
+    public Person getPerson() {
+        return person;
+    }
+
+    public void setPerson(Person person) {
+        this.person = person;
     }
 }

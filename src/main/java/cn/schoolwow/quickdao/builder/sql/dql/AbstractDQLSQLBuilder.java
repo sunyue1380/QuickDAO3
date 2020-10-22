@@ -63,6 +63,11 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
 
         PreparedStatement ps = connection.prepareStatement(builder.toString());
         builder = new StringBuilder(builder.toString().replace("?",PLACEHOLDER));
+        for(SubQuery subQuery:query.subQueryList){
+            if(null!=subQuery.subQuery){
+                addMainTableParameters(ps,subQuery.subQuery,query,builder);
+            }
+        }
         addMainTableParameters(ps,query,builder);
         return ps;
     }

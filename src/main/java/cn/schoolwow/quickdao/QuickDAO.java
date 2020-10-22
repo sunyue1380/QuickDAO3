@@ -39,6 +39,33 @@ public class QuickDAO {
      * */
     public QuickDAO dataSource(DataSource dataSource) {
         quickDAOConfig.dataSource = dataSource;
+        try {
+            Connection connection = quickDAOConfig.dataSource.getConnection();
+            connection.setAutoCommit(false);
+            String url = connection.getMetaData().getURL();
+            logger.info("[数据源地址]{}", url);
+            if (url.contains("jdbc:h2")) {
+                quickDAOConfig.database = new H2Database();
+                quickDAOConfig.tableBuilder = new H2TableBuilder(quickDAOConfig);
+            } else if (url.contains("jdbc:sqlite")) {
+                quickDAOConfig.database = new SQLiteDatabase();
+                quickDAOConfig.tableBuilder = new SQLiteTableBuilder(quickDAOConfig);
+            } else if (url.contains("jdbc:mysql")) {
+                quickDAOConfig.database = new MySQLDatabase();
+                quickDAOConfig.tableBuilder = new MySQLTableBuilder(quickDAOConfig);
+            } else if (url.contains("jdbc:postgresql")) {
+                quickDAOConfig.database = new PostgreDatabase();
+                quickDAOConfig.tableBuilder = new PostgreTableBuilder(quickDAOConfig);
+            } else if (url.contains("jdbc:sqlserver:")) {
+                quickDAOConfig.database = new SQLServerDatabase();
+                quickDAOConfig.tableBuilder = new SQLServerTableBuilder(quickDAOConfig);
+            } else {
+                throw new IllegalArgumentException("不支持的数据库类型!");
+            }
+            quickDAOConfig.tableBuilder.connection = connection;
+        }catch (Exception e){
+            throw new SQLRuntimeException(e);
+        }
         return this;
     }
 
@@ -161,8 +188,26 @@ public class QuickDAO {
 
     /**自定义表和列*/
     public TableDefiner define(Class clazz) {
-        if(quickDAOConfig.packageNameMap.isEmpty()){
-            throw new IllegalArgumentException("请先设置要扫描的实体类包名!");
+        if(quickDAOConfig.entityMap.isEmpty()){
+            try {
+                quickDAOConfig.defaultTableDefiner.getEntityMap();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if(!quickDAOConfig.entityMap.containsKey(clazz.getName())){
+            throw new IllegalArgumentException("未扫描到此类信息!类名:"+clazz.getName());
+        }
+        if(null==quickDAOConfig.database){
+            throw new IllegalArgumentException("请先调用dataSource方法配置数据源!");
+        }
+        quickDAOConfig.defaultTableDefiner.define(clazz);
+        return quickDAOConfig.defaultTableDefiner;
+    }
+
+    public DAO build(){
+        if(null==quickDAOConfig.database){
+            throw new IllegalArgumentException("请先调用dataSource方法配置数据源!");
         }
         if(quickDAOConfig.entityMap.isEmpty()){
             try {
@@ -171,52 +216,12 @@ public class QuickDAO {
                 throw new RuntimeException(e);
             }
         }
-        quickDAOConfig.defaultTableDefiner.define(clazz);
-        return quickDAOConfig.defaultTableDefiner;
-    }
-
-    public DAO build(){
-        if(null==quickDAOConfig.dataSource){
-            throw new IllegalArgumentException("请设置数据库连接池属性!");
-        }
-        //自动建表
-        AbstractTableBuilder tableBuilder = null;
         try {
-            Connection connection = quickDAOConfig.dataSource.getConnection();
-            connection.setAutoCommit(false);
-            String url = connection.getMetaData().getURL();
-            logger.info("[数据源地址]{}",url);
-            if(url.contains("jdbc:h2")){
-                quickDAOConfig.database = new H2Database();
-                tableBuilder = new H2TableBuilder(quickDAOConfig);
-            }else if(url.contains("jdbc:sqlite")){
-                quickDAOConfig.database = new SQLiteDatabase();
-                tableBuilder = new SQLiteTableBuilder(quickDAOConfig);
-            }else if(url.contains("jdbc:mysql")){
-                quickDAOConfig.database = new MySQLDatabase();
-                tableBuilder = new MySQLTableBuilder(quickDAOConfig);
-            }else if(url.contains("jdbc:postgresql")){
-                quickDAOConfig.database = new PostgreDatabase();
-                tableBuilder = new PostgreTableBuilder(quickDAOConfig);
-            }else if(url.contains("jdbc:sqlserver:")){
-                quickDAOConfig.database = new SQLServerDatabase();
-                tableBuilder = new SQLServerTableBuilder(quickDAOConfig);
-            }else{
-                throw new IllegalArgumentException("不支持的数据库类型!");
-            }
-            tableBuilder.connection = connection;
-            if(quickDAOConfig.entityMap.isEmpty()){
-                try {
-                    quickDAOConfig.defaultTableDefiner.getEntityMap();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
             quickDAOConfig.defaultTableDefiner.handleEntityMap();
-            tableBuilder.autoBuildDatabase();
-            tableBuilder.connection.commit();
-            tableBuilder.connection.close();
-            TableBuilderInvocationHandler invocationHandler = new TableBuilderInvocationHandler(tableBuilder);
+            quickDAOConfig.tableBuilder.autoBuildDatabase();
+            quickDAOConfig.tableBuilder.connection.commit();
+            quickDAOConfig.tableBuilder.connection.close();
+            TableBuilderInvocationHandler invocationHandler = new TableBuilderInvocationHandler(quickDAOConfig.tableBuilder);
             TableBuilder tableBuilderProxy = (TableBuilder) Proxy.newProxyInstance(Thread.currentThread()
                     .getContextClassLoader(), new Class<?>[]{TableBuilder.class},invocationHandler);
 

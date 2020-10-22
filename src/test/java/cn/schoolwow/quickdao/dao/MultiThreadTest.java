@@ -34,6 +34,7 @@ public class MultiThreadTest extends BaseDAOTest{
                     //新建Person
                     {
                         Person person = new Person();
+                        person.setPassword("123456");
                         person.setFirstName("Bill");
                         person.setLastName("Gates "+j);
                         person.setAddress("Xuanwumen 10");
