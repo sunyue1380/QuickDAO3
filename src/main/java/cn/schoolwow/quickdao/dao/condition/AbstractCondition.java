@@ -349,14 +349,14 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
 
     @Override
     public <E> SubCondition<E> crossJoinTable(Class<E> clazz) {
-        SubQuery subQuery = new SubQuery();
+        SubQuery<E> subQuery = new SubQuery<E>();
         subQuery.entity = query.quickDAOConfig.entityMap.get(clazz.getName());
         subQuery.tableAliasName = query.tableAliasName + (query.joinTableIndex++);
         subQuery.join = "cross join";
         subQuery.query = query;
         subQuery.condition = this;
 
-        AbstractSubCondition subCondition = null;
+        AbstractSubCondition<E> subCondition = null;
         if(query.quickDAOConfig.database instanceof SQLiteDatabase){
             subCondition = new SQLiteSubCondition(subQuery);
         }else{
@@ -400,7 +400,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
 
     @Override
     public <E> SubCondition<E> joinTable(Class<E> clazz, String primaryField, String joinTableField, String compositField) {
-        SubQuery subQuery = new SubQuery();
+        SubQuery<E> subQuery = new SubQuery<E>();
         subQuery.entity = query.quickDAOConfig.entityMap.get(clazz.getName());
         subQuery.tableAliasName = query.tableAliasName + (query.joinTableIndex++);
         subQuery.primaryField = query.entity.getColumnNameByFieldName(primaryField);
@@ -417,7 +417,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
         subQuery.query = query;
         subQuery.condition = this;
 
-        AbstractSubCondition subCondition = null;
+        AbstractSubCondition<E> subCondition = null;
         if(query.quickDAOConfig.database instanceof SQLiteDatabase){
             subCondition = new SQLiteSubCondition(subQuery);
         }else{
@@ -431,18 +431,18 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     public <E> SubCondition<E> joinTable(Condition<E> joinCondition, String primaryField, String joinConditionField) {
         joinCondition.execute();
         Query joinQuery = ((AbstractCondition) joinCondition).query;
-        SubQuery subQuery = new SubQuery();
+        SubQuery<E> subQuery = new SubQuery();
         subQuery.entity = joinQuery.entity;
         subQuery.subQuerySQLBuilder = joinQuery.dqlsqlBuilder.getArraySQL(joinQuery);
 
         subQuery.tableAliasName = query.tableAliasName + (query.joinTableIndex++);
         subQuery.primaryField = query.entity.getColumnNameByFieldName(primaryField);
         subQuery.joinTableField = joinConditionField;
-        subQuery.parameterList = joinQuery.parameterList;
+        subQuery.subQuery = joinQuery;
         subQuery.condition = this;
         subQuery.query = query;
 
-        AbstractSubCondition subCondition = null;
+        AbstractSubCondition<E> subCondition = null;
         if(query.quickDAOConfig.database instanceof SQLiteDatabase){
             subCondition = new SQLiteSubCondition(subQuery);
         }else{
