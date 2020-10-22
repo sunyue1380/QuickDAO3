@@ -6,7 +6,6 @@ import cn.schoolwow.quickdao.builder.sql.dml.AbstractDMLSQLBuilder;
 import cn.schoolwow.quickdao.dao.AbstractDAO;
 import cn.schoolwow.quickdao.dao.sql.AbstractSQLDAO;
 import cn.schoolwow.quickdao.domain.Entity;
-import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import org.slf4j.MDC;
 
@@ -37,21 +36,32 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
             effect = ps.executeUpdate();
             Entity entity = dmlsqlBuilder.quickDAOConfig.entityMap.get(instance.getClass().getName());
             if (effect>0&&null!=entity.id&&entity.id.strategy.equals(IdStrategy.AutoIncrement)) {
-                Property property = dmlsqlBuilder.quickDAOConfig.entityMap.get(instance.getClass().getName()).id;
-                if(null!=property){
-                    ResultSet rs = ps.getGeneratedKeys();
-                    if (rs.next()) {
-                        long id = rs.getLong(1);
-                        Field idField = instance.getClass().getDeclaredField(property.name);
-                        idField.setAccessible(true);
-                        if (idField.getType().isPrimitive()) {
-                            idField.setLong(instance, id);
-                        } else {
-                            idField.set(instance, Long.valueOf(id));
-                        }
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    Field idField = instance.getClass().getDeclaredField(entity.id.name);
+                    idField.setAccessible(true);
+                    switch(idField.getType().getSimpleName().toLowerCase()){
+                        case "int":
+                        case "integer":{
+                            if(idField.getType().isPrimitive()){
+                                idField.setInt(instance,rs.getInt(1));
+                            }else{
+                                idField.set(instance,Integer.valueOf(rs.getInt(1)));
+                            }
+                        }break;
+                        case "long":{
+                            if(idField.getType().isPrimitive()){
+                                idField.setLong(instance,rs.getLong(1));
+                            }else{
+                                idField.set(instance,Long.valueOf(rs.getLong(1)));
+                            }
+                        }break;
+                        case "string":{
+                            idField.set(instance,rs.getString(1));
+                        }break;
                     }
-                    rs.close();
                 }
+                rs.close();
             }
             ps.close();
         } catch (Exception e) {

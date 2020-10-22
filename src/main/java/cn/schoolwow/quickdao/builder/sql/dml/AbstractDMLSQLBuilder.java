@@ -180,10 +180,26 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             if(property.id&&property.strategy==IdStrategy.IdGenerator){
                 Field idField = instance.getClass().getDeclaredField(property.name);
                 idField.setAccessible(true);
-                if (idField.getType().isPrimitive()) {
-                    idField.setLong(instance, quickDAOConfig.idGenerator.getNextId());
-                } else {
-                    idField.set(instance, Long.valueOf(quickDAOConfig.idGenerator.getNextId()));
+                long value = quickDAOConfig.idGenerator.getNextId();
+                switch(idField.getType().getSimpleName().toLowerCase()){
+                    case "int":
+                    case "integer":{
+                        if(idField.getType().isPrimitive()){
+                            idField.setInt(instance, (int) value);
+                        }else{
+                            idField.set(instance,Integer.valueOf(value+""));
+                        }
+                    }break;
+                    case "long":{
+                        if(idField.getType().isPrimitive()){
+                            idField.setLong(instance,value);
+                        }else{
+                            idField.set(instance,Long.valueOf(value));
+                        }
+                    }break;
+                    case "string":{
+                        idField.set(instance,value+"");
+                    }break;
                 }
             }
             if(property.createdAt||property.updateAt){
