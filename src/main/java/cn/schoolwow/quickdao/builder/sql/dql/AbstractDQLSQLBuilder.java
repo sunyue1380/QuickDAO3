@@ -140,24 +140,26 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
 
         PreparedStatement ps = connection.prepareStatement(builder.toString());
         builder = new StringBuilder(builder.toString().replace("?",PLACEHOLDER));
+        for(SubQuery subQuery:query.subQueryList){
+            if(null!=subQuery.subQuery){
+                addMainTableParameters(ps,subQuery.subQuery,query,builder);
+            }
+        }
         addMainTableParameters(ps,query,builder);
         for (Object parameter : query.havingParameterList) {
             setParameter(parameter,ps,query.parameterIndex++,builder);
         }
         //添加union语句
         for(AbstractCondition abstractCondition:query.unionList){
-            for (Object parameter : abstractCondition.query.parameterList) {
+            Query unionQuery = abstractCondition.query;
+            for(SubQuery subQuery:unionQuery.subQueryList){
+                if(null!=subQuery.subQuery){
+                    addMainTableParameters(ps,subQuery.subQuery,query,builder);
+                }
+            }
+            addMainTableParameters(ps,unionQuery,query,builder);
+            for (Object parameter : unionQuery.havingParameterList) {
                 setParameter(parameter,ps,query.parameterIndex++,builder);
-            }
-            for (SubQuery subQuery : abstractCondition.query.subQueryList) {
-                for (Object parameter : subQuery.parameterList) {
-                    setParameter(parameter,ps,query.parameterIndex++,builder);
-                }
-            }
-            for(AbstractCondition orCondition:query.orList){
-                for (Object parameter : orCondition.query.parameterList) {
-                    setParameter(parameter,ps,query.parameterIndex++,builder);
-                }
             }
         }
         MDC.put("name","获取列表");
@@ -176,9 +178,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         }
         if(query.compositField){
             for (SubQuery subQuery : query.subQueryList) {
-                if(subQuery.columnBuilder.length()==0){
-                    builder.append("," + columns(subQuery.entity, subQuery.tableAliasName));
-                }
+                builder.append("," + columns(subQuery.entity, subQuery.tableAliasName));
             }
         }
         builder.append(" from " + query.entity.escapeTableName);
@@ -218,10 +218,9 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
      * 添加where的SQL语句
      */
     private void addWhereStatement(Query query,StringBuilder sqlBuilder) {
-        //添加查询条件
         sqlBuilder.append(" " + query.whereBuilder.toString());
         for (SubQuery subQuery : query.subQueryList) {
-            if (subQuery.columnBuilder.length()==0&&subQuery.whereBuilder.length() > 0) {
+            if (subQuery.whereBuilder.length() > 0) {
                 sqlBuilder.append(" and " + subQuery.whereBuilder.toString() + " ");
             }
         }
@@ -234,17 +233,24 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
      * 添加主表参数
      */
     protected void addMainTableParameters(PreparedStatement ps, Query query, StringBuilder sqlBuilder) throws SQLException {
+        addMainTableParameters(ps,query,query,sqlBuilder);
+    }
+
+    /**
+     * 添加主表参数
+     */
+    protected void addMainTableParameters(PreparedStatement ps, Query query, Query mainQuery, StringBuilder sqlBuilder) throws SQLException {
+        for (Object parameter : query.parameterList) {
+            setParameter(parameter,ps,mainQuery.parameterIndex++,sqlBuilder);
+        }
         for (SubQuery subQuery : query.subQueryList) {
             for (Object parameter : subQuery.parameterList) {
-                setParameter(parameter,ps,query.parameterIndex++,sqlBuilder);
+                setParameter(parameter,ps,mainQuery.parameterIndex++,sqlBuilder);
             }
-        }
-        for (Object parameter : query.parameterList) {
-            setParameter(parameter,ps,query.parameterIndex++,sqlBuilder);
         }
         for(AbstractCondition orCondition:query.orList){
             for (Object parameter : orCondition.query.parameterList) {
-                setParameter(parameter,ps,query.parameterIndex++,sqlBuilder);
+                setParameter(parameter,ps,mainQuery.parameterIndex++,sqlBuilder);
             }
         }
     }

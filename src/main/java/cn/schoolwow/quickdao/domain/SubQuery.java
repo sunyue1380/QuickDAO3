@@ -17,10 +17,6 @@ public class SubQuery<T> implements Serializable {
      */
     public transient Entity entity;
     /**
-     * 关联表自定义列名
-     */
-    public StringBuilder columnBuilder = new StringBuilder();
-    /**
      * 表别名
      */
     public String tableAliasName;
@@ -49,9 +45,13 @@ public class SubQuery<T> implements Serializable {
      */
     public List parameterList = new ArrayList();
     /**
-     * 关联子查询
+     * join Condition 关联子查询
      * */
     public StringBuilder subQuerySQLBuilder;
+    /**
+     * join Condition 关联子查询Query
+     * */
+    public Query subQuery;
     /**
      * 父表
      */
