@@ -393,6 +393,11 @@ public class DefaultTableDefiner implements TableDefiner{
                     return true;
                 }
             }
+            for(Class _clazz:quickDAOConfig.entityClassMap.keySet()){
+                if(_clazz.getName().equals(clazz.getName())){
+                    return true;
+                }
+            }
         }
 
         if(null!=quickDAOConfig.predicate){

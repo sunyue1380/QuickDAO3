@@ -1,6 +1,7 @@
 package cn.schoolwow.quickdao.domain;
 
 import cn.schoolwow.quickdao.annotation.IdStrategy;
+import cn.schoolwow.quickdao.builder.table.AbstractTableBuilder;
 import cn.schoolwow.quickdao.dao.sql.dml.IDGenerator;
 import cn.schoolwow.quickdao.dao.sql.dml.SnowflakeIdGenerator;
 import cn.schoolwow.quickdao.database.Database;
@@ -61,10 +62,6 @@ public class QuickDAOConfig {
      */
     public IDGenerator idGenerator = new SnowflakeIdGenerator();
     /**
-     * 实体表自定义
-     */
-    public DefaultTableDefiner defaultTableDefiner;
-    /**
      * 扫描后的实体类信息
      * */
     public Map<String, Entity> entityMap = new HashMap<>();
@@ -84,4 +81,12 @@ public class QuickDAOConfig {
      * 数据库锁
      * */
     public ReentrantLock reentrantLock;
+    /**
+     * 扫描实体了信息
+     */
+    public DefaultTableDefiner defaultTableDefiner;
+    /**
+     * 建表对象
+     */
+    public AbstractTableBuilder tableBuilder;
 }
