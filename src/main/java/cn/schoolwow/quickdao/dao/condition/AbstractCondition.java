@@ -176,7 +176,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
         subQuery.execute();
         Query selectQuery = ((AbstractCondition)subQuery).query;
         query.columnBuilder.append("( " + query.dqlsqlBuilder.getArraySQL(selectQuery) + ") "+columnNameAlias+",");
-        query.parameterList.addAll(selectQuery.parameterList);
+        query.selectQueryList.add(selectQuery);
         return this;
     }
 

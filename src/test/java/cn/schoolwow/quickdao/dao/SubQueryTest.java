@@ -43,7 +43,9 @@ public class SubQueryTest extends BaseDAOTest{
     }
 
     private void testSelectSubQuery(){
-        Condition selectCondition = dao.query("dual")
+        Condition selectCondition = dao.query(Product.class)
+                .addQuery("type","电器")
+                .addQuery("price",4000)
                 .addColumn("name");
         List<String> productNameList = dao.query(Product.class)
                 .addColumn(selectCondition,"nameAlias")
@@ -54,6 +56,7 @@ public class SubQueryTest extends BaseDAOTest{
 
     private void testFromSubQuery(){
         Condition<Product> fromCondition = dao.query(Product.class)
+                .addQuery("type","电器")
                 .groupBy("type")
                 .addColumn("type")
                 .addColumn("avg(price) avgPrice");

@@ -57,18 +57,25 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
 
     @Override
     public PreparedStatement count(Query query) throws SQLException {
-        StringBuilder builder = new StringBuilder("select count(1) from " + query.entity.escapeTableName + " as "+query.tableAliasName);
+        StringBuilder builder = new StringBuilder("select count(1) from ( select " + query.distinct + " ");
+        //如果有指定列,则添加指定列
+        if(query.columnBuilder.length()>0){
+            builder.append(query.columnBuilder.toString());
+        }else{
+            builder.append(columns(query.entity, query.tableAliasName));
+        }
+        builder.append(" from " + query.entity.escapeTableName);
+        if(null!=query.entity.clazz){
+            builder.append(" as " + query.tableAliasName);
+        }
         addJoinTableStatement(query,builder);
         addWhereStatement(query,builder);
+        builder.append(" " + query.groupByBuilder.toString() + " " + query.havingBuilder.toString());
+        builder.append(") as foo");
 
         PreparedStatement ps = connection.prepareStatement(builder.toString());
         builder = new StringBuilder(builder.toString().replace("?",PLACEHOLDER));
-        for(SubQuery subQuery:query.subQueryList){
-            if(null!=subQuery.subQuery){
-                addMainTableParameters(ps,subQuery.subQuery,query,builder);
-            }
-        }
-        addMainTableParameters(ps,query,builder);
+        addArraySQLParameters(ps,query,query,builder);
         return ps;
     }
 
@@ -105,7 +112,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         for (Object parameter : query.updateParameterList) {
             setParameter(parameter,ps,query.parameterIndex++,builder);
         }
-        addMainTableParameters(ps,query,builder);
+        addMainTableParameters(ps,query,query,builder);
         MDC.put("name","批量更新");
         MDC.put("sql",builder.toString());
         return ps;
@@ -119,7 +126,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
 
         PreparedStatement ps = connection.prepareStatement(builder.toString());
         builder = new StringBuilder(builder.toString().replace("?",PLACEHOLDER));
-        addMainTableParameters(ps,query,builder);
+        addMainTableParameters(ps,query,query,builder);
         MDC.put("name","批量删除");
         MDC.put("sql",builder.toString());
         return ps;
@@ -145,12 +152,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
 
         PreparedStatement ps = connection.prepareStatement(builder.toString());
         builder = new StringBuilder(builder.toString().replace("?",PLACEHOLDER));
-        for(SubQuery subQuery:query.subQueryList){
-            if(null!=subQuery.subQuery){
-                addMainTableParameters(ps,subQuery.subQuery,query,builder);
-            }
-        }
-        addMainTableParameters(ps,query,builder);
+        addArraySQLParameters(ps,query,query,builder);
         for (Object parameter : query.havingParameterList) {
             setParameter(parameter,ps,query.parameterIndex++,builder);
         }
@@ -235,10 +237,27 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
     }
 
     /**
-     * 添加主表参数
-     */
-    protected void addMainTableParameters(PreparedStatement ps, Query query, StringBuilder sqlBuilder) throws SQLException {
-        addMainTableParameters(ps,query,query,sqlBuilder);
+     * 添加Array语句参数
+     * @param ps prepareStatment对象
+     * @param query 当前query对象
+     * @param mainQuery 主query
+     * @param builder SQL语句拼接
+     * */
+    private void addArraySQLParameters(PreparedStatement ps, Query query, Query mainQuery, StringBuilder builder) throws SQLException {
+        for(Query selectQuery:query.selectQueryList){
+            addArraySQLParameters(ps,selectQuery,mainQuery,builder);
+        }
+        //from子查询
+        if(null!=query.fromQuery){
+            addArraySQLParameters(ps,query.fromQuery,mainQuery,builder);
+        }
+        //关联子查询
+        for(SubQuery subQuery:query.subQueryList){
+            if(null!=subQuery.subQuery){
+                addArraySQLParameters(ps,subQuery.subQuery,mainQuery,builder);
+            }
+        }
+        addMainTableParameters(ps,query,mainQuery,builder);
     }
 
     /**

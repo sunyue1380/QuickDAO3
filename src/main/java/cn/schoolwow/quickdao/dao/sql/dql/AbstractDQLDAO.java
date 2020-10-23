@@ -93,12 +93,15 @@ public class AbstractDQLDAO extends AbstractSQLDAO implements DQLDAO {
     public Condition query(Condition condition) {
         condition.execute();
         Query fromQuery = ((AbstractCondition) condition).query;
+
         Entity entity = new Entity();
         entity.clazz = Entity.class;
         entity.tableName = "( " + dqlsqlBuilder.getArraySQL(fromQuery).toString() +" )";
         entity.escapeTableName = entity.tableName;
         entity.properties = new Property[0];
-        return query(entity);
+        AbstractCondition condition1 = (AbstractCondition) query(entity);
+        condition1.query.fromQuery = fromQuery;
+        return condition1;
     }
 
     private Condition query(Entity entity){
