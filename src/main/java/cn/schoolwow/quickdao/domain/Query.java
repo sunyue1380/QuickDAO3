@@ -18,6 +18,10 @@ public class Query implements Serializable {
      */
     public transient Entity entity;
     /**
+     * from子查询
+     */
+    public Query fromQuery;
+    /**
      * 关联表计数
      * */
     public int joinTableIndex = 1;
@@ -81,6 +85,10 @@ public class Query implements Serializable {
      * 参数索引
      */
     public int parameterIndex = 1;
+    /**
+     * select子查询
+     */
+    public List<Query> selectQueryList = new ArrayList();
     /**
      * 查询参数
      */
