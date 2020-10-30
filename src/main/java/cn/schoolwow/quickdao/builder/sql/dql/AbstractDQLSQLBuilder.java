@@ -6,6 +6,7 @@ import cn.schoolwow.quickdao.domain.*;
 import org.slf4j.MDC;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLBuilder{
@@ -53,6 +54,41 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         MDC.put("name","字段查询");
         MDC.put("sql",sql.replace("?",(value instanceof String)?"'"+value.toString()+"'":value.toString()));
         return ps;
+    }
+
+    @Override
+    public int getResultSetRowCount(Query query) throws SQLException {
+        query.parameterIndex = 1;
+        StringBuilder builder = new StringBuilder("select count(1) from ( select " + query.distinct + " ");
+        //如果有指定列,则添加指定列
+        if(query.columnBuilder.length()>0){
+            builder.append(query.columnBuilder.toString());
+        }else{
+            builder.append(columns(query.entity, query.tableAliasName));
+        }
+        builder.append(" from " + query.entity.escapeTableName);
+        if(null!=query.entity.clazz){
+            builder.append(" as " + query.tableAliasName);
+        }
+        addJoinTableStatement(query,builder);
+        addWhereStatement(query,builder);
+        builder.append(" " + query.groupByBuilder.toString() + " " + query.havingBuilder.toString());
+        builder.append(" "+query.limit);
+        builder.append(") as foo");
+
+        PreparedStatement ps = connection.prepareStatement(builder.toString());
+        builder = new StringBuilder(builder.toString().replace("?",PLACEHOLDER));
+        addArraySQLParameters(ps,query,query,builder);
+        ResultSet resultSet = ps.executeQuery();
+        int count = -1;
+        if (resultSet.next()) {
+            count = resultSet.getInt(1);
+        }
+        resultSet.close();
+        ps.close();
+        MDC.put("count",count+"");
+        query.parameterIndex = 1;
+        return count;
     }
 
     @Override

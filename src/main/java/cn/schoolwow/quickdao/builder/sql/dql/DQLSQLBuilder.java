@@ -16,6 +16,11 @@ public interface DQLSQLBuilder {
     PreparedStatement fetch(Class clazz, String field, Object value) throws SQLException;
 
     /**
+     * 获取结果集行数
+     */
+    int getResultSetRowCount(Query query) throws SQLException;
+
+    /**
      * 获取符合条件的总数目
      */
     PreparedStatement count(Query query) throws SQLException;

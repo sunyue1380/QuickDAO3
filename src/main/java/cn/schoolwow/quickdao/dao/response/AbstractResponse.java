@@ -39,7 +39,6 @@ public class AbstractResponse<T> implements Response<T>{
             throw new SQLRuntimeException(e);
         }
         query.parameterIndex = 1;
-        MDC.put("count",count+"");
         return count;
     }
 
@@ -119,7 +118,7 @@ public class AbstractResponse<T> implements Response<T>{
     public List getSingleColumnList(Class clazz) {
         try {
             PreparedStatement ps = query.dqlsqlBuilder.getArray(query);
-            JSONArray array = new JSONArray((int) count());
+            JSONArray array = new JSONArray(query.dqlsqlBuilder.getResultSetRowCount(query));
             ResultSet resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 array.add(resultSet.getString(1));
@@ -147,7 +146,7 @@ public class AbstractResponse<T> implements Response<T>{
         JSONArray array = null;
         try {
             PreparedStatement ps = query.dqlsqlBuilder.getArray(query);
-            array = new JSONArray((int) count());
+            array = new JSONArray(query.dqlsqlBuilder.getResultSetRowCount(query));
             ResultSet resultSet = ps.executeQuery();
             if(query.columnBuilder.length()>0){
                 ResultSetMetaData metaData = resultSet.getMetaData();
