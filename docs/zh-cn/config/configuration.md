@@ -20,12 +20,14 @@ QuickDAO通过配置信息生成DAO对象以便对数据库进行操作.用户�
                 .packageName("cn.schoolwow.quickdao.entity","quickdao")
                 //指定扫描单个实体类(v3.2版本开始提供)
                 .entity(Person.class)
-                //是否自动新增表,默认关闭
+                //是否自动新增表,默认开启
                 .autoCreateTable(false)
-                //是否自动新增字段,默认关闭
+                //是否自动新增字段,默认开启
                 .autoCreateProperty(false)
                 //指定全局Id策略(v3.4版本开始提供)
                 .idStrategy(IdStrategy.IdGenerator)
+                //指定全局Id生成期实例(目前只支持雪花算法)
+                .idGenerator(new SnowflakeIdGenerator())
                 //是否建表时建立外键约束,默认关闭
                 .foreignKey(false)
                 //忽略指定实体类

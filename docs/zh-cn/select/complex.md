@@ -41,7 +41,7 @@ Condition condition = dao.query(Person.class)
     .addQuery("type",">=","1")
 ```
 
-这些方法名见名知义,同时也有详细的JavaDoc文档.所有的查询条件接口以``add``开头,您可以很方便的分辨出哪些是查询方法接口.
+这些方法名见名知义,同时也有详细的JavaDoc文档.所有的查询条件接口以``addXXXQuery``命名,您可以很方便的分辨出哪些是查询方法接口.
 
 ## or查询
 

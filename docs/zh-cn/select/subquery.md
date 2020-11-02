@@ -2,7 +2,9 @@
 
 > 此功能从v3.6版本开始提供
 
-QuickDAO从3.6版本开始全部支持子查询功能,您可以将Condition接口对象作为子查询参数传入.
+QuickDAO从3.6版本开始支持子查询功能,您可以将Condition接口对象作为子查询参数传入.
+
+## 实体类信息
 
 ```java
 public class Product {

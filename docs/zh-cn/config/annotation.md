@@ -27,7 +27,7 @@ public class User{
 
 全局Id生成器策略请参阅[配置DAO](/zh-cn/config/configuration.md)
 
-## @ColumnNamne
+## @ColumnName
 
 映射字段名,作用于类字段上
 
@@ -61,9 +61,10 @@ public class User{
 
 ## @Comment
 
-添加数据库注释,作用于类字段上
+添加数据库注释,作用于类和成员变量上
 
 ```java
+@Comment("用户表")
 public class User{
     @Comment("用户名")
     private String username;
