@@ -1,6 +1,6 @@
 # 关联外键查询
 
-QuickDAO提供了强大的外键关联查询,核心方法joinTable方法,且可以多次关联.
+QuickDAO提供了强大的外键关联查询,核心方法为joinTable方法.
 
 ## 实体类信息
 
@@ -78,7 +78,7 @@ joinTable方法用于关联表,方法定义如下:
 
 ## 表别名
 
-默认情况下,主表别名为t,依次关联的子表分为t1,t2,t3......
+默认情况下,主表别名为t,依次关联的子表分别为t1,t2,t3......
 
 ## 关联查询
 
@@ -140,11 +140,11 @@ public class Person {
 
 ```java
 List<Person> userList = dao.query(Person.class)
-        //person1.motherId = person2.id,关联属性到mother变量
-        .joinTable(Person.class,"motherId","id","mother")
+        //person1.mother_id = person2.id,关联属性到mother变量
+        .joinTable(Person.class,"mother_id","id","mother")
         .done()
-        //关联到User表的id字段,返回实体类信息放入变量名为followUser的实体类中
-        .joinTable(Person.class,"fatherId","id","father")
+        //person1.father_id = person2.id,关联属性到father变量
+        .joinTable(Person.class,"father_id","id","father")
         .done()
         .compositField()
         .execute()

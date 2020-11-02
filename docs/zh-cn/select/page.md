@@ -1,6 +1,6 @@
 # 分页与排序
 
-QuickDAO提供了非常简单的分页排序接口,由于只有查询操作需要分页排序,故这些方法放在了Condition接口中.
+QuickDAO提供了非常简单的分页排序接口.
 
 ```java
 Condition condition = dao.query(Person.class)
@@ -10,7 +10,7 @@ Condition condition = dao.query(Person.class)
        .limit(0,10)
        //根据该字段升序排列
        .orderBy("id")
-       ////根据该字段升序排列
+       //根据该字段升序排列
        .orderByDesc("id");
 Response response = condition.execute();
 PageVo<Person> personList = response.getPagingList();
