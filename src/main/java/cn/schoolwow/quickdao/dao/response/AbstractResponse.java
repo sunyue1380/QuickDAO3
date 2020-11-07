@@ -142,6 +142,22 @@ public class AbstractResponse<T> implements Response<T>{
     }
 
     @Override
+    public PageVo<T> getPagingList() {
+        query.pageVo.setList(getArray());
+        setPageVo();
+        return query.pageVo;
+    }
+
+    @Override
+    public JSONObject getObject() {
+        JSONArray array = getArray();
+        if(null==array||array.isEmpty()){
+            return null;
+        }
+        return array.getJSONObject(0);
+    }
+
+    @Override
     public JSONArray getArray() {
         JSONArray array = null;
         try {
@@ -179,13 +195,6 @@ public class AbstractResponse<T> implements Response<T>{
         return array;
     }
 
-    @Override
-    public PageVo<T> getPagingList() {
-        query.pageVo.setList(getList());
-        setPageVo();
-        return query.pageVo;
-    }
-
     /**设置分页对象*/
     private void setPageVo() {
         if (query.pageVo == null) {
@@ -203,38 +212,39 @@ public class AbstractResponse<T> implements Response<T>{
         JSONObject subObject = new JSONObject(true);
         for (Property property : entity.properties) {
             String columnName = tableAliasName + "_" + property.column;
+            String key = property.name==null?property.column:property.name;
             if(null==property.simpleTypeName){
-                subObject.put(property.name, resultSet.getString(columnName));
+                subObject.put(key, resultSet.getString(columnName));
                 continue;
             }
             switch (property.simpleTypeName) {
                 case "boolean": {
-                    subObject.put(property.name, resultSet.getBoolean(columnName));
+                    subObject.put(key, resultSet.getBoolean(columnName));
                 }
                 break;
                 case "int":
                 case "integer": {
-                    subObject.put(property.name, resultSet.getInt(columnName));
+                    subObject.put(key, resultSet.getInt(columnName));
                 }
                 break;
                 case "float": {
-                    subObject.put(property.name, resultSet.getFloat(columnName));
+                    subObject.put(key, resultSet.getFloat(columnName));
                 }
                 break;
                 case "long": {
-                    subObject.put(property.name, resultSet.getLong(columnName));
+                    subObject.put(key, resultSet.getLong(columnName));
                 }
                 break;
                 case "double": {
-                    subObject.put(property.name, resultSet.getDouble(columnName));
+                    subObject.put(key, resultSet.getDouble(columnName));
                 }
                 break;
                 case "string": {
-                    subObject.put(property.name, resultSet.getString(columnName));
+                    subObject.put(key, resultSet.getString(columnName));
                 }
                 break;
                 default: {
-                    subObject.put(property.name, resultSet.getObject(columnName));
+                    subObject.put(key, resultSet.getObject(columnName));
                 }
             }
         }

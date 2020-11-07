@@ -86,6 +86,10 @@ public class AbstractSQLBuilder implements SQLBuilder{
      * DQL查询操作设置参数
      */
     protected static void setParameter(Object parameter, PreparedStatement ps, int parameterIndex, StringBuilder sqlBuilder) throws SQLException {
+        if(null==parameter){
+            ps.setObject(parameterIndex,null);
+            return;
+        }
         switch (parameter.getClass().getSimpleName().toLowerCase()) {
             case "boolean": {
                 ps.setBoolean(parameterIndex, (Boolean) parameter);
@@ -108,7 +112,7 @@ public class AbstractSQLBuilder implements SQLBuilder{
             }break;
             case "date": {
                 if(parameter instanceof Date){
-                    ps.setDate(parameterIndex, (java.sql.Date) parameter);
+                    ps.setDate(parameterIndex, (Date) parameter);
                 }else{
                     java.util.Date d = (java.util.Date) parameter;
                     ps.setDate(parameterIndex, new Date(d.getTime()));

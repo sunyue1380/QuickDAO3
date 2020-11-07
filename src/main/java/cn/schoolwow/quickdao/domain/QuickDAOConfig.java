@@ -89,4 +89,14 @@ public class QuickDAOConfig {
      * 建表对象
      */
     public AbstractTableBuilder tableBuilder;
+
+    /**根据表名获取对应数据库实体类*/
+    public Entity getDbEntityByTableName(String tableName){
+        for(Entity entity:dbEntityList){
+            if(entity.tableName.equals(tableName)){
+                return entity;
+            }
+        }
+        return null;
+    }
 }

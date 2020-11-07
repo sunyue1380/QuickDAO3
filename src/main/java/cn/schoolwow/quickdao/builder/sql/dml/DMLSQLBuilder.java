@@ -18,6 +18,8 @@ public interface DMLSQLBuilder {
     PreparedStatement updateById(Object[] instances) throws Exception;
     /**根据字段值删除*/
     PreparedStatement deleteByProperty(Class clazz, String property, Object value) throws SQLException;
+    /**根据字段值删除*/
+    PreparedStatement deleteByProperty(String tableName, String property, Object value) throws SQLException;
     /**清空表*/
     PreparedStatement clear(Class clazz) throws SQLException;
 }

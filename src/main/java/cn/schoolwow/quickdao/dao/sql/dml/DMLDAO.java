@@ -103,6 +103,14 @@ public interface DMLDAO extends SQLDAO {
     int delete(Class clazz, String field, Object value);
 
     /**
+     * 根据指定字段值删除数据库记录
+     * @param tableName 数据库表名
+     * @param field 指定字段名
+     * @param value 指定字段值
+     */
+    int delete(String tableName, String field, Object value);
+
+    /**
      * 清空表
      * @param clazz 类名,对应数据库中的一张表
      */

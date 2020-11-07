@@ -57,6 +57,41 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
     }
 
     @Override
+    public PreparedStatement fetchNull(String tableName, String field) throws SQLException {
+        String key = "fetchNull_" + tableName+"_"+field+"_"+quickDAOConfig.database.getClass().getSimpleName();
+        if (!sqlCache.containsKey(key)) {
+            Entity dbEntity = quickDAOConfig.getDbEntityByTableName(tableName);
+            StringBuilder builder = new StringBuilder("select ");
+            builder.append(columns(dbEntity,"t"));
+            builder.append(" from " + dbEntity.escapeTableName + " as t where t." + quickDAOConfig.database.escape(dbEntity.getColumnNameByFieldName(field)) +" is null");
+            sqlCache.put(key, builder.toString());
+        }
+        String sql = sqlCache.get(key);
+        PreparedStatement ps = connection.prepareStatement(sql);
+        MDC.put("name","Null查询");
+        MDC.put("sql",sql);
+        return ps;
+    }
+
+    @Override
+    public PreparedStatement fetch(String tableName, String field, Object value) throws SQLException {
+        String key = "fetch_" + tableName+"_"+field+"_"+quickDAOConfig.database.getClass().getSimpleName();
+        if (!sqlCache.containsKey(key)) {
+            Entity dbEntity = quickDAOConfig.getDbEntityByTableName(tableName);
+            StringBuilder builder = new StringBuilder("select ");
+            builder.append(columns(dbEntity,"t"));
+            builder.append(" from " + dbEntity.escapeTableName + " as t where t." + quickDAOConfig.database.escape(dbEntity.getColumnNameByFieldName(field)) + " = ?");
+            sqlCache.put(key, builder.toString());
+        }
+        String sql = sqlCache.get(key);
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setObject(1,value);
+        MDC.put("name","字段查询");
+        MDC.put("sql",sql.replace("?",(value instanceof String)?"'"+value.toString()+"'":value.toString()));
+        return ps;
+    }
+
+    @Override
     public int getResultSetRowCount(Query query) throws SQLException {
         query.parameterIndex = 1;
         StringBuilder builder = new StringBuilder("select count(1) from ( select " + query.distinct + " ");

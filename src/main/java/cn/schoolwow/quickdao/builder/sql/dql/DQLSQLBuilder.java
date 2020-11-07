@@ -15,6 +15,12 @@ public interface DQLSQLBuilder {
     /**根据字段值查询*/
     PreparedStatement fetch(Class clazz, String field, Object value) throws SQLException;
 
+    /**is null查询*/
+    PreparedStatement fetchNull(String tableName, String field) throws SQLException;
+
+    /**根据字段值查询*/
+    PreparedStatement fetch(String tableName, String field, Object value) throws SQLException;
+
     /**
      * 获取结果集行数
      */

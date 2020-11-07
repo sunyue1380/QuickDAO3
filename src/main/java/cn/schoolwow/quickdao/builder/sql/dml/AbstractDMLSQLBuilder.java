@@ -123,6 +123,16 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
     }
 
     @Override
+    public PreparedStatement deleteByProperty(String tableName, String property, Object value) throws SQLException {
+        String sql = "delete from " + quickDAOConfig.database.escape(tableName) + " where " + quickDAOConfig.database.escape(property) + " = ?";
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setObject(1, value);
+        MDC.put("name","根据单个字段删除");
+        MDC.put("sql",sql.replace("?",(value instanceof String)?"'"+value.toString()+"'":value.toString()));
+        return ps;
+    }
+
+    @Override
     public PreparedStatement clear(Class clazz) throws SQLException {
         String key = "clear_" + clazz.getName()+"_"+quickDAOConfig.database.getClass().getSimpleName();
         if (!sqlCache.containsKey(key)) {
