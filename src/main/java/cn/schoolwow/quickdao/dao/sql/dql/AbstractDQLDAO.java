@@ -12,6 +12,7 @@ import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.Query;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.MDC;
 
 import java.sql.PreparedStatement;
@@ -60,6 +61,39 @@ public class AbstractDQLDAO extends AbstractSQLDAO implements DQLDAO {
             ps.close();
             MDC.put("count",array.size()+"");
             return array.toJavaList(clazz);
+        } catch (SQLException e) {
+            throw new SQLRuntimeException(e);
+        }
+    }
+
+    @Override
+    public JSONObject fetch(String tableName, String field, Object value) {
+        JSONArray array = fetchList(tableName,field,value);
+        if(null==array||array.isEmpty()){
+            return null;
+        }
+        return array.getJSONObject(0);
+    }
+
+    @Override
+    public JSONArray fetchList(String tableName, String field, Object value) {
+        try {
+            PreparedStatement ps = null;
+            if(null==value){
+                ps = dqlsqlBuilder.fetchNull(tableName,field);
+            }else{
+                ps = dqlsqlBuilder.fetch(tableName,field,value);
+            }
+            Entity dbEntity = abstractDAO.quickDAOConfig.getDbEntityByTableName(tableName);
+            ResultSet resultSet = ps.executeQuery();
+            JSONArray array = new JSONArray();
+            while(resultSet.next()){
+                array.add(AbstractResponse.getObject(dbEntity, "t",resultSet));
+            }
+            resultSet.close();
+            ps.close();
+            MDC.put("count",array.size()+"");
+            return array;
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }

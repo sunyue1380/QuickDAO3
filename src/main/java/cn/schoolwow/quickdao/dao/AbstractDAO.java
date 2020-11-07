@@ -18,6 +18,8 @@ import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import cn.schoolwow.quickdao.util.StringUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +67,18 @@ public class AbstractDAO implements DAO {
     public <T> List<T> fetchList(Class<T> clazz, String property, Object value) {
         DQLDAO dqldao = createDQLDAO();
         return dqldao.fetchList(clazz,property,value);
+    }
+
+    @Override
+    public JSONObject fetch(String tableName, String field, Object value) {
+        DQLDAO dqldao = createDQLDAO();
+        return dqldao.fetch(tableName,field,value);
+    }
+
+    @Override
+    public JSONArray fetchList(String tableName, String field, Object value) {
+        DQLDAO dqldao = createDQLDAO();
+        return dqldao.fetchList(tableName,field,value);
     }
 
     @Override
@@ -158,6 +172,12 @@ public class AbstractDAO implements DAO {
     }
 
     @Override
+    public int delete(String tableName, String field, Object value) {
+        DMLDAO dmldao = createDMLDAO();
+        return dmldao.delete(tableName,field,value);
+    }
+
+    @Override
     public int clear(Class clazz) {
         DMLDAO dmldao = createDMLDAO();
         return dmldao.clear(clazz);
@@ -244,6 +264,23 @@ public class AbstractDAO implements DAO {
     @Override
     public Entity[] getDbEntityList() {
         return quickDAOConfig.dbEntityList;
+    }
+
+    @Override
+    public void refreshDbEntityList() {
+        try {
+            quickDAOConfig.tableBuilder.connection = quickDAOConfig.dataSource.getConnection();
+            List<Entity> dbEntityList = quickDAOConfig.tableBuilder.getDatabaseEntity();
+            quickDAOConfig.tableBuilder.connection.close();
+            for(Entity dbEntity:dbEntityList){
+                dbEntity.escapeTableName = quickDAOConfig.database.escape(dbEntity.tableName);
+                dbEntity.clazz = Entity.class;
+            }
+            quickDAOConfig.dbEntityList = dbEntityList.toArray(new Entity[0]);
+            logger.info("[刷新数据库表信息]数据库表个数:{}", dbEntityList.size());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

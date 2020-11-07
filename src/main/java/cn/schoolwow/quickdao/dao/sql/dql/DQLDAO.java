@@ -2,6 +2,8 @@ package cn.schoolwow.quickdao.dao.sql.dql;
 
 import cn.schoolwow.quickdao.dao.condition.Condition;
 import cn.schoolwow.quickdao.dao.sql.SQLDAO;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
 
@@ -31,6 +33,22 @@ public interface DQLDAO extends SQLDAO {
      * @param value 指字段值
      */
     <T> List<T> fetchList(Class<T> clazz, String field, Object value);
+
+    /**
+     * 根据属性查询单个记录
+     * @param tableName 表名
+     * @param field 指定字段名
+     * @param value 指字段值
+     */
+    JSONObject fetch(String tableName, String field, Object value);
+
+    /**
+     * 根据属性查询多个记录
+     * @param tableName 表名
+     * @param field 指定字段名
+     * @param value 指字段值
+     */
+    JSONArray fetchList(String tableName, String field, Object value);
 
     /**
      * 复杂查询

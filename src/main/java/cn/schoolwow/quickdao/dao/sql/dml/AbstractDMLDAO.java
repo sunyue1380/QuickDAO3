@@ -224,6 +224,20 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
     }
 
     @Override
+    public int delete(String tableName, String field, Object value) {
+        int effect = 0;
+        try {
+            PreparedStatement ps = dmlsqlBuilder.deleteByProperty(tableName,field,value);
+            effect = ps.executeUpdate();
+            ps.close();
+        } catch (SQLException e) {
+            throw new SQLRuntimeException(e);
+        }
+        MDC.put("count",effect+"");
+        return effect;
+    }
+
+    @Override
     public int clear(Class clazz) {
         int effect = 0;
         try {

@@ -2,6 +2,7 @@ package cn.schoolwow.quickdao.dao.response;
 
 import cn.schoolwow.quickdao.domain.PageVo;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
 
@@ -71,6 +72,11 @@ public interface Response<T> {
      * @see {@link cn.schoolwow.quickdao.dao.condition.Condition#page(int, int)}
      */
     PageVo<T> getPagingList();
+
+    /**
+     * 返回符合条件的第一条数据库记录
+     */
+    JSONObject getObject();
 
     /**
      * 返回符合条件的数据库记录

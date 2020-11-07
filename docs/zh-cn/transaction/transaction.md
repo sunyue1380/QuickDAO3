@@ -7,7 +7,7 @@ QuickDAO封装了事务操作.事务操作只适用于更新操作,查询操作�
 Transaction transaction = dao.startTransaction();
 //设置事务隔离级别
 transaction.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-//插入用互信息
+//插入用户信息
 transaction.insert(user);
 //提交
 transaction.commit();
