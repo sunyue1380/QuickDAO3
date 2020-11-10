@@ -143,7 +143,7 @@ public class AbstractResponse<T> implements Response<T>{
 
     @Override
     public PageVo<T> getPagingList() {
-        query.pageVo.setList(getArray());
+        query.pageVo.setList(getArray().toJavaList(query.entity.clazz));
         setPageVo();
         return query.pageVo;
     }

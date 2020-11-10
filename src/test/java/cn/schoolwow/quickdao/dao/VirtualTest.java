@@ -59,15 +59,15 @@ public class VirtualTest extends BaseDAOTest{
             Assert.assertEquals("电器",result.getString("type"));
         }
         {
-            PageVo<JSONArray> pageVo = dao.query("product")
+            PageVo<JSONObject> pageVo = dao.query("product")
                     .addQuery("type","电器")
                     .page(1,2)
                     .execute()
                     .getPagingList();
-            System.out.println(pageVo.getPageSize());
-            System.out.println(pageVo.getCurrentPage());
-            System.out.println(pageVo.getTotalPage());
-            System.out.println(pageVo.getList());
+            Assert.assertEquals(2,pageVo.getPageSize());
+            Assert.assertEquals(1,pageVo.getCurrentPage());
+            Assert.assertEquals(2,pageVo.getTotalPage());
+            Assert.assertEquals(2,pageVo.getList().size());
         }
     }
 

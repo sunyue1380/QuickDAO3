@@ -4,6 +4,7 @@ import cn.schoolwow.quickdao.annotation.IdStrategy;
 import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -273,7 +274,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         }
         for(Entity dbEntity:dbEntityList){
             dbEntity.escapeTableName = quickDAOConfig.database.escape(dbEntity.tableName);
-            dbEntity.clazz = Entity.class;
+            dbEntity.clazz = JSONObject.class;
         }
         quickDAOConfig.dbEntityList = dbEntityList.toArray(new Entity[0]);
         //添加虚拟表

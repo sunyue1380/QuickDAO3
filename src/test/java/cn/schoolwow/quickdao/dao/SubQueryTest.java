@@ -1,7 +1,6 @@
 package cn.schoolwow.quickdao.dao;
 
 import cn.schoolwow.quickdao.dao.condition.Condition;
-import cn.schoolwow.quickdao.dao.sql.transaction.Transaction;
 import cn.schoolwow.quickdao.entity.Product;
 import com.alibaba.fastjson.JSONArray;
 import org.junit.Assert;
@@ -9,7 +8,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.Date;
 import java.util.List;
 
 /**子查询测试*/
