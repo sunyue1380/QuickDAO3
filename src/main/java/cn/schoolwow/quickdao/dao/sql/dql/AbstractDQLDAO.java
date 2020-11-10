@@ -129,7 +129,7 @@ public class AbstractDQLDAO extends AbstractSQLDAO implements DQLDAO {
         Query fromQuery = ((AbstractCondition) condition).query;
 
         Entity entity = new Entity();
-        entity.clazz = Entity.class;
+        entity.clazz = JSONObject.class;
         entity.tableName = "( " + dqlsqlBuilder.getArraySQL(fromQuery).toString() +" )";
         entity.escapeTableName = entity.tableName;
         entity.properties = new Property[0];

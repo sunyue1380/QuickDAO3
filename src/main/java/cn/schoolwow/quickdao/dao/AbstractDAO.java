@@ -274,7 +274,7 @@ public class AbstractDAO implements DAO {
             quickDAOConfig.tableBuilder.connection.close();
             for(Entity dbEntity:dbEntityList){
                 dbEntity.escapeTableName = quickDAOConfig.database.escape(dbEntity.tableName);
-                dbEntity.clazz = Entity.class;
+                dbEntity.clazz = JSONObject.class;
             }
             quickDAOConfig.dbEntityList = dbEntityList.toArray(new Entity[0]);
             logger.info("[刷新数据库表信息]数据库表个数:{}", dbEntityList.size());
