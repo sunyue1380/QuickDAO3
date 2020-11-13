@@ -188,6 +188,15 @@ public class DQLTest extends BaseDAOTest{
                     .getList();
             Assert.assertEquals(4,productList.size());
         }
+        {
+            String password = (String) dao.query(Product.class)
+                    .joinTable(Person.class,"personId","id")
+                    .addColumn("password")
+                    .done()
+                    .execute()
+                    .getSingleColumn(String.class);
+            Assert.assertEquals("7199e4df92df94bb67252513b070945c",password);
+        }
     }
 
     private void groupBy(){

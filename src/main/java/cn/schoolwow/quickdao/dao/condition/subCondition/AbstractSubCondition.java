@@ -131,6 +131,14 @@ public class AbstractSubCondition<T> implements SubCondition<T>{
     }
 
     @Override
+    public SubCondition<T> addColumn(String... fields) {
+        for(String field:fields){
+            subQuery.query.columnBuilder.append(subQuery.tableAliasName+"."+subQuery.entity.getColumnNameByFieldName(field)+ ",");
+        }
+        return this;
+    }
+
+    @Override
     public <E> SubCondition<E> joinTable(Class<E> clazz, String primaryField, String joinTableField) {
         return joinTable(clazz,primaryField,joinTableField,subQuery.condition.getUniqueCompositFieldInMainClass(subQuery.entity.clazz,clazz));
     }

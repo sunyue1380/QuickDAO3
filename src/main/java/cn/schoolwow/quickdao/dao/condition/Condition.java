@@ -177,10 +177,10 @@ public interface Condition<T> extends Serializable {
      * @param subQuery 子查询语句
      */
     Condition<T> addNotExistSubQuery(Condition subQuery);
-
     /**
-     * 添加自定义字段,具体映射规则请看此{@link cn.schoolwow.quickdao.dao.condition.Condition}
-     * @param fields 自定义查询列
+     * 添加自定义字段,具体映射规则请看Condition类的JavaDoc注释
+     * @param fields 自定义查询列\
+     * @see Condition
      */
     Condition<T> addColumn(String... fields);
 
@@ -204,6 +204,13 @@ public interface Condition<T> extends Serializable {
      * @param value 待更新字段的值
      */
     Condition<T> addInsert(String field, Object value);
+
+    /**
+     * 插入记录,参数value的key值为数据库表对应的字段名称
+     *
+     * @param value 待插入记录
+     */
+    Condition<T> addInsert(JSONObject value);
 
     /**
      * 添加更新字段,用于{@link cn.schoolwow.quickdao.dao.response.Response#update()}方法

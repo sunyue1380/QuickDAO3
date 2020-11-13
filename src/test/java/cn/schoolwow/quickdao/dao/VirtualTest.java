@@ -31,6 +31,19 @@ public class VirtualTest extends BaseDAOTest{
             Assert.assertEquals(1,effect);
         }
         {
+            JSONObject product = new JSONObject();
+            product.put("id",System.currentTimeMillis());
+            product.put("name","洗衣机");
+            product.put("type","家电");
+            product.put("price",1600);
+            product.put("person_id",1);
+            int effect = dao.query("product")
+                    .addInsert(product)
+                    .execute()
+                    .insert();
+            Assert.assertEquals(1,effect);
+        }
+        {
             int effect = dao.query("product")
                     .addQuery("name","洗衣机")
                     .addQuery("type","家电")

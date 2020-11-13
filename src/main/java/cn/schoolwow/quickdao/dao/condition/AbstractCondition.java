@@ -188,6 +188,18 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
+    public Condition<T> addInsert(JSONObject value) {
+        Property[] properties = query.entity.properties;
+        for(Property property:properties){
+            if(value.containsKey(property.column)){
+                addInsert(property.column,value.get(property.column));
+                break;
+            }
+        }
+        return this;
+    }
+
+    @Override
     public Condition<T> addUpdate(String field, Object value) {
         query.setBuilder.append(query.quickDAOConfig.database.escape(query.entity.getColumnNameByFieldName(field)) + " = ?,");
         query.updateParameterList.add(value);
