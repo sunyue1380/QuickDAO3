@@ -15,6 +15,7 @@ public interface Response<T> {
     /**
      * <p>插入记录</p>
      * <p><b>前置条件</b>:请先调用<b>{@link cn.schoolwow.quickdao.dao.condition.Condition#addInsert(String, Object)}</b>方法</p>
+     * <p>若是使用addInsert(JSONObject value) 方法则返回结果的键generatedKeys会设置为自增id的值
      */
     int insert();
 

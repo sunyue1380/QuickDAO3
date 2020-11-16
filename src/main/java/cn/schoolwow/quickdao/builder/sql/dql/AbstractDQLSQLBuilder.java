@@ -160,7 +160,7 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         builder.deleteCharAt(builder.length()-1);
         builder.append(")");
 
-        PreparedStatement ps = connection.prepareStatement(builder.toString());
+        PreparedStatement ps = connection.prepareStatement(builder.toString(),PreparedStatement.RETURN_GENERATED_KEYS);
         builder = new StringBuilder(builder.toString().replace("?",PLACEHOLDER));
         for (Object parameter : query.insertParameterList) {
             setParameter(parameter,ps,query.parameterIndex++,builder);

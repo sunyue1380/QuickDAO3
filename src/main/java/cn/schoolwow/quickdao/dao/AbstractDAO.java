@@ -285,6 +285,9 @@ public class AbstractDAO implements DAO {
 
     @Override
     public void generateEntityFile(String sourcePath, String[] tableNames) {
+        if(quickDAOConfig.packageNameMap.isEmpty()){
+            throw new IllegalArgumentException("请先调用packageName方法指定包名");
+        }
         quickDAOConfig.autoCreateTable = false;
         quickDAOConfig.autoCreateProperty = false;
         //数据库类型对应表

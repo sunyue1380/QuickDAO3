@@ -206,8 +206,8 @@ public interface Condition<T> extends Serializable {
     Condition<T> addInsert(String field, Object value);
 
     /**
-     * 插入记录,参数value的key值为数据库表对应的字段名称
-     *
+     * <p>插入记录,参数value的key值为数据库表对应的字段名称</p>
+     * <p>返回结果时value的键generatedKeys会设置自增id的值</p>
      * @param value 待插入记录
      */
     Condition<T> addInsert(JSONObject value);
