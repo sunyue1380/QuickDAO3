@@ -193,9 +193,9 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
         for(Property property:properties){
             if(value.containsKey(property.column)){
                 addInsert(property.column,value.get(property.column));
-                break;
             }
         }
+        query.insertValue = value;
         return this;
     }
 

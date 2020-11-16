@@ -4,6 +4,7 @@ import cn.schoolwow.quickdao.builder.sql.dql.DQLSQLBuilder;
 import cn.schoolwow.quickdao.dao.DAO;
 import cn.schoolwow.quickdao.dao.condition.AbstractCondition;
 import cn.schoolwow.quickdao.dao.response.UnionType;
+import com.alibaba.fastjson.JSONObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -93,6 +94,10 @@ public class Query implements Serializable {
      * 查询参数
      */
     public List parameterList = new ArrayList();
+    /**
+     * 插入参数对象
+     */
+    public JSONObject insertValue;
     /**
      * 插入参数
      */

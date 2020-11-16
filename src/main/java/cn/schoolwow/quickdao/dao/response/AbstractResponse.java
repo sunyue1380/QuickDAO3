@@ -47,7 +47,14 @@ public class AbstractResponse<T> implements Response<T>{
         int count = 0;
         try {
             PreparedStatement ps = query.dqlsqlBuilder.insert(query);
-            count= ps.executeUpdate();
+            count = ps.executeUpdate();
+            if (count>0&&null!=query.insertValue) {
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    query.insertValue.put("generatedKeys",rs.getString(1));
+                }
+                rs.close();
+            }
             ps.close();
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);

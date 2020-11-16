@@ -88,6 +88,7 @@ public class AbstractSQLBuilder implements SQLBuilder{
     protected static void setParameter(Object parameter, PreparedStatement ps, int parameterIndex, StringBuilder sqlBuilder) throws SQLException {
         if(null==parameter){
             ps.setObject(parameterIndex,null);
+            replaceFirst(sqlBuilder,"null");
             return;
         }
         switch (parameter.getClass().getSimpleName().toLowerCase()) {
