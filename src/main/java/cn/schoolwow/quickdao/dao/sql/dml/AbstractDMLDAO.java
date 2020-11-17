@@ -78,7 +78,64 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
         }
         int effect = 0;
         try {
-            PreparedStatement ps = dmlsqlBuilder.insert(instances);
+            PreparedStatement[] preparedStatements = dmlsqlBuilder.insert(instances);
+            Entity entity = dmlsqlBuilder.quickDAOConfig.entityMap.get(instances[0].getClass().getName());
+            Field idField = null;
+            if(null!=entity.id&&entity.id.strategy.equals(IdStrategy.AutoIncrement)){
+                idField = instances[0].getClass().getDeclaredField(entity.id.name);
+                idField.setAccessible(true);
+            }
+            for(int i=0;i<preparedStatements.length;i++){
+                effect += preparedStatements[i].executeUpdate();
+                if(effect>0&&null!=idField){
+                    ResultSet rs = preparedStatements[i].getGeneratedKeys();
+                    if(rs.next()){
+                        switch(idField.getType().getSimpleName().toLowerCase()){
+                            case "int":
+                            case "integer":{
+                                if(idField.getType().isPrimitive()){
+                                    idField.setInt(instances[i],rs.getInt(1));
+                                }else{
+                                    idField.set(instances[i],Integer.valueOf(rs.getInt(1)));
+                                }
+                            }break;
+                            case "long":{
+                                if(idField.getType().isPrimitive()){
+                                    idField.setLong(instances[i],rs.getLong(1));
+                                }else{
+                                    idField.set(instances[i],Long.valueOf(rs.getLong(1)));
+                                }
+                            }break;
+                            case "string":{
+                                idField.set(instances[i],rs.getString(1));
+                            }break;
+                        }
+                    }
+                    rs.close();
+                }
+                preparedStatements[i].close();
+            }
+            dmlsqlBuilder.connection.commit();
+        } catch (Exception e) {
+            throw new SQLRuntimeException(e);
+        }
+        MDC.put("count",effect+"");
+        return effect;
+    }
+
+    @Override
+    public int insert(Collection instanceCollection) {
+        return insert(instanceCollection.toArray(new Object[0]));
+    }
+
+    @Override
+    public int insertBatch(Object[] instances) {
+        if(null==instances||instances.length==0){
+            return 0;
+        }
+        int effect = 0;
+        try {
+            PreparedStatement ps = dmlsqlBuilder.insertBatch(instances);
             int[] batches = ps.executeBatch();
             for (int batch : batches) {
                 effect += batch;
@@ -93,8 +150,8 @@ public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
     }
 
     @Override
-    public int insert(Collection instanceCollection) {
-        return insert(instanceCollection.toArray(new Object[0]));
+    public int insertBatch(Collection instanceCollection) {
+        return insertBatch(instanceCollection.toArray(new Object[0]));
     }
 
     @Override
