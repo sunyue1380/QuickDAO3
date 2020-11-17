@@ -1,6 +1,5 @@
 package cn.schoolwow.quickdao.dao.sql.dql;
 
-import cn.schoolwow.quickdao.dao.condition.Condition;
 import cn.schoolwow.quickdao.dao.sql.SQLDAO;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -49,22 +48,4 @@ public interface DQLDAO extends SQLDAO {
      * @param value 指字段值
      */
     JSONArray fetchList(String tableName, String field, Object value);
-
-    /**
-     * 复杂查询
-     * @param clazz 实体类表
-     * */
-    Condition query(Class clazz);
-
-    /**
-     * 复杂查询
-     * @param tableName 指定表名
-     * */
-    Condition query(String tableName);
-
-    /**
-     * 添加FROM子查询
-     * @param condition 子查询
-     * */
-    Condition query(Condition condition);
 }

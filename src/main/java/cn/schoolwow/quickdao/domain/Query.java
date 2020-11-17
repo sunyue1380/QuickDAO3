@@ -1,9 +1,10 @@
 package cn.schoolwow.quickdao.domain;
 
-import cn.schoolwow.quickdao.builder.sql.dql.DQLSQLBuilder;
+import cn.schoolwow.quickdao.builder.sql.dql.AbstractDQLSQLBuilder;
 import cn.schoolwow.quickdao.dao.DAO;
 import cn.schoolwow.quickdao.dao.condition.AbstractCondition;
 import cn.schoolwow.quickdao.dao.response.UnionType;
+import cn.schoolwow.quickdao.dao.sql.AbstractSQLDAO;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.Serializable;
@@ -127,7 +128,11 @@ public class Query implements Serializable {
      * */
     public transient DAO dao;
     /**
+     * 关联SQLDAO
+     * */
+    public transient AbstractSQLDAO abstractSQLDAO;
+    /**
      * DQL查询语句构建
      * */
-    public transient DQLSQLBuilder dqlsqlBuilder;
+    public transient AbstractDQLSQLBuilder dqlsqlBuilder;
 }

@@ -6,7 +6,7 @@ import java.sql.SQLException;
 public interface DMLSQLBuilder {
     /**插入语句*/
     PreparedStatement insert(Object instance) throws Exception;
-    /**根据id更新*/
+    /**插入语句*/
     PreparedStatement insert(Object[] instances) throws Exception;
     /**根据唯一性约束更新*/
     PreparedStatement updateByUniqueKey(Object instance) throws Exception;

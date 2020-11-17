@@ -1,8 +1,6 @@
 package cn.schoolwow.quickdao.dao;
 
 import cn.schoolwow.quickdao.annotation.IdStrategy;
-import cn.schoolwow.quickdao.builder.sql.dml.AbstractDMLSQLBuilder;
-import cn.schoolwow.quickdao.builder.sql.dql.*;
 import cn.schoolwow.quickdao.builder.table.TableBuilder;
 import cn.schoolwow.quickdao.dao.condition.Condition;
 import cn.schoolwow.quickdao.dao.sql.SQLDAOInvocationHandler;
@@ -12,7 +10,6 @@ import cn.schoolwow.quickdao.dao.sql.dql.AbstractDQLDAO;
 import cn.schoolwow.quickdao.dao.sql.dql.DQLDAO;
 import cn.schoolwow.quickdao.dao.sql.transaction.AbstractTransaction;
 import cn.schoolwow.quickdao.dao.sql.transaction.Transaction;
-import cn.schoolwow.quickdao.database.*;
 import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
@@ -185,8 +182,7 @@ public class AbstractDAO implements DAO {
 
     @Override
     public Transaction startTransaction() {
-        AbstractDMLSQLBuilder dmlsqlBuilder = new AbstractDMLSQLBuilder(quickDAOConfig);
-        AbstractTransaction transaction = new AbstractTransaction(dmlsqlBuilder,this);
+        AbstractTransaction transaction = new AbstractTransaction(this);
         transaction.transaction = true;
         SQLDAOInvocationHandler sqldaoInvocationHandler = new SQLDAOInvocationHandler(transaction);
         Transaction transactionProxy = (Transaction) Proxy.newProxyInstance(Thread.currentThread()
@@ -390,8 +386,7 @@ public class AbstractDAO implements DAO {
 
     /**创建DMLDAO*/
     private DMLDAO createDMLDAO(){
-        AbstractDMLSQLBuilder dmlsqlBuilder = new AbstractDMLSQLBuilder(quickDAOConfig);
-        SQLDAOInvocationHandler sqldaoInvocationHandler = new SQLDAOInvocationHandler(new AbstractDMLDAO(dmlsqlBuilder,this));
+        SQLDAOInvocationHandler sqldaoInvocationHandler = new SQLDAOInvocationHandler(new AbstractDMLDAO(this));
         DMLDAO dmldao = (DMLDAO) Proxy.newProxyInstance(Thread.currentThread()
                 .getContextClassLoader(), new Class<?>[]{DMLDAO.class},sqldaoInvocationHandler);
         return dmldao;
@@ -399,21 +394,7 @@ public class AbstractDAO implements DAO {
 
     /**创建DQLDAO*/
     private DQLDAO createDQLDAO(){
-        AbstractDQLSQLBuilder dqlsqlBuilder = null;
-        if(quickDAOConfig.database instanceof MySQLDatabase){
-            dqlsqlBuilder = new MySQLDQLSQLBuilder(quickDAOConfig);
-        }else if(quickDAOConfig.database instanceof SQLiteDatabase){
-            dqlsqlBuilder = new SQLiteDQLSQLBuilder(quickDAOConfig);
-        }else if(quickDAOConfig.database instanceof H2Database){
-            dqlsqlBuilder = new H2DQLSQLBuilder(quickDAOConfig);
-        }else if(quickDAOConfig.database instanceof PostgreDatabase){
-            dqlsqlBuilder = new PostgreDQLSQLBuilder(quickDAOConfig);
-        }else if(quickDAOConfig.database instanceof SQLServerDatabase){
-            dqlsqlBuilder = new SQLServerDQLSQLBuilder(quickDAOConfig);
-        }else{
-            throw new IllegalArgumentException("不支持的数据库类型!");
-        }
-        SQLDAOInvocationHandler sqldaoInvocationHandler = new SQLDAOInvocationHandler(new AbstractDQLDAO(dqlsqlBuilder,this));
+        SQLDAOInvocationHandler sqldaoInvocationHandler = new SQLDAOInvocationHandler(new AbstractDQLDAO(this));
         DQLDAO dqldao = (DQLDAO) Proxy.newProxyInstance(Thread.currentThread()
                 .getContextClassLoader(), new Class<?>[]{DQLDAO.class},sqldaoInvocationHandler);
         return dqldao;

@@ -1,6 +1,6 @@
 package cn.schoolwow.quickdao.dao.response;
 
-import cn.schoolwow.quickdao.builder.sql.AbstractSQLBuilder;
+import cn.schoolwow.quickdao.builder.sql.dql.AbstractDQLSQLBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -19,9 +19,6 @@ public class ResponseInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        abstractResponse.connection = abstractResponse.query.quickDAOConfig.dataSource.getConnection();
-        AbstractSQLBuilder abstractSQLBuilder = (AbstractSQLBuilder) abstractResponse.query.dqlsqlBuilder;
-        abstractSQLBuilder.connection = abstractResponse.connection;
         long startTime = System.currentTimeMillis();
         try {
             Object result = method.invoke(abstractResponse, args);
@@ -37,7 +34,10 @@ public class ResponseInvocationHandler implements InvocationHandler {
             throw e.getTargetException();
         }finally {
             abstractResponse.query.parameterIndex = 1;
-            abstractResponse.connection.close();
+            AbstractDQLSQLBuilder dqlsqlBuilder = (AbstractDQLSQLBuilder) abstractResponse.query.dqlsqlBuilder;
+            if (!abstractResponse.query.abstractSQLDAO.transaction && !dqlsqlBuilder.connection.isClosed()) {
+                dqlsqlBuilder.connection.close();
+            }
             MDC.clear();
         }
     }

@@ -1,6 +1,5 @@
 package cn.schoolwow.quickdao.dao;
 
-import cn.schoolwow.quickdao.builder.sql.dml.AbstractDMLSQLBuilder;
 import cn.schoolwow.quickdao.builder.table.TableBuilder;
 import cn.schoolwow.quickdao.dao.sql.SQLDAOInvocationHandler;
 import cn.schoolwow.quickdao.dao.sql.transaction.AbstractTransaction;
@@ -25,8 +24,7 @@ public class SQLiteDAO extends AbstractDAO {
     @Override
     public Transaction startTransaction() {
         quickDAOConfig.reentrantLock.lock();
-        AbstractDMLSQLBuilder dmlsqlBuilder = new AbstractDMLSQLBuilder(quickDAOConfig);
-        AbstractTransaction transaction = new SQLiteTransaction(dmlsqlBuilder,this);
+        AbstractTransaction transaction = new SQLiteTransaction(this);
         transaction.transaction = true;
         InvocationHandler sqldaoInvocationHandler = new SQLDAOInvocationHandler(transaction);
         Transaction transactionProxy = (Transaction) Proxy.newProxyInstance(Thread.currentThread()

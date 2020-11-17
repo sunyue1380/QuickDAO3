@@ -82,7 +82,7 @@ public class QuickDAOConfig {
      * */
     public ReentrantLock reentrantLock;
     /**
-     * 扫描实体了信息
+     * 扫描实体类信息
      */
     public DefaultTableDefiner defaultTableDefiner;
     /**
