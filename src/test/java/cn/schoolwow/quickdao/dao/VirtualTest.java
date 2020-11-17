@@ -1,6 +1,7 @@
 package cn.schoolwow.quickdao.dao;
 
 import cn.schoolwow.quickdao.domain.PageVo;
+import cn.schoolwow.quickdao.entity.Person;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.junit.Assert;
@@ -33,15 +34,32 @@ public class VirtualTest extends BaseDAOTest{
         {
             JSONObject product = new JSONObject();
             product.put("id",System.currentTimeMillis());
-            product.put("name","洗衣机");
-            product.put("type","家电");
-            product.put("price",1600);
+            product.put("name","双肩背包");
+            product.put("type","箱包");
+            product.put("price",100);
             product.put("person_id",1);
             int effect = dao.query("product")
                     .addInsert(product)
                     .execute()
                     .insert();
             Assert.assertEquals(1,effect);
+            JSONObject result = dao.fetch("product","price",100);
+            Assert.assertEquals("双肩背包",result.getString("name"));
+            Assert.assertEquals("箱包",result.getString("type"));
+            Assert.assertEquals(1,result.getIntValue("person_id"));
+        }
+        dao.rebuild(Person.class);
+        {
+            JSONObject person = new JSONObject();
+            person.put("password","123456");
+            person.put("last_name","托马斯");
+            int effect = dao.query("person")
+                    .addInsert(person)
+                    .execute()
+                    .insert();
+            Assert.assertEquals(1,effect);
+            Assert.assertTrue(person.containsKey("generatedKeys"));
+            Assert.assertTrue(person.getIntValue("generatedKeys")>0);
         }
         {
             int effect = dao.query("product")

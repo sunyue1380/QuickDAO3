@@ -8,7 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,8 +19,6 @@ public class AbstractResponse<T> implements Response<T>{
     private Logger logger = LoggerFactory.getLogger(AbstractResponse.class);
     //查询对象参数
     public Query query;
-    //数据库连接
-    public Connection connection;
 
     public AbstractResponse(Query query) {
         this.query = query;

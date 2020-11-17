@@ -1,5 +1,6 @@
 package cn.schoolwow.quickdao.dao.condition;
 
+import cn.schoolwow.quickdao.builder.sql.SQLBuilder;
 import cn.schoolwow.quickdao.dao.condition.subCondition.AbstractSubCondition;
 import cn.schoolwow.quickdao.dao.condition.subCondition.SQLiteSubCondition;
 import cn.schoolwow.quickdao.dao.condition.subCondition.SubCondition;
@@ -16,6 +17,7 @@ import com.alibaba.fastjson.JSONObject;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Stack;
@@ -591,15 +593,26 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
             query.entity = this.query.entity;
             query.unionType = this.query.unionType;
             query.quickDAOConfig = this.query.quickDAOConfig;
-            query.dao = this.query.dao;
-            query.dqlsqlBuilder = this.query.dqlsqlBuilder;
+            query.abstractSQLDAO = this.query.abstractSQLDAO;
+            query.dqlsqlBuilder = SQLBuilder.getDQLSQLBuilderInstance(query.quickDAOConfig);
+            if (query.abstractSQLDAO.transaction) {
+                if (null == query.dqlsqlBuilder.connection || query.dqlsqlBuilder.connection.isClosed()) {
+                    query.dqlsqlBuilder.connection = query.quickDAOConfig.dataSource.getConnection();
+                    if (query.abstractSQLDAO.transactionIsolation > 0) {
+                        query.dqlsqlBuilder.connection.setTransactionIsolation(query.abstractSQLDAO.transactionIsolation);
+                    }
+                    query.dqlsqlBuilder.connection.setAutoCommit(false);
+                }
+            } else {
+                query.dqlsqlBuilder.connection = query.quickDAOConfig.dataSource.getConnection();
+            }
             for(int i=0;i<query.subQueryList.size();i++){
                 query.subQueryList.get(i).entity = this.query.subQueryList.get(i).entity;
                 query.subQueryList.get(i).query = query;
                 query.subQueryList.get(i).condition = abstractCondition;
             }
             return abstractCondition;
-        } catch (IOException |ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }
         return null;

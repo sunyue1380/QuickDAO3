@@ -1,5 +1,6 @@
 package cn.schoolwow.quickdao.dao.sql;
 
+import cn.schoolwow.quickdao.dao.condition.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -8,6 +9,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+/**DAO接口调用方法*/
 public class SQLDAOInvocationHandler implements InvocationHandler {
     private Logger logger = LoggerFactory.getLogger(SQLDAOInvocationHandler.class);
     private AbstractSQLDAO abstractSQLDAO;
@@ -40,7 +42,8 @@ public class SQLDAOInvocationHandler implements InvocationHandler {
             if(null!=MDC.get("name")){
                 logger.debug("[{}]行数:{},耗时:{}ms,执行SQL:{}",MDC.get("name"),MDC.get("count"),endTime-startTime,MDC.get("sql"));
             }
-            if (!abstractSQLDAO.transaction && !abstractSQLDAO.sqlBuilder.connection.isClosed()) {
+            //若返回类型为Condition则不关闭Connection连接
+            if (!(result instanceof Condition) && !abstractSQLDAO.transaction && !abstractSQLDAO.sqlBuilder.connection.isClosed()) {
                 abstractSQLDAO.sqlBuilder.connection.close();
             }
             return result;
