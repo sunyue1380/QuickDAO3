@@ -27,6 +27,18 @@ public interface DMLDAO extends SQLDAO {
     int insert(Collection instanceCollection);
 
     /**
+     * 批量插入对象数组(不返回自增id)
+     * @param instances 待保存对象数组
+     */
+    int insertBatch(Object[] instances);
+
+    /**
+     * 批量插入对象集合(不返回自增id)
+     * @param instanceCollection 待保存对象集合
+     */
+    int insertBatch(Collection instanceCollection);
+
+    /**
      * 更新对象
      * 若对象有唯一性约束,则根据唯一性约束更新,否则根据id更新
      * @param instance 待更新对象

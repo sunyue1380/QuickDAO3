@@ -115,6 +115,18 @@ public class AbstractDAO implements DAO {
     }
 
     @Override
+    public int insertBatch(Object[] instances) {
+        DMLDAO dmldao = createDMLDAO();
+        return dmldao.insertBatch(instances);
+    }
+
+    @Override
+    public int insertBatch(Collection instanceCollection) {
+        DMLDAO dmldao = createDMLDAO();
+        return dmldao.insertBatch(instanceCollection);
+    }
+
+    @Override
     public int update(Object instance) {
         DMLDAO dmldao = createDMLDAO();
         return dmldao.update(instance);

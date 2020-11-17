@@ -54,6 +54,9 @@ public class DMLTest extends BaseDAOTest{
             }
             int effect = dao.insert(persons);
             Assert.assertEquals(5, effect);
+            for(Person person:persons){
+                Assert.assertTrue(person.getId()>0);
+            }
         }
         //无实体类插入
         {

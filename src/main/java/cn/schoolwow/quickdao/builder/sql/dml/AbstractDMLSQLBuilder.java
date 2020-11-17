@@ -33,7 +33,25 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
     }
 
     @Override
-    public PreparedStatement insert(Object[] instances) throws Exception {
+    public PreparedStatement[] insert(Object[] instances) throws Exception {
+        String sql = insert(instances[0].getClass());
+        connection.setAutoCommit(false);
+        PreparedStatement[] preparedStatements = new PreparedStatement[instances.length];
+        StringBuilder builder = new StringBuilder();
+        for(int i=0;i<instances.length;i++){
+            PreparedStatement ps = connection.prepareStatement(sql,PreparedStatement.RETURN_GENERATED_KEYS);
+            StringBuilder sqlBuilder = new StringBuilder(sql.replace("?", PLACEHOLDER));
+            insert(ps,instances[i],sqlBuilder);
+            builder.append(sqlBuilder.toString()+";");
+            preparedStatements[i] = ps;
+        }
+        MDC.put("name","批量插入对象");
+        MDC.put("sql",builder.toString());
+        return preparedStatements;
+    }
+
+    @Override
+    public PreparedStatement insertBatch(Object[] instances) throws Exception {
         String sql = insert(instances[0].getClass());
         connection.setAutoCommit(false);
         PreparedStatement ps = connection.prepareStatement(sql);
