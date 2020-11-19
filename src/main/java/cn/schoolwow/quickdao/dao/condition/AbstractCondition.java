@@ -191,6 +191,9 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
 
     @Override
     public Condition<T> addInsert(JSONObject value) {
+        if(null==value||value.isEmpty()){
+            throw new IllegalArgumentException("value参数不能为空!");
+        }
         Property[] properties = query.entity.properties;
         for(Property property:properties){
             if(value.containsKey(property.column)){
@@ -198,6 +201,15 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
             }
         }
         query.insertValue = value;
+        return this;
+    }
+
+    @Override
+    public Condition<T> addInsert(JSONArray array) {
+        if(null==array||array.isEmpty()){
+            throw new IllegalArgumentException("array参数不能为空!");
+        }
+        query.insertArray = array;
         return this;
     }
 

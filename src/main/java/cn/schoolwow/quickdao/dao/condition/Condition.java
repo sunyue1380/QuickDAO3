@@ -3,6 +3,7 @@ package cn.schoolwow.quickdao.dao.condition;
 import cn.schoolwow.quickdao.dao.condition.subCondition.SubCondition;
 import cn.schoolwow.quickdao.dao.response.Response;
 import cn.schoolwow.quickdao.dao.response.UnionType;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.Serializable;
@@ -211,6 +212,13 @@ public interface Condition<T> extends Serializable {
      * @param value 待插入记录
      */
     Condition<T> addInsert(JSONObject value);
+
+    /**
+     * <p>批量插入记录,参数value的key值为数据库表对应的字段名称</p>
+     * <p>返回结果时每个arrayl里面的JSONObject的键generatedKeys会设置自增id的值</p>
+     * @param array 待插入记录
+     */
+    Condition<T> addInsert(JSONArray array);
 
     /**
      * 添加更新字段,用于{@link cn.schoolwow.quickdao.dao.response.Response#update()}方法

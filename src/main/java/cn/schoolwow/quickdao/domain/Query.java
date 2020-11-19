@@ -5,6 +5,7 @@ import cn.schoolwow.quickdao.dao.DAO;
 import cn.schoolwow.quickdao.dao.condition.AbstractCondition;
 import cn.schoolwow.quickdao.dao.response.UnionType;
 import cn.schoolwow.quickdao.dao.sql.AbstractSQLDAO;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.Serializable;
@@ -99,6 +100,10 @@ public class Query implements Serializable {
      * 插入参数对象
      */
     public JSONObject insertValue;
+    /**
+     * 批量插入参数对象
+     */
+    public JSONArray insertArray;
     /**
      * 插入参数
      */

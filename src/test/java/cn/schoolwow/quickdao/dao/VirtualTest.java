@@ -49,6 +49,7 @@ public class VirtualTest extends BaseDAOTest{
             Assert.assertEquals(1,result.getIntValue("person_id"));
         }
         dao.rebuild(Person.class);
+        //插入JSONObject
         {
             JSONObject person = new JSONObject();
             person.put("password","123456");
@@ -60,6 +61,26 @@ public class VirtualTest extends BaseDAOTest{
             Assert.assertEquals(1,effect);
             Assert.assertTrue(person.containsKey("generatedKeys"));
             Assert.assertTrue(person.getIntValue("generatedKeys")>0);
+        }
+        //批量插入JSONArray
+        {
+            JSONArray array = new JSONArray(10);
+            for(int i=0;i<10;i++){
+                JSONObject person = new JSONObject();
+                person.put("password","123456");
+                person.put("last_name","托尼"+i);
+                array.add(person);
+            }
+            int effect = dao.query("person")
+                    .addInsert(array)
+                    .execute()
+                    .insert();
+            Assert.assertEquals(10,effect);
+            for(int i=0;i<array.size();i++){
+                JSONObject person = array.getJSONObject(i);
+                Assert.assertTrue(person.containsKey("generatedKeys"));
+                Assert.assertTrue(person.getIntValue("generatedKeys")>0);
+            }
         }
         {
             int effect = dao.query("product")
