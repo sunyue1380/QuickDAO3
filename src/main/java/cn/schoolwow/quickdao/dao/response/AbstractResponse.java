@@ -47,16 +47,32 @@ public class AbstractResponse<T> implements Response<T>{
     public int insert() {
         int count = 0;
         try {
-            PreparedStatement ps = query.dqlsqlBuilder.insert(query);
-            count = ps.executeUpdate();
-            if (count>0&&null!=query.insertValue) {
-                ResultSet rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    query.insertValue.put("generatedKeys",rs.getString(1));
+            if(null!=query.insertArray){
+                PreparedStatement[] preparedStatements = query.dqlsqlBuilder.insertArray(query);
+                for(int i=0;i<preparedStatements.length;i++){
+                    count += preparedStatements[i].executeUpdate();
+                    if(count>0){
+                        ResultSet rs = preparedStatements[i].getGeneratedKeys();
+                        if (rs.next()) {
+                            query.insertArray.getJSONObject(i).put("generatedKeys",rs.getString(1));
+                        }
+                        rs.close();
+                    }
+                    preparedStatements[i].close();
                 }
-                rs.close();
+                query.dqlsqlBuilder.connection.commit();
+            }else{
+                PreparedStatement ps = query.dqlsqlBuilder.insert(query);
+                count = ps.executeUpdate();
+                if (count>0&&null!=query.insertValue) {
+                    ResultSet rs = ps.getGeneratedKeys();
+                    if (rs.next()) {
+                        query.insertValue.put("generatedKeys",rs.getString(1));
+                    }
+                    rs.close();
+                }
+                ps.close();
             }
-            ps.close();
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }

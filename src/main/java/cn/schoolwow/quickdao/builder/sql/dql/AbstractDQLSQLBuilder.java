@@ -3,6 +3,8 @@ package cn.schoolwow.quickdao.builder.sql.dql;
 import cn.schoolwow.quickdao.builder.sql.AbstractSQLBuilder;
 import cn.schoolwow.quickdao.dao.condition.AbstractCondition;
 import cn.schoolwow.quickdao.domain.*;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.MDC;
 
 import java.sql.PreparedStatement;
@@ -168,6 +170,40 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         MDC.put("name","插入记录");
         MDC.put("sql",builder.toString());
         return ps;
+    }
+
+    @Override
+    public PreparedStatement[] insertArray(Query query) throws SQLException {
+        StringBuilder builder = new StringBuilder("insert into " + query.entity.escapeTableName + "(");
+        Property[] properties = query.entity.properties;
+        for(Property property:properties){
+            builder.append(query.quickDAOConfig.database.escape(property.column) + ",");
+        }
+        builder.deleteCharAt(builder.length()-1);
+        builder.append(") values(");
+        for(int i=0;i<properties.length;i++){
+            builder.append("?,");
+        }
+        builder.deleteCharAt(builder.length()-1);
+        builder.append(")");
+
+        connection.setAutoCommit(false);
+        JSONArray array = query.insertArray;
+        PreparedStatement[] preparedStatements = new PreparedStatement[array.size()];
+        String sql = builder.toString();
+        for(int i=0;i<array.size();i++){
+            PreparedStatement ps = connection.prepareStatement(sql,PreparedStatement.RETURN_GENERATED_KEYS);
+            StringBuilder sqlBuilder = new StringBuilder(sql.replace("?",PLACEHOLDER));
+            JSONObject o = array.getJSONObject(i);
+            for(int j=0;j<properties.length;j++){
+                setParameter(o.getString(properties[j].column),ps,j+1,sqlBuilder);
+            }
+            builder.append(sqlBuilder.toString()+";");
+            preparedStatements[i] = ps;
+        }
+        MDC.put("name","插入记录");
+        MDC.put("sql",builder.toString());
+        return preparedStatements;
     }
 
     @Override
