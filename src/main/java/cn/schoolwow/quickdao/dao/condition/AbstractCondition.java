@@ -67,6 +67,16 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
+    public Condition<T> addInQuery(String field, String inQuery) {
+        if(null==inQuery||inQuery.isEmpty()){
+            query.whereBuilder.append("( 1 = 2 ) and ");
+            return this;
+        }
+        query.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " in ("+inQuery+") ) and ");
+        return this;
+    }
+
+    @Override
     public Condition<T> addInQuery(String field, Object... values) {
         addInQuery(field, values, "in");
         return this;
@@ -75,6 +85,16 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     @Override
     public Condition<T> addInQuery(String field, Collection values) {
         return addInQuery(field,values.toArray(new Object[0]));
+    }
+
+    @Override
+    public Condition<T> addNotInQuery(String field, String inQuery) {
+        if(null==inQuery||inQuery.isEmpty()){
+            query.whereBuilder.append("( 1 = 2 ) and ");
+            return this;
+        }
+        query.whereBuilder.append("(" + getQueryColumnNameByFieldName(field) + " not in ("+inQuery+") ) and ");
+        return this;
     }
 
     @Override
@@ -139,6 +159,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     public Condition<T> addSubQuery(String field, String operator, Condition subQuery) {
         subQuery.execute();
         AbstractCondition abstractCondition = (AbstractCondition) subQuery;
+        abstractCondition.query.tableAliasName = query.tableAliasName + (query.joinTableIndex++);
         query.whereBuilder.append(getQueryColumnNameByFieldName(field) + " " + operator + " (" + query.dqlsqlBuilder.getArraySQL(abstractCondition.query) + ") and ");
         this.query.parameterList.addAll(abstractCondition.query.parameterList);
         return this;

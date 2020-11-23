@@ -2,7 +2,7 @@ package cn.schoolwow.quickdao.entity;
 
 import cn.schoolwow.quickdao.annotation.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Comment("人")
 public class Person {
@@ -23,10 +23,10 @@ public class Person {
     private String city;
 
     @TableField(createdAt = true)
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     @TableField(updatedAt = true)
-    private Date updatedAt;
+    private LocalDateTime updatedAt;
 
     private Order order;
 
@@ -86,19 +86,19 @@ public class Person {
         this.order = order;
     }
 
-    public Date getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getUpdatedAt() {
+    public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Date updatedAt) {
+    public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
 }
