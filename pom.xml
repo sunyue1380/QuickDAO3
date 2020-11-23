@@ -6,7 +6,7 @@
 
     <groupId>cn.schoolwow</groupId>
     <artifactId>QuickDAO</artifactId>
-    <version>3.6.4-SNAPSHOT</version>
+    <version>3.6.4</version>
 
     <name>QuickDAO</name>
     <url>https://github.com/sunyue1380/QuickDAO3</url>
@@ -92,7 +92,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.6</version>
+            <version>5.1.37</version>
             <scope>test</scope>
         </dependency>
         <dependency>

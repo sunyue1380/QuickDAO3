@@ -97,6 +97,13 @@ public interface Condition<T> extends Serializable {
     /**
      * 添加范围查询语句
      * @param field  字段名
+     * @param inQuery 英文逗号隔开的字段值
+     */
+    Condition<T> addInQuery(String field, String inQuery);
+
+    /**
+     * 添加范围查询语句
+     * @param field  字段名
      * @param values 指明在该范围内的值
      */
     Condition<T> addInQuery(String field, Object... values);
@@ -107,6 +114,13 @@ public interface Condition<T> extends Serializable {
      * @param values 指明在该范围内的值
      */
     Condition<T> addInQuery(String field, Collection values);
+
+    /**
+     * 添加范围查询语句
+     * @param field  字段名
+     * @param inQuery 英文逗号隔开的字段值
+     */
+    Condition<T> addNotInQuery(String field, String inQuery);
 
     /**
      * 添加范围查询语句

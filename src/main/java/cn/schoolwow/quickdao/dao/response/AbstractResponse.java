@@ -12,7 +12,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class AbstractResponse<T> implements Response<T>{
@@ -139,7 +144,7 @@ public class AbstractResponse<T> implements Response<T>{
     }
 
     @Override
-    public List getSingleColumnList(Class clazz) {
+    public <E> List<E> getSingleColumnList(Class<E> clazz) {
         try {
             PreparedStatement ps = query.dqlsqlBuilder.getArray(query);
             JSONArray array = new JSONArray(query.dqlsqlBuilder.getResultSetRowCount(query));
@@ -265,6 +270,18 @@ public class AbstractResponse<T> implements Response<T>{
                 break;
                 case "string": {
                     subObject.put(key, resultSet.getString(columnName));
+                }
+                break;
+                case "localdate": {
+                    Date date = resultSet.getTimestamp(columnName);
+                    LocalDate localDate = Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+                    subObject.put(key, localDate);
+                }
+                break;
+                case "localdatetime": {
+                    Date date = resultSet.getTimestamp(columnName);
+                    LocalDateTime localDateTime = Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    subObject.put(key, localDateTime);
                 }
                 break;
                 default: {

@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.time.ZoneId;
+
 /**测试注解是否正常*/
 @RunWith(Parameterized.class)
 public class AnnotationTest extends BaseDAOTest{
@@ -34,7 +36,7 @@ public class AnnotationTest extends BaseDAOTest{
         //createdAt
         {
             Person person = dao.fetch(Person.class,1);
-            Assert.assertTrue(System.currentTimeMillis()-person.getCreatedAt().getTime()<1000);
+            Assert.assertTrue(System.currentTimeMillis()-person.getCreatedAt().atZone(ZoneId.systemDefault()).toEpochSecond()*1000<3000);
         }
         //updatedAt
         {
@@ -44,7 +46,7 @@ public class AnnotationTest extends BaseDAOTest{
             Assert.assertEquals(1, effect);
 
             person = dao.fetch(Person.class,1);
-            Assert.assertTrue(System.currentTimeMillis()-person.getUpdatedAt().getTime()<1000);
+            Assert.assertTrue(System.currentTimeMillis()-person.getUpdatedAt().atZone(ZoneId.systemDefault()).toEpochSecond()*1000<3000);
         }
     }
 }
