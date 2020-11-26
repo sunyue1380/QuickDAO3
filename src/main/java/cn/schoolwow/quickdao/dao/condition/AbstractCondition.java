@@ -651,6 +651,11 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
         return null;
     }
 
+    @Override
+    public Query getQuery() {
+        return this.query;
+    }
+
     /**
      * 找到子表中唯一一个类型为主表的成员变量名
      * @param mainClass 主类

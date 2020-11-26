@@ -18,6 +18,7 @@ import org.slf4j.MDC;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Collection;
 
 public class AbstractSQLDAO implements SQLDAO {
     protected Logger logger = LoggerFactory.getLogger(SQLDAO.class);
@@ -63,6 +64,34 @@ public class AbstractSQLDAO implements SQLDAO {
             throw new SQLRuntimeException(e);
         }
         return result;
+    }
+
+    @Override
+    public boolean existAny(Object... instances) {
+        boolean result = false;
+        for(Object instance:instances){
+            result = result||exist(instance);
+        }
+        return result;
+    }
+
+    @Override
+    public boolean existAll(Object... instances) {
+        boolean result = true;
+        for(Object instance:instances){
+            result = result&&exist(instance);
+        }
+        return result;
+    }
+
+    @Override
+    public boolean existAny(Collection instances) {
+        return existAny(instances.toArray());
+    }
+
+    @Override
+    public boolean existAll(Collection instances) {
+        return existAll(instances.toArray());
     }
 
     @Override
