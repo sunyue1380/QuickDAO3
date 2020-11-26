@@ -40,14 +40,17 @@ public class DQLTest extends BaseDAOTest{
         {
             Person person = dao.fetch(Person.class,1);
             Assert.assertEquals("Gates",person.getLastName());
+            Assert.assertTrue(dao.exist(person));
         }
         {
             Person person = dao.fetch(Person.class,"lastName","Carter");
             Assert.assertEquals("Thomas",person.getFirstName());
+            Assert.assertTrue(dao.exist(person));
         }
         {
             List<Person> personList = dao.fetchList(Person.class,"password","123456");
             Assert.assertEquals(3,personList.size());
+            Assert.assertTrue(dao.existAll(personList));
         }
     }
 

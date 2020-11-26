@@ -49,6 +49,30 @@ public class AbstractDAO implements DAO {
     }
 
     @Override
+    public boolean existAny(Object... instances) {
+        DQLDAO dqldao = createDQLDAO();
+        return dqldao.existAny(instances);
+    }
+
+    @Override
+    public boolean existAll(Object... instances) {
+        DQLDAO dqldao = createDQLDAO();
+        return dqldao.existAll(instances);
+    }
+
+    @Override
+    public boolean existAny(Collection instances) {
+        DQLDAO dqldao = createDQLDAO();
+        return dqldao.existAny(instances);
+    }
+
+    @Override
+    public boolean existAll(Collection instances) {
+        DQLDAO dqldao = createDQLDAO();
+        return dqldao.existAll(instances);
+    }
+
+    @Override
     public <T> T fetch(Class<T> clazz, long id) {
         DQLDAO dqldao = createDQLDAO();
         return dqldao.fetch(clazz,id);
