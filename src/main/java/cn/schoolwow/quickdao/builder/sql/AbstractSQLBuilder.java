@@ -22,6 +22,8 @@ public class AbstractSQLBuilder implements SQLBuilder{
     private final static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
     /**格式化日期参数*/
     private final static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
+    /**格式化日期参数*/
+    private final static DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     /**SQL参数占位符*/
     protected final static String PLACEHOLDER = "** NOT SPECIFIED **";
     /**SQL语句缓存*/
@@ -152,7 +154,7 @@ public class AbstractSQLBuilder implements SQLBuilder{
             }break;
             case "localdate": {
                 LocalDate localDate = (LocalDate) parameter;
-                replaceFirst(sqlBuilder,"'"+dateTimeFormatter.format(localDate)+"'");
+                replaceFirst(sqlBuilder,"'"+dateFormatter.format(localDate)+"'");
             }break;
             case "localdatetime": {
                 LocalDateTime localDateTime = (LocalDateTime) parameter;
@@ -243,7 +245,7 @@ public class AbstractSQLBuilder implements SQLBuilder{
                 }else{
                     ps.setObject(parameterIndex, o);
                     LocalDate localDate = (LocalDate) o;
-                    parameter = "'"+dateTimeFormatter.format(localDate)+"'";
+                    parameter = "'"+dateFormatter.format(localDate)+"'";
                 }
             }break;
             case "localdatetime": {

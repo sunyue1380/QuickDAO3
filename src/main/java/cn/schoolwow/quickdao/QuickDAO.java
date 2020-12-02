@@ -186,6 +186,24 @@ public class QuickDAO {
         return this;
     }
 
+    /**
+     * 指定全局数据库表引擎
+     * @param engine 数据库表引擎
+     * */
+    public QuickDAO engine(String engine) {
+        quickDAOConfig.engine = engine;
+        return this;
+    }
+
+    /**
+     * 指定全局数据库表编码格式
+     * @param charset charset
+     * */
+    public QuickDAO charset(String charset) {
+        quickDAOConfig.charset = charset;
+        return this;
+    }
+
     /**自定义表和列*/
     public TableDefiner define(Class clazz) {
         if(quickDAOConfig.entityMap.isEmpty()){

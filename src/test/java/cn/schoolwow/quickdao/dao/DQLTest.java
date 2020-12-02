@@ -231,7 +231,7 @@ public class DQLTest extends BaseDAOTest{
             JSONArray array = dao.query(Product.class)
                     .addColumn("type","count(id) count")
                     .groupBy("type")
-                    .having("count(id) > 1")
+                    .having("count(id) > ?",1)
                     .execute()
                     .getArray();
             Assert.assertEquals(1,array.size());

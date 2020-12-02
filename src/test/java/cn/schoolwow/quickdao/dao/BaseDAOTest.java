@@ -51,6 +51,8 @@ public class BaseDAOTest {
             DAO dao = QuickDAO.newInstance().dataSource(dataSources[i])
                     .packageName("cn.schoolwow.quickdao.entity")
                     .autoCreateTable(true)
+                    .charset("utf8")
+                    .engine("InnoDB")
                     .build();
             data[i][0] = dao;
         }

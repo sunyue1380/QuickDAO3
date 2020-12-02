@@ -5,12 +5,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**指定表名*/
+/**指定表相关属性*/
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TableName {
+public @interface Table {
     /**
-     * 映射表名
+     * 指定表引擎
      */
-    String value();
+    String engine() default "";
+    /**
+     * 指定表编码格式
+     */
+    String charset() default "";
 }
