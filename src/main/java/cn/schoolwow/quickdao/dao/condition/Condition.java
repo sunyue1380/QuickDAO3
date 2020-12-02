@@ -3,7 +3,6 @@ package cn.schoolwow.quickdao.dao.condition;
 import cn.schoolwow.quickdao.dao.condition.subCondition.SubCondition;
 import cn.schoolwow.quickdao.dao.response.Response;
 import cn.schoolwow.quickdao.dao.response.UnionType;
-import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.Query;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;

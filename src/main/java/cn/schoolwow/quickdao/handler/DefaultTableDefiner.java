@@ -99,7 +99,9 @@ public class DefaultTableDefiner implements TableDefiner{
         //扫描指定实体类
         for(Class c:quickDAOConfig.entityClassMap.keySet()){
             Entity entity = new Entity();
-            if(quickDAOConfig.entityClassMap.get(c).isEmpty()){
+            if(c.getDeclaredAnnotation(TableName.class)!=null){
+                entity.tableName = ((TableName) c.getDeclaredAnnotation(TableName.class)).value();
+            }else if(quickDAOConfig.entityClassMap.get(c).isEmpty()){
                 entity.tableName = StringUtil.Camel2Underline(c.getSimpleName());
             }else{
                 entity.tableName = quickDAOConfig.entityClassMap.get(c)+"@"+StringUtil.Camel2Underline(c.getSimpleName());
@@ -115,6 +117,11 @@ public class DefaultTableDefiner implements TableDefiner{
             if (c.getDeclaredAnnotation(Comment.class) != null) {
                 Comment comment = (Comment) c.getDeclaredAnnotation(Comment.class);
                 entity.comment = comment.value();
+            }
+            if (c.getDeclaredAnnotation(Table.class) != null) {
+                Table table = (Table) c.getDeclaredAnnotation(Table.class);
+                entity.charset = table.charset();
+                entity.engine = table.engine();
             }
             //属性列表
             List<Property> propertyList = new ArrayList<>();

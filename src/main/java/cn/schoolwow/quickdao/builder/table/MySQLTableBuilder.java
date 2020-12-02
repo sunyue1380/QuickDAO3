@@ -108,6 +108,35 @@ public class MySQLTableBuilder extends AbstractTableBuilder {
     }
 
     @Override
+    public void createTable(Entity entity) throws SQLException {
+        super.createTable(entity);
+        //修改表引擎
+        {
+            String engine = entity.engine;
+            if(null==engine||engine.isEmpty()){
+                engine = quickDAOConfig.engine;
+            }
+            if(null!=engine&&!engine.isEmpty()){
+                String sql = "alter table "+quickDAOConfig.database.escape(entity.tableName)+" engine="+engine+";";
+                logger.debug("[修改表引擎]执行SQL:{}",sql);
+                connection.prepareStatement(sql).executeUpdate();
+            }
+        }
+        //修改表编码格式
+        {
+            String charset = entity.charset;
+            if(null==charset||charset.isEmpty()){
+                charset = quickDAOConfig.charset;
+            }
+            if(null!=charset&&!charset.isEmpty()){
+                String sql = "alter table "+quickDAOConfig.database.escape(entity.tableName)+" convert to character set "+charset+";";
+                logger.debug("[修改表编码格式]执行SQL:{}",sql);
+                connection.prepareStatement(sql).executeUpdate();
+            }
+        }
+    }
+
+    @Override
     public boolean hasIndexExists(Entity entity, IndexType indexType) throws SQLException {
         String indexName = entity.tableName+"_"+indexType.name();
         String sql = "show index from "+quickDAOConfig.database.escape(entity.tableName)+" where key_name = '"+indexName+"'";

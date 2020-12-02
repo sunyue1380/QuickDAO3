@@ -274,14 +274,18 @@ public class AbstractResponse<T> implements Response<T>{
                 break;
                 case "localdate": {
                     Date date = resultSet.getTimestamp(columnName);
-                    LocalDate localDate = Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
-                    subObject.put(key, localDate);
+                    if(null!=date){
+                        LocalDate localDate = Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+                        subObject.put(key, localDate);
+                    }
                 }
                 break;
                 case "localdatetime": {
                     Date date = resultSet.getTimestamp(columnName);
-                    LocalDateTime localDateTime = Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
-                    subObject.put(key, localDateTime);
+                    if(null!=date){
+                        LocalDateTime localDateTime = Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+                        subObject.put(key, localDateTime);
+                    }
                 }
                 break;
                 default: {

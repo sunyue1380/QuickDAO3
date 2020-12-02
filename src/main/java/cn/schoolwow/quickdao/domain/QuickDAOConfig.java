@@ -62,6 +62,14 @@ public class QuickDAOConfig {
      */
     public IDGenerator idGenerator = new SnowflakeIdGenerator();
     /**
+     * 全局表编码格式
+     * */
+    public String charset;
+    /**
+     * 全局表引擎
+     * */
+    public String engine;
+    /**
      * 扫描后的实体类信息
      * */
     public Map<String, Entity> entityMap = new HashMap<>();

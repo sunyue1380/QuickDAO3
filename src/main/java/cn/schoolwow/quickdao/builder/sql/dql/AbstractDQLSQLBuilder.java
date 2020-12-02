@@ -260,9 +260,6 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
         PreparedStatement ps = connection.prepareStatement(builder.toString());
         builder = new StringBuilder(builder.toString().replace("?",PLACEHOLDER));
         addArraySQLParameters(ps,query,query,builder);
-        for (Object parameter : query.havingParameterList) {
-            setParameter(parameter,ps,query.parameterIndex++,builder);
-        }
         //添加union语句
         for(AbstractCondition abstractCondition:query.unionList){
             Query unionQuery = abstractCondition.query;
@@ -383,6 +380,9 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
             for (Object parameter : orCondition.query.parameterList) {
                 setParameter(parameter,ps,mainQuery.parameterIndex++,sqlBuilder);
             }
+        }
+        for (Object parameter : query.havingParameterList) {
+            setParameter(parameter,ps,mainQuery.parameterIndex++,sqlBuilder);
         }
     }
 

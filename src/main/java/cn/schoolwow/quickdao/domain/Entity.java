@@ -55,6 +55,14 @@ public class Entity {
      * Field数组(实体包类)
      */
     public Field[] compositFields;
+    /**
+     * 表编码格式
+     * */
+    public String charset;
+    /**
+     * 表引擎
+     * */
+    public String engine;
 
     /**
      * 根据字段名查询数据库列名,只返回列名
