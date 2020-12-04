@@ -56,10 +56,6 @@ public class AbstractTransaction extends AbstractDMLDAO implements Transaction{
 
     @Override
     public void endTransaction() {
-        try {
-            sqlBuilder.connection.close();
-        } catch (SQLException e) {
-            throw new SQLRuntimeException(e);
-        }
+        transaction = false;
     }
 }

@@ -1,6 +1,7 @@
 package cn.schoolwow.quickdao.dao.response;
 
 import cn.schoolwow.quickdao.builder.sql.dql.AbstractDQLSQLBuilder;
+import cn.schoolwow.quickdao.dao.sql.AbstractSQLDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -21,6 +22,19 @@ public class ResponseInvocationHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         long startTime = System.currentTimeMillis();
         try {
+            AbstractSQLDAO abstractSQLDAO = abstractResponse.query.abstractSQLDAO;
+            //判断是否开启事务
+            if (abstractSQLDAO.transaction) {
+                if (null == abstractSQLDAO.sqlBuilder.connection || abstractSQLDAO.sqlBuilder.connection.isClosed()) {
+                    abstractSQLDAO.sqlBuilder.connection = abstractSQLDAO.sqlBuilder.quickDAOConfig.dataSource.getConnection();
+                    if (abstractSQLDAO.transactionIsolation > 0) {
+                        abstractSQLDAO.sqlBuilder.connection.setTransactionIsolation(abstractSQLDAO.transactionIsolation);
+                    }
+                    abstractSQLDAO.sqlBuilder.connection.setAutoCommit(false);
+                }
+            } else {
+                abstractSQLDAO.sqlBuilder.connection = abstractSQLDAO.sqlBuilder.quickDAOConfig.dataSource.getConnection();
+            }
             Object result = method.invoke(abstractResponse, args);
             long endTime = System.currentTimeMillis();
             if(null!=MDC.get("name")){
@@ -34,7 +48,7 @@ public class ResponseInvocationHandler implements InvocationHandler {
             throw e.getTargetException();
         }finally {
             abstractResponse.query.parameterIndex = 1;
-            AbstractDQLSQLBuilder dqlsqlBuilder = (AbstractDQLSQLBuilder) abstractResponse.query.dqlsqlBuilder;
+            AbstractDQLSQLBuilder dqlsqlBuilder = abstractResponse.query.dqlsqlBuilder;
             if (!abstractResponse.query.abstractSQLDAO.transaction && !dqlsqlBuilder.connection.isClosed()) {
                 dqlsqlBuilder.connection.close();
             }

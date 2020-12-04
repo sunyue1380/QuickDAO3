@@ -1,6 +1,5 @@
 package cn.schoolwow.quickdao.dao.sql;
 
-import cn.schoolwow.quickdao.dao.condition.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -20,31 +19,31 @@ public class SQLDAOInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        Object result = null;
         try {
             if(null!=abstractSQLDAO.sqlBuilder.quickDAOConfig.reentrantLock){
                 abstractSQLDAO.sqlBuilder.quickDAOConfig.reentrantLock.lock();
             }
-            //判断是否开启事务
-            if (abstractSQLDAO.transaction) {
-                if (null == abstractSQLDAO.sqlBuilder.connection || abstractSQLDAO.sqlBuilder.connection.isClosed()) {
-                    abstractSQLDAO.sqlBuilder.connection = abstractSQLDAO.sqlBuilder.quickDAOConfig.dataSource.getConnection();
-                    if (abstractSQLDAO.transactionIsolation > 0) {
-                        abstractSQLDAO.sqlBuilder.connection.setTransactionIsolation(abstractSQLDAO.transactionIsolation);
+            //调用query方法不会申请数据库连接
+            if(!"query".equals(method.getName())){
+                //判断是否开启事务
+                if (abstractSQLDAO.transaction) {
+                    if (null == abstractSQLDAO.sqlBuilder.connection || abstractSQLDAO.sqlBuilder.connection.isClosed()) {
+                        abstractSQLDAO.sqlBuilder.connection = abstractSQLDAO.sqlBuilder.quickDAOConfig.dataSource.getConnection();
+                        if (abstractSQLDAO.transactionIsolation > 0) {
+                            abstractSQLDAO.sqlBuilder.connection.setTransactionIsolation(abstractSQLDAO.transactionIsolation);
+                        }
+                        abstractSQLDAO.sqlBuilder.connection.setAutoCommit(false);
                     }
-                    abstractSQLDAO.sqlBuilder.connection.setAutoCommit(false);
+                } else {
+                    abstractSQLDAO.sqlBuilder.connection = abstractSQLDAO.sqlBuilder.quickDAOConfig.dataSource.getConnection();
                 }
-            } else {
-                abstractSQLDAO.sqlBuilder.connection = abstractSQLDAO.sqlBuilder.quickDAOConfig.dataSource.getConnection();
             }
             long startTime = System.currentTimeMillis();
-            Object result = method.invoke(abstractSQLDAO, args);
+            result = method.invoke(abstractSQLDAO, args);
             long endTime = System.currentTimeMillis();
             if(null!=MDC.get("name")){
                 logger.debug("[{}]行数:{},耗时:{}ms,执行SQL:{}",MDC.get("name"),MDC.get("count"),endTime-startTime,MDC.get("sql"));
-            }
-            //若返回类型为Condition则不关闭Connection连接
-            if (!(result instanceof Condition) && !abstractSQLDAO.transaction && !abstractSQLDAO.sqlBuilder.connection.isClosed()) {
-                abstractSQLDAO.sqlBuilder.connection.close();
             }
             return result;
         }catch (InvocationTargetException e){
@@ -55,6 +54,9 @@ public class SQLDAOInvocationHandler implements InvocationHandler {
         }finally {
             if(null!=abstractSQLDAO.sqlBuilder.quickDAOConfig.reentrantLock){
                 abstractSQLDAO.sqlBuilder.quickDAOConfig.reentrantLock.unlock();
+            }
+            if (!abstractSQLDAO.transaction&&null!=abstractSQLDAO.sqlBuilder.connection&&!abstractSQLDAO.sqlBuilder.connection.isClosed()) {
+                abstractSQLDAO.sqlBuilder.connection.close();
             }
         }
     }
