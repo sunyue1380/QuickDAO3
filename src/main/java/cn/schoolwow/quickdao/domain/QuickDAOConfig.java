@@ -1,7 +1,8 @@
 package cn.schoolwow.quickdao.domain;
 
 import cn.schoolwow.quickdao.annotation.IdStrategy;
-import cn.schoolwow.quickdao.builder.table.AbstractTableBuilder;
+import cn.schoolwow.quickdao.builder.table.TableBuilder;
+import cn.schoolwow.quickdao.dao.AbstractDAO;
 import cn.schoolwow.quickdao.dao.sql.dml.IDGenerator;
 import cn.schoolwow.quickdao.dao.sql.dml.SnowflakeIdGenerator;
 import cn.schoolwow.quickdao.database.Database;
@@ -12,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
 /**数据源访问配置选项*/
@@ -91,17 +91,17 @@ public class QuickDAOConfig {
      * */
     public Database database;
     /**
-     * 数据库锁
-     * */
-    public ReentrantLock reentrantLock;
-    /**
      * 扫描实体类信息
      */
     public DefaultTableDefiner defaultTableDefiner;
     /**
      * 建表对象
      */
-    public AbstractTableBuilder tableBuilder;
+    public TableBuilder tableBuilder;
+    /**
+     * 每个数据库对应一个AbstractDAO对象
+     * */
+    public AbstractDAO abstractDAO;
 
     /**根据表名获取对应数据库实体类*/
     public Entity getDbEntityByTableName(String tableName){

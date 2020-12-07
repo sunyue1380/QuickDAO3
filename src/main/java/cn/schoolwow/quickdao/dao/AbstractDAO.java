@@ -1,7 +1,6 @@
 package cn.schoolwow.quickdao.dao;
 
 import cn.schoolwow.quickdao.annotation.IdStrategy;
-import cn.schoolwow.quickdao.builder.table.TableBuilder;
 import cn.schoolwow.quickdao.dao.condition.Condition;
 import cn.schoolwow.quickdao.dao.sql.SQLDAOInvocationHandler;
 import cn.schoolwow.quickdao.dao.sql.dml.AbstractDMLDAO;
@@ -32,13 +31,10 @@ import java.util.*;
 
 public class AbstractDAO implements DAO {
     private Logger logger = LoggerFactory.getLogger(DAO.class);
-    //数据库建表
-    private TableBuilder tableBuilder;
     //数据源配置信息
     public QuickDAOConfig quickDAOConfig;
 
-    public AbstractDAO(TableBuilder tableBuilder, QuickDAOConfig quickDAOConfig) {
-        this.tableBuilder = tableBuilder;
+    public AbstractDAO(QuickDAOConfig quickDAOConfig) {
         this.quickDAOConfig = quickDAOConfig;
     }
 
@@ -218,7 +214,8 @@ public class AbstractDAO implements DAO {
 
     @Override
     public Transaction startTransaction() {
-        AbstractTransaction transaction = new AbstractTransaction(this);
+        quickDAOConfig.abstractDAO = this;
+        AbstractTransaction transaction = new AbstractTransaction(quickDAOConfig);
         transaction.transaction = true;
         SQLDAOInvocationHandler sqldaoInvocationHandler = new SQLDAOInvocationHandler(transaction);
         Transaction transactionProxy = (Transaction) Proxy.newProxyInstance(Thread.currentThread()
@@ -250,7 +247,7 @@ public class AbstractDAO implements DAO {
     @Override
     public void create(Entity entity) {
         try {
-            tableBuilder.createTable(entity);
+            quickDAOConfig.tableBuilder.createTable(entity);
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
@@ -259,7 +256,7 @@ public class AbstractDAO implements DAO {
     @Override
     public void drop(Class clazz) {
         try {
-            tableBuilder.dropTable(this.quickDAOConfig.entityMap.get(clazz.getName()).tableName);
+            quickDAOConfig.tableBuilder.dropTable(this.quickDAOConfig.entityMap.get(clazz.getName()).tableName);
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
@@ -268,7 +265,7 @@ public class AbstractDAO implements DAO {
     @Override
     public void drop(String tableName) {
         try {
-            tableBuilder.dropTable(tableName);
+            quickDAOConfig.tableBuilder.dropTable(tableName);
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
@@ -277,7 +274,7 @@ public class AbstractDAO implements DAO {
     @Override
     public void rebuild(Class clazz) {
         try {
-            tableBuilder.rebuild(this.quickDAOConfig.entityMap.get(clazz.getName()));
+            quickDAOConfig.tableBuilder.rebuild(this.quickDAOConfig.entityMap.get(clazz.getName()));
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
@@ -301,9 +298,7 @@ public class AbstractDAO implements DAO {
     @Override
     public void refreshDbEntityList() {
         try {
-            quickDAOConfig.tableBuilder.connection = quickDAOConfig.dataSource.getConnection();
             List<Entity> dbEntityList = quickDAOConfig.tableBuilder.getDatabaseEntity();
-            quickDAOConfig.tableBuilder.connection.close();
             for(Entity dbEntity:dbEntityList){
                 dbEntity.escapeTableName = quickDAOConfig.database.escape(dbEntity.tableName);
                 dbEntity.clazz = JSONObject.class;
@@ -422,7 +417,9 @@ public class AbstractDAO implements DAO {
 
     /**创建DMLDAO*/
     private DMLDAO createDMLDAO(){
-        SQLDAOInvocationHandler sqldaoInvocationHandler = new SQLDAOInvocationHandler(new AbstractDMLDAO(this));
+        quickDAOConfig.abstractDAO = this;
+        AbstractDMLDAO abstractDMLDAO = new AbstractDMLDAO(quickDAOConfig);
+        SQLDAOInvocationHandler sqldaoInvocationHandler = new SQLDAOInvocationHandler(abstractDMLDAO);
         DMLDAO dmldao = (DMLDAO) Proxy.newProxyInstance(Thread.currentThread()
                 .getContextClassLoader(), new Class<?>[]{DMLDAO.class},sqldaoInvocationHandler);
         return dmldao;
@@ -430,7 +427,9 @@ public class AbstractDAO implements DAO {
 
     /**创建DQLDAO*/
     private DQLDAO createDQLDAO(){
-        SQLDAOInvocationHandler sqldaoInvocationHandler = new SQLDAOInvocationHandler(new AbstractDQLDAO(this));
+        quickDAOConfig.abstractDAO = this;
+        AbstractDQLDAO abstractDQLDAO = new AbstractDQLDAO(quickDAOConfig);
+        SQLDAOInvocationHandler sqldaoInvocationHandler = new SQLDAOInvocationHandler(abstractDQLDAO);
         DQLDAO dqldao = (DQLDAO) Proxy.newProxyInstance(Thread.currentThread()
                 .getContextClassLoader(), new Class<?>[]{DQLDAO.class},sqldaoInvocationHandler);
         return dqldao;

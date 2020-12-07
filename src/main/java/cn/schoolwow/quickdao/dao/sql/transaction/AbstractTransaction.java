@@ -1,7 +1,7 @@
 package cn.schoolwow.quickdao.dao.sql.transaction;
 
-import cn.schoolwow.quickdao.dao.AbstractDAO;
 import cn.schoolwow.quickdao.dao.sql.dml.AbstractDMLDAO;
+import cn.schoolwow.quickdao.domain.QuickDAOConfig;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 
 import java.sql.SQLException;
@@ -9,8 +9,8 @@ import java.sql.Savepoint;
 
 public class AbstractTransaction extends AbstractDMLDAO implements Transaction{
 
-    public AbstractTransaction(AbstractDAO abstractDAO) {
-        super(abstractDAO);
+    public AbstractTransaction(QuickDAOConfig quickDAOConfig) {
+        super(quickDAOConfig);
     }
 
     @Override
@@ -57,5 +57,10 @@ public class AbstractTransaction extends AbstractDMLDAO implements Transaction{
     @Override
     public void endTransaction() {
         transaction = false;
+        try {
+            sqlBuilder.connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

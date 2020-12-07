@@ -1,6 +1,5 @@
 package cn.schoolwow.quickdao.dao.condition;
 
-import cn.schoolwow.quickdao.builder.sql.SQLBuilder;
 import cn.schoolwow.quickdao.dao.condition.subCondition.AbstractSubCondition;
 import cn.schoolwow.quickdao.dao.condition.subCondition.SQLiteSubCondition;
 import cn.schoolwow.quickdao.dao.condition.subCondition.SubCondition;
@@ -14,17 +13,18 @@ import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import java.io.*;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Stack;
 
-public class AbstractCondition<T> implements Condition<T>, Serializable {
-    //查询对象
+public class AbstractCondition<T> implements Condition<T>, Serializable,Cloneable {
+    /**查询对象*/
     public Query query;
+    /**execute方法是否已经被调用过*/
+    private boolean hasExecute;
 
     public AbstractCondition(Query query) {
         this.query = query;
@@ -353,7 +353,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
 
     @Override
     public Condition<T> or() {
-        AbstractCondition orCondition = (AbstractCondition) query.dao.query(query.entity.clazz);
+        AbstractCondition orCondition = (AbstractCondition) query.abstractSQLDAO.query(query.entity.clazz);
         query.orList.add(orCondition);
         return orCondition;
     }
@@ -566,6 +566,9 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
 
     @Override
     public Response<T> execute() {
+        if(hasExecute){
+            throw new IllegalArgumentException("该Condition已经执行过,不能再次执行!");
+        }
         if (query.columnBuilder.length() > 0) {
             query.columnBuilder.deleteCharAt(query.columnBuilder.length() - 1);
         }
@@ -606,6 +609,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
             condition.execute();
             condition.query.whereBuilder.delete(0,5);
         }
+        hasExecute = true;
         AbstractResponse abstractResponse = new AbstractResponse(query);
         ResponseInvocationHandler invocationHandler = new ResponseInvocationHandler(abstractResponse);
         return (Response) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),new Class<?>[]{Response.class},invocationHandler);
@@ -613,42 +617,12 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
 
     @Override
     public Condition<T> clone(){
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(query);
-            oos.close();
-
-            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            Query query = (Query) ois.readObject();
-            AbstractCondition abstractCondition = new AbstractCondition(query);
-            query.entity = this.query.entity;
-            query.unionType = this.query.unionType;
-            query.quickDAOConfig = this.query.quickDAOConfig;
-            query.abstractSQLDAO = this.query.abstractSQLDAO;
-            query.dqlsqlBuilder = SQLBuilder.getDQLSQLBuilderInstance(query.quickDAOConfig);
-            if (query.abstractSQLDAO.transaction) {
-                if (null == query.dqlsqlBuilder.connection || query.dqlsqlBuilder.connection.isClosed()) {
-                    query.dqlsqlBuilder.connection = query.quickDAOConfig.dataSource.getConnection();
-                    if (query.abstractSQLDAO.transactionIsolation > 0) {
-                        query.dqlsqlBuilder.connection.setTransactionIsolation(query.abstractSQLDAO.transactionIsolation);
-                    }
-                    query.dqlsqlBuilder.connection.setAutoCommit(false);
-                }
-            } else {
-                query.dqlsqlBuilder.connection = query.quickDAOConfig.dataSource.getConnection();
-            }
-            for(int i=0;i<query.subQueryList.size();i++){
-                query.subQueryList.get(i).entity = this.query.subQueryList.get(i).entity;
-                query.subQueryList.get(i).query = query;
-                query.subQueryList.get(i).condition = abstractCondition;
-            }
-            return abstractCondition;
-        } catch (IOException | ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
+        Query query = this.query.clone();
+        AbstractCondition<T> abstractCondition = new AbstractCondition<T>(query);
+        for(int i=0;i<query.subQueryList.size();i++){
+            query.subQueryList.get(i).condition = abstractCondition;
         }
-        return null;
+        return abstractCondition;
     }
 
     @Override

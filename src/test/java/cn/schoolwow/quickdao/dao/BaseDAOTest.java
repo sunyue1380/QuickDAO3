@@ -3,10 +3,10 @@ package cn.schoolwow.quickdao.dao;
 import cn.schoolwow.quickdao.QuickDAO;
 import cn.schoolwow.quickdao.dao.sql.transaction.Transaction;
 import cn.schoolwow.quickdao.entity.Product;
-import org.apache.commons.dbcp.BasicDataSource;
+import com.zaxxer.hikari.HikariDataSource;
+import org.junit.AfterClass;
 import org.junit.runners.Parameterized;
 
-import javax.sql.DataSource;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,37 +17,38 @@ public class BaseDAOTest {
 
     @Parameterized.Parameters
     public static Collection prepareData() {
-        BasicDataSource mysqlDataSource = new BasicDataSource();
+        HikariDataSource mysqlDataSource = new HikariDataSource();
         mysqlDataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        mysqlDataSource.setUrl("jdbc:mysql://127.0.0.1:3306/quickdao");
+        mysqlDataSource.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/quickdao");
         mysqlDataSource.setUsername("root");
         mysqlDataSource.setPassword("123456");
 
-        BasicDataSource sqliteDataSource = new BasicDataSource();
+        HikariDataSource sqliteDataSource = new HikariDataSource();
         sqliteDataSource.setDriverClassName("org.sqlite.JDBC");
-        sqliteDataSource.setUrl("jdbc:sqlite:" + new File("quickdao_sqlite.db").getAbsolutePath());
+        sqliteDataSource.setJdbcUrl("jdbc:sqlite:" + new File("quickdao_sqlite.db").getAbsolutePath());
 
-        BasicDataSource h2DataSource = new BasicDataSource();
+        HikariDataSource h2DataSource = new HikariDataSource();
         h2DataSource.setDriverClassName("org.h2.Driver");
-        h2DataSource.setUrl("jdbc:h2:" + new File("quickdao_h2.db").getAbsolutePath() + ";mode=MYSQL");
+        h2DataSource.setJdbcUrl("jdbc:h2:" + new File("quickdao_h2.db").getAbsolutePath() + ";mode=MYSQL");
 
-        BasicDataSource postgreDataSource = new BasicDataSource();
+        HikariDataSource postgreDataSource = new HikariDataSource();
         postgreDataSource.setDriverClassName("org.postgresql.Driver");
-        postgreDataSource.setUrl("jdbc:postgresql://127.0.0.1:5432/quickdao");
+        postgreDataSource.setJdbcUrl("jdbc:postgresql://127.0.0.1:5432/quickdao");
         postgreDataSource.setUsername("postgres");
         postgreDataSource.setPassword("123456");
 
-        BasicDataSource sqlServerDataSource = new BasicDataSource();
+        HikariDataSource sqlServerDataSource = new HikariDataSource();
         sqlServerDataSource.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        sqlServerDataSource.setUrl("jdbc:sqlserver://127.0.0.1:1433;databaseName=quickdao");
+        sqlServerDataSource.setJdbcUrl("jdbc:sqlserver://127.0.0.1:1433;databaseName=quickdao");
         sqlServerDataSource.setUsername("sa");
         sqlServerDataSource.setPassword("aa1122335");
 
         //各种数据库产品
 //        DataSource[] dataSources = {mysqlDataSource, sqliteDataSource, h2DataSource, postgreDataSource};
-        DataSource[] dataSources = {mysqlDataSource};
+        HikariDataSource[] dataSources = {mysqlDataSource};
         Object[][] data = new Object[dataSources.length][1];
         for (int i = 0; i < dataSources.length; i++) {
+            dataSources[i].setLeakDetectionThreshold(3000);
             DAO dao = QuickDAO.newInstance().dataSource(dataSources[i])
                     .packageName("cn.schoolwow.quickdao.entity")
                     .autoCreateTable(true)
@@ -82,5 +83,15 @@ public class BaseDAOTest {
         }
         transaction.commit();
         transaction.endTransaction();
+    }
+
+    @AfterClass
+    public static void afterClass(){
+        System.out.println("等待5s后继续执行!");
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

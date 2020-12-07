@@ -4,12 +4,12 @@ import cn.schoolwow.quickdao.builder.sql.AbstractSQLBuilder;
 import cn.schoolwow.quickdao.builder.sql.SQLBuilder;
 import cn.schoolwow.quickdao.builder.sql.dql.AbstractDQLSQLBuilder;
 import cn.schoolwow.quickdao.builder.sql.dql.DQLSQLBuilder;
-import cn.schoolwow.quickdao.dao.AbstractDAO;
 import cn.schoolwow.quickdao.dao.condition.*;
 import cn.schoolwow.quickdao.database.*;
 import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.Query;
+import cn.schoolwow.quickdao.domain.QuickDAOConfig;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -20,20 +20,22 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Collection;
 
+/**
+ * 数据库操作实例
+ * */
 public class AbstractSQLDAO implements SQLDAO {
     protected Logger logger = LoggerFactory.getLogger(SQLDAO.class);
-    //SQL语句构建
+    /**SQL语句构建*/
     public AbstractSQLBuilder sqlBuilder;
-    //DAO对象
-    public AbstractDAO abstractDAO;
-    //是否开启事务
+    /**数据库配置对象*/
+    public QuickDAOConfig quickDAOConfig;
+    /**是否开启事务*/
     public boolean transaction = false;
-    //事务隔离级别
+    /**事务隔离级别*/
     public int transactionIsolation;
 
-    public AbstractSQLDAO(AbstractDAO abstractDAO) {
-        this.sqlBuilder = SQLBuilder.getDQLSQLBuilderInstance(abstractDAO.quickDAOConfig);
-        this.abstractDAO = abstractDAO;
+    public AbstractSQLDAO(QuickDAOConfig quickDAOConfig) {
+        this.quickDAOConfig = quickDAOConfig;
     }
 
     @Override
@@ -43,7 +45,7 @@ public class AbstractSQLDAO implements SQLDAO {
         }
         boolean result = false;
         try {
-            Entity entity = abstractDAO.quickDAOConfig.entityMap.get(instance.getClass().getName());
+            Entity entity = quickDAOConfig.entityMap.get(instance.getClass().getName());
             PreparedStatement ps = null;
             if(null!=entity.uniqueKeyProperties&&entity.uniqueKeyProperties.length>0){
                 ps = sqlBuilder.selectCountByUniqueKey(instance);
@@ -96,7 +98,7 @@ public class AbstractSQLDAO implements SQLDAO {
 
     @Override
     public Condition query(Class clazz) {
-        Entity entity = abstractDAO.quickDAOConfig.entityMap.get(clazz.getName());
+        Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
         if(null==entity){
             throw new IllegalArgumentException("不存在的实体类:"+clazz.getName()+"!");
         }
@@ -105,12 +107,12 @@ public class AbstractSQLDAO implements SQLDAO {
 
     @Override
     public Condition query(String tableName) {
-        for(Entity entity:abstractDAO.quickDAOConfig.dbEntityList){
+        for(Entity entity:quickDAOConfig.dbEntityList){
             if(entity.tableName.equals(tableName)){
                 return query(entity);
             }
         }
-        for(Entity entity:abstractDAO.quickDAOConfig.visualTableList){
+        for(Entity entity:quickDAOConfig.visualTableList){
             if(entity.tableName.equals(tableName)){
                 return query(entity);
             }
@@ -125,12 +127,7 @@ public class AbstractSQLDAO implements SQLDAO {
 
         Entity entity = new Entity();
         entity.clazz = JSONObject.class;
-        AbstractDQLSQLBuilder dqlsqlBuilder = null;
-        if(sqlBuilder instanceof DQLSQLBuilder){
-            dqlsqlBuilder = (AbstractDQLSQLBuilder) sqlBuilder;
-        }else{
-            dqlsqlBuilder = SQLBuilder.getDQLSQLBuilderInstance(fromQuery.quickDAOConfig);
-        }
+        AbstractDQLSQLBuilder dqlsqlBuilder = getAbstractDQLSQLBuilder();
         entity.tableName = "( " + dqlsqlBuilder.getArraySQL(fromQuery).toString() +" )";
         entity.escapeTableName = entity.tableName;
         entity.properties = new Property[0];
@@ -142,16 +139,8 @@ public class AbstractSQLDAO implements SQLDAO {
     private Condition query(Entity entity){
         Query query = new Query();
         query.entity = entity;
-        query.quickDAOConfig = abstractDAO.quickDAOConfig;
-        AbstractDQLSQLBuilder dqlsqlBuilder = null;
-        if(sqlBuilder instanceof DQLSQLBuilder){
-            dqlsqlBuilder = (AbstractDQLSQLBuilder) sqlBuilder;
-        }else{
-            dqlsqlBuilder = SQLBuilder.getDQLSQLBuilderInstance(query.quickDAOConfig);
-            dqlsqlBuilder.connection = sqlBuilder.connection;
-        }
-        query.dqlsqlBuilder = dqlsqlBuilder;
-        query.dao = abstractDAO;
+        query.quickDAOConfig = quickDAOConfig;
+        query.dqlsqlBuilder = getAbstractDQLSQLBuilder();
         query.abstractSQLDAO = this;
         if(query.quickDAOConfig.database instanceof MySQLDatabase){
             return new MySQLCondition(query);
@@ -166,5 +155,20 @@ public class AbstractSQLDAO implements SQLDAO {
         }else{
             throw new IllegalArgumentException("不支持的数据库类型!");
         }
+    }
+
+    /**
+     * 获取DQLSQLBuilder
+     * */
+    private AbstractDQLSQLBuilder getAbstractDQLSQLBuilder(){
+        AbstractDQLSQLBuilder dqlsqlBuilder = null;
+        if(sqlBuilder instanceof DQLSQLBuilder){
+            dqlsqlBuilder = (AbstractDQLSQLBuilder) sqlBuilder;
+        }else{
+            dqlsqlBuilder = SQLBuilder.getDQLSQLBuilderInstance(quickDAOConfig);
+            dqlsqlBuilder.quickDAOConfig = quickDAOConfig;
+            dqlsqlBuilder.connection = sqlBuilder.connection;
+        }
+        return dqlsqlBuilder;
     }
 }

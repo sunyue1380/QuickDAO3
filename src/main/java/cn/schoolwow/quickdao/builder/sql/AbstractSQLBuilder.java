@@ -14,7 +14,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class AbstractSQLBuilder implements SQLBuilder{
     protected final static Logger logger = LoggerFactory.getLogger(AbstractSQLBuilder.class);

@@ -1,21 +1,21 @@
 package cn.schoolwow.quickdao.domain;
 
+import cn.schoolwow.quickdao.builder.sql.SQLBuilder;
 import cn.schoolwow.quickdao.builder.sql.dql.AbstractDQLSQLBuilder;
-import cn.schoolwow.quickdao.dao.DAO;
 import cn.schoolwow.quickdao.dao.condition.AbstractCondition;
 import cn.schoolwow.quickdao.dao.response.UnionType;
 import cn.schoolwow.quickdao.dao.sql.AbstractSQLDAO;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 查询
  */
-public class Query implements Serializable {
+public class Query implements Serializable,Cloneable {
     /**
      * 关联Entity
      */
@@ -129,10 +129,6 @@ public class Query implements Serializable {
      * */
     public transient QuickDAOConfig quickDAOConfig;
     /**
-     * 关联DAO
-     * */
-    public transient DAO dao;
-    /**
      * 关联SQLDAO
      * */
     public transient AbstractSQLDAO abstractSQLDAO;
@@ -140,4 +136,43 @@ public class Query implements Serializable {
      * DQL查询语句构建
      * */
     public transient AbstractDQLSQLBuilder dqlsqlBuilder;
+
+    @Override
+    public Query clone(){
+        ByteArrayInputStream bais = null;
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()){
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(this);
+            oos.close();
+
+            bais = new ByteArrayInputStream(baos.toByteArray());
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            Query query = (Query) ois.readObject();
+            query.entity = this.entity;
+            query.unionType = this.unionType;
+            query.quickDAOConfig = this.quickDAOConfig;
+            query.abstractSQLDAO = this.abstractSQLDAO;
+            query.dqlsqlBuilder = SQLBuilder.getDQLSQLBuilderInstance(quickDAOConfig);
+            for(int i=0;i<query.orList.size();i++){
+                query.orList.get(i).query = query;
+            }
+            for(int i=0;i<query.subQueryList.size();i++){
+                query.subQueryList.get(i).entity = this.subQueryList.get(i).entity;
+                query.subQueryList.get(i).query = query;
+            }
+            bais.close();
+            return query;
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            if(null!=bais){
+                try {
+                    bais.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
+    }
 }

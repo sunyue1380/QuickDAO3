@@ -7,7 +7,7 @@ import cn.schoolwow.quickdao.domain.QuickDAOConfig;
 import cn.schoolwow.quickdao.entity.DownloadTask;
 import cn.schoolwow.quickdao.entity.Order;
 import cn.schoolwow.quickdao.entity.Person;
-import org.apache.commons.dbcp.BasicDataSource;
+import com.zaxxer.hikari.HikariDataSource;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -106,29 +106,29 @@ public class ConfigTest{
     }
 
     private DataSource[] getDataSources(){
-        BasicDataSource mysqlDataSource = new BasicDataSource();
+        HikariDataSource mysqlDataSource = new HikariDataSource();
         mysqlDataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        mysqlDataSource.setUrl("jdbc:mysql://127.0.0.1:3306/quickdao");
+        mysqlDataSource.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/quickdao");
         mysqlDataSource.setUsername("root");
         mysqlDataSource.setPassword("123456");
 
-        BasicDataSource sqliteDataSource = new BasicDataSource();
+        HikariDataSource sqliteDataSource = new HikariDataSource();
         sqliteDataSource.setDriverClassName("org.sqlite.JDBC");
-        sqliteDataSource.setUrl("jdbc:sqlite:" + new File("quickdao_sqlite.db").getAbsolutePath());
+        sqliteDataSource.setJdbcUrl("jdbc:sqlite:" + new File("quickdao_sqlite.db").getAbsolutePath());
 
-        BasicDataSource h2DataSource = new BasicDataSource();
+        HikariDataSource h2DataSource = new HikariDataSource();
         h2DataSource.setDriverClassName("org.h2.Driver");
-        h2DataSource.setUrl("jdbc:h2:" + new File("quickdao_h2.db").getAbsolutePath() + ";mode=MYSQL");
+        h2DataSource.setJdbcUrl("jdbc:h2:" + new File("quickdao_h2.db").getAbsolutePath() + ";mode=MYSQL");
 
-        BasicDataSource postgreDataSource = new BasicDataSource();
+        HikariDataSource postgreDataSource = new HikariDataSource();
         postgreDataSource.setDriverClassName("org.postgresql.Driver");
-        postgreDataSource.setUrl("jdbc:postgresql://127.0.0.1:5432/quickdao");
+        postgreDataSource.setJdbcUrl("jdbc:postgresql://127.0.0.1:5432/quickdao");
         postgreDataSource.setUsername("postgres");
         postgreDataSource.setPassword("123456");
 
-        BasicDataSource sqlServerDataSource = new BasicDataSource();
+        HikariDataSource sqlServerDataSource = new HikariDataSource();
         sqlServerDataSource.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        sqlServerDataSource.setUrl("jdbc:sqlserver://127.0.0.1:1433;databaseName=quickdao");
+        sqlServerDataSource.setJdbcUrl("jdbc:sqlserver://127.0.0.1:1433;databaseName=quickdao");
         sqlServerDataSource.setUsername("sa");
         sqlServerDataSource.setPassword("aa1122335");
 
