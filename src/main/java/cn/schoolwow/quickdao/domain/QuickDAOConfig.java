@@ -11,6 +11,7 @@ import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
@@ -72,7 +73,11 @@ public class QuickDAOConfig {
     /**
      * 扫描后的实体类信息
      * */
-    public Map<String, Entity> entityMap = new HashMap<>();
+    public final Map<String, Entity> entityMap = new HashMap<>();
+    /**
+     * SQL语句缓存
+     * */
+    public final ConcurrentHashMap<String,String> sqlCache = new ConcurrentHashMap();
     /**
      * 数据库获取的表信息
      * */

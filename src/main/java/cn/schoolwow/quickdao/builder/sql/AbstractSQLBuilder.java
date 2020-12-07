@@ -26,8 +26,6 @@ public class AbstractSQLBuilder implements SQLBuilder{
     private final static DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     /**SQL参数占位符*/
     protected final static String PLACEHOLDER = "** NOT SPECIFIED **";
-    /**SQL语句缓存*/
-    protected final static ConcurrentHashMap<String,String> sqlCache = new ConcurrentHashMap();
     /**数据库信息对象*/
     public QuickDAOConfig quickDAOConfig;
     /**数据库连接对象*/
@@ -41,13 +39,13 @@ public class AbstractSQLBuilder implements SQLBuilder{
     public PreparedStatement selectCountById(Object instance) throws Exception {
         String key = "selectCountById_" + instance.getClass().getName()+"_"+quickDAOConfig.database.getClass().getName();
         Entity entity = quickDAOConfig.entityMap.get(instance.getClass().getName());
-        if (!sqlCache.containsKey(key)) {
+        if (!quickDAOConfig.sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder();
             builder.append("select count(1) from " + entity.escapeTableName + " where ");
             builder.append(entity.id.column+" = "+(null==entity.id.function?"?":entity.id.function)+" ");
-            sqlCache.put(key, builder.toString());
+            quickDAOConfig.sqlCache.put(key, builder.toString());
         }
-        String sql = sqlCache.get(key);
+        String sql = quickDAOConfig.sqlCache.get(key);
         PreparedStatement ps = connection.prepareStatement(sql);
         Field field = instance.getClass().getDeclaredField(entity.id.name);
         field.setAccessible(true);
@@ -62,16 +60,16 @@ public class AbstractSQLBuilder implements SQLBuilder{
     public PreparedStatement selectCountByUniqueKey(Object instance) throws Exception {
         String key = "selectCountByUniqueKey_" + instance.getClass().getName()+"_"+quickDAOConfig.database.getClass().getName();
         Entity entity = quickDAOConfig.entityMap.get(instance.getClass().getName());
-        if (!sqlCache.containsKey(key)) {
+        if (!quickDAOConfig.sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder();
             builder.append("select count(1) from " + entity.escapeTableName + " where ");
             for(Property property:entity.uniqueKeyProperties){
                 builder.append(quickDAOConfig.database.escape(property.column)+ "= "+(null==property.function?"?":property.function)+" and ");
             }
             builder.delete(builder.length()-5,builder.length());
-            sqlCache.put(key, builder.toString());
+            quickDAOConfig.sqlCache.put(key, builder.toString());
         }
-        String sql = sqlCache.get(key);
+        String sql = quickDAOConfig.sqlCache.get(key);
         StringBuilder builder = new StringBuilder(sql.replace("?", PLACEHOLDER));
         PreparedStatement ps = connection.prepareStatement(sql);
         int parameterIndex = 1;
