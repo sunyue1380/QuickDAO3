@@ -19,14 +19,14 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
     @Override
     public PreparedStatement fetchNull(Class clazz, String field) throws SQLException {
         String key = "fetchNull_" + clazz.getName()+"_"+field+"_"+quickDAOConfig.database.getClass().getSimpleName();
-        if (!sqlCache.containsKey(key)) {
+        if (!quickDAOConfig.sqlCache.containsKey(key)) {
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
             StringBuilder builder = new StringBuilder("select ");
             builder.append(columns(entity,"t"));
             builder.append(" from " + entity.escapeTableName + " as t where t." + quickDAOConfig.database.escape(entity.getColumnNameByFieldName(field)) +" is null");
-            sqlCache.put(key, builder.toString());
+            quickDAOConfig.sqlCache.put(key, builder.toString());
         }
-        String sql = sqlCache.get(key);
+        String sql = quickDAOConfig.sqlCache.get(key);
         PreparedStatement ps = connection.prepareStatement(sql);
         MDC.put("name","Null查询");
         MDC.put("sql",sql);
@@ -42,15 +42,15 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
     @Override
     public PreparedStatement fetch(Class clazz, String field, Object value) throws SQLException {
         String key = "fetch_" + clazz.getName()+"_"+field+"_"+quickDAOConfig.database.getClass().getSimpleName();
-        if (!sqlCache.containsKey(key)) {
+        if (!quickDAOConfig.sqlCache.containsKey(key)) {
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
             StringBuilder builder = new StringBuilder("select ");
             builder.append(columns(entity,"t"));
             Property property = entity.getPropertyByFieldName(field);
             builder.append(" from " + entity.escapeTableName + " as t where t." + quickDAOConfig.database.escape(entity.getColumnNameByFieldName(field)) + " = "+(null==property||null==property.function?"?":property.function)+"");
-            sqlCache.put(key, builder.toString());
+            quickDAOConfig.sqlCache.put(key, builder.toString());
         }
-        String sql = sqlCache.get(key);
+        String sql = quickDAOConfig.sqlCache.get(key);
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setObject(1,value);
         MDC.put("name","字段查询");
@@ -61,14 +61,14 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
     @Override
     public PreparedStatement fetchNull(String tableName, String field) throws SQLException {
         String key = "fetchNull_" + tableName+"_"+field+"_"+quickDAOConfig.database.getClass().getSimpleName();
-        if (!sqlCache.containsKey(key)) {
+        if (!quickDAOConfig.sqlCache.containsKey(key)) {
             Entity dbEntity = quickDAOConfig.getDbEntityByTableName(tableName);
             StringBuilder builder = new StringBuilder("select ");
             builder.append(columns(dbEntity,"t"));
             builder.append(" from " + dbEntity.escapeTableName + " as t where t." + quickDAOConfig.database.escape(dbEntity.getColumnNameByFieldName(field)) +" is null");
-            sqlCache.put(key, builder.toString());
+            quickDAOConfig.sqlCache.put(key, builder.toString());
         }
-        String sql = sqlCache.get(key);
+        String sql = quickDAOConfig.sqlCache.get(key);
         PreparedStatement ps = connection.prepareStatement(sql);
         MDC.put("name","Null查询");
         MDC.put("sql",sql);
@@ -78,14 +78,14 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
     @Override
     public PreparedStatement fetch(String tableName, String field, Object value) throws SQLException {
         String key = "fetch_" + tableName+"_"+field+"_"+quickDAOConfig.database.getClass().getSimpleName();
-        if (!sqlCache.containsKey(key)) {
+        if (!quickDAOConfig.sqlCache.containsKey(key)) {
             Entity dbEntity = quickDAOConfig.getDbEntityByTableName(tableName);
             StringBuilder builder = new StringBuilder("select ");
             builder.append(columns(dbEntity,"t"));
             builder.append(" from " + dbEntity.escapeTableName + " as t where t." + quickDAOConfig.database.escape(dbEntity.getColumnNameByFieldName(field)) + " = ?");
-            sqlCache.put(key, builder.toString());
+            quickDAOConfig.sqlCache.put(key, builder.toString());
         }
-        String sql = sqlCache.get(key);
+        String sql = quickDAOConfig.sqlCache.get(key);
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setObject(1,value);
         MDC.put("name","字段查询");
@@ -391,14 +391,14 @@ public class AbstractDQLSQLBuilder extends AbstractSQLBuilder implements DQLSQLB
      */
     private String columns(Entity entity, String tableAlias) {
         String key = "columns_" + entity.tableName + "_" + tableAlias+quickDAOConfig.database.getClass().getName();
-        if (!sqlCache.containsKey(key)) {
+        if (!quickDAOConfig.sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder();
             for (Property property : entity.properties) {
                 builder.append(tableAlias + "." + quickDAOConfig.database.escape(property.column) + " as " + tableAlias + "_" + property.column + ",");
             }
             builder.deleteCharAt(builder.length() - 1);
-            sqlCache.put(key, builder.toString());
+            quickDAOConfig.sqlCache.put(key, builder.toString());
         }
-        return sqlCache.get(key);
+        return quickDAOConfig.sqlCache.get(key);
     }
 }

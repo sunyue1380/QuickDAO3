@@ -126,13 +126,13 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
     @Override
     public PreparedStatement deleteByProperty(Class clazz, String property, Object value) throws SQLException {
         String key = "deleteByProperty_" + clazz.getName()+"_"+property+"_"+quickDAOConfig.database.getClass().getSimpleName();
-        if (!sqlCache.containsKey(key)) {
+        if (!quickDAOConfig.sqlCache.containsKey(key)) {
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
             StringBuilder builder = new StringBuilder();
             builder.append("delete from " + entity.escapeTableName + " where " + quickDAOConfig.database.escape(entity.getColumnNameByFieldName(property)) + " = ?");
-            sqlCache.put(key, builder.toString());
+            quickDAOConfig.sqlCache.put(key, builder.toString());
         }
-        String sql = sqlCache.get(key);
+        String sql = quickDAOConfig.sqlCache.get(key);
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setObject(1, value);
         MDC.put("name","根据单个字段删除");
@@ -153,11 +153,11 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
     @Override
     public PreparedStatement clear(Class clazz) throws SQLException {
         String key = "clear_" + clazz.getName()+"_"+quickDAOConfig.database.getClass().getSimpleName();
-        if (!sqlCache.containsKey(key)) {
+        if (!quickDAOConfig.sqlCache.containsKey(key)) {
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
-            sqlCache.put(key, "delete from "+entity.escapeTableName);
+            quickDAOConfig.sqlCache.put(key, "delete from "+entity.escapeTableName);
         }
-        PreparedStatement preparedStatement = connection.prepareStatement(sqlCache.get(key));
+        PreparedStatement preparedStatement = connection.prepareStatement(quickDAOConfig.sqlCache.get(key));
         return preparedStatement;
     }
 
@@ -167,7 +167,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
      * */
     private String insert(Class clazz){
         String key = "insert_" + clazz.getName()+"_"+quickDAOConfig.database.getClass().getSimpleName();
-        if (!sqlCache.containsKey(key)) {
+        if (!quickDAOConfig.sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder();
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
             builder.append("insert into " + entity.escapeTableName + "(");
@@ -187,9 +187,9 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             }
             builder.deleteCharAt(builder.length() - 1);
             builder.append(")");
-            sqlCache.put(key, builder.toString());
+            quickDAOConfig.sqlCache.put(key, builder.toString());
         }
-        return sqlCache.get(key);
+        return quickDAOConfig.sqlCache.get(key);
     }
 
     /**
@@ -244,7 +244,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
      * */
     private String updateByUniqueKey(Class clazz){
         String key = "updateByUniqueKey_" + clazz.getName()+"_"+quickDAOConfig.database.getClass().getSimpleName();
-        if (!sqlCache.containsKey(key)) {
+        if (!quickDAOConfig.sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder();
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
             builder.append("update " + entity.escapeTableName + " set ");
@@ -265,9 +265,9 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
                 }
             }
             builder.delete(builder.length() - 5, builder.length());
-            sqlCache.put(key, builder.toString());
+            quickDAOConfig.sqlCache.put(key, builder.toString());
         }
-        return sqlCache.get(key);
+        return quickDAOConfig.sqlCache.get(key);
     }
 
     /**
@@ -306,7 +306,7 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
      * */
     private String updateById(Class clazz){
         String key = "updateById_" + clazz.getName()+"_"+quickDAOConfig.database.getClass().getSimpleName();
-        if (!sqlCache.containsKey(key)) {
+        if (!quickDAOConfig.sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder();
             Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
             builder.append("update " + entity.escapeTableName + " set ");
@@ -321,9 +321,9 @@ public class AbstractDMLSQLBuilder extends AbstractSQLBuilder implements DMLSQLB
             }
             builder.deleteCharAt(builder.length() - 1);
             builder.append(" where " + quickDAOConfig.database.escape(entity.id.column) + " = ?");
-            sqlCache.put(key, builder.toString());
+            quickDAOConfig.sqlCache.put(key, builder.toString());
         }
-        return sqlCache.get(key);
+        return quickDAOConfig.sqlCache.get(key);
     }
 
     /**
