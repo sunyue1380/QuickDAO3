@@ -1,10 +1,11 @@
 package cn.schoolwow.quickdao.dao.sql.dql;
 
+import cn.schoolwow.quickdao.builder.sql.SQLBuilder;
 import cn.schoolwow.quickdao.builder.sql.dql.AbstractDQLSQLBuilder;
-import cn.schoolwow.quickdao.dao.AbstractDAO;
 import cn.schoolwow.quickdao.dao.response.AbstractResponse;
 import cn.schoolwow.quickdao.dao.sql.AbstractSQLDAO;
 import cn.schoolwow.quickdao.domain.Entity;
+import cn.schoolwow.quickdao.domain.QuickDAOConfig;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -18,14 +19,15 @@ import java.util.List;
 public class AbstractDQLDAO extends AbstractSQLDAO implements DQLDAO {
     private AbstractDQLSQLBuilder dqlsqlBuilder;
 
-    public AbstractDQLDAO(AbstractDAO abstractDAO) {
-        super(abstractDAO);
+    public AbstractDQLDAO(QuickDAOConfig quickDAOConfig) {
+        super(quickDAOConfig);
+        super.sqlBuilder = SQLBuilder.getDQLSQLBuilderInstance(quickDAOConfig);
         dqlsqlBuilder = (AbstractDQLSQLBuilder) sqlBuilder;
     }
 
     @Override
     public <T> T fetch(Class<T> clazz, long id) {
-        return fetch(clazz,abstractDAO.quickDAOConfig.entityMap.get(clazz.getName()).id.column,id);
+        return fetch(clazz,quickDAOConfig.entityMap.get(clazz.getName()).id.column,id);
     }
 
     @Override
@@ -46,7 +48,7 @@ public class AbstractDQLDAO extends AbstractSQLDAO implements DQLDAO {
             }else{
                 ps = dqlsqlBuilder.fetch(clazz,field,value);
             }
-            Entity entity = abstractDAO.quickDAOConfig.entityMap.get(clazz.getName());
+            Entity entity = quickDAOConfig.entityMap.get(clazz.getName());
             ResultSet resultSet = ps.executeQuery();
             JSONArray array = new JSONArray();
             while(resultSet.next()){
@@ -79,7 +81,7 @@ public class AbstractDQLDAO extends AbstractSQLDAO implements DQLDAO {
             }else{
                 ps = dqlsqlBuilder.fetch(tableName,field,value);
             }
-            Entity dbEntity = abstractDAO.quickDAOConfig.getDbEntityByTableName(tableName);
+            Entity dbEntity = quickDAOConfig.getDbEntityByTableName(tableName);
             ResultSet resultSet = ps.executeQuery();
             JSONArray array = new JSONArray();
             while(resultSet.next()){

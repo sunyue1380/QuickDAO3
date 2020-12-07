@@ -4,7 +4,6 @@ import cn.schoolwow.quickdao.annotation.IdStrategy;
 import cn.schoolwow.quickdao.builder.table.*;
 import cn.schoolwow.quickdao.dao.AbstractDAO;
 import cn.schoolwow.quickdao.dao.DAO;
-import cn.schoolwow.quickdao.dao.SQLiteDAO;
 import cn.schoolwow.quickdao.dao.sql.dml.IDGenerator;
 import cn.schoolwow.quickdao.database.*;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
@@ -62,7 +61,8 @@ public class QuickDAO {
             } else {
                 throw new IllegalArgumentException("不支持的数据库类型!");
             }
-            quickDAOConfig.tableBuilder.connection = connection;
+            AbstractTableBuilder abstractTableBuilder = (AbstractTableBuilder) quickDAOConfig.tableBuilder;
+            abstractTableBuilder.connection = connection;
         }catch (Exception e){
             throw new SQLRuntimeException(e);
         }
@@ -236,20 +236,16 @@ public class QuickDAO {
         }
         try {
             quickDAOConfig.defaultTableDefiner.handleEntityMap();
-            quickDAOConfig.tableBuilder.autoBuildDatabase();
-            quickDAOConfig.tableBuilder.connection.commit();
-            quickDAOConfig.tableBuilder.connection.close();
-            TableBuilderInvocationHandler invocationHandler = new TableBuilderInvocationHandler(quickDAOConfig.tableBuilder);
+            AbstractTableBuilder abstractTableBuilder = (AbstractTableBuilder) quickDAOConfig.tableBuilder;
+            abstractTableBuilder.autoBuildDatabase();
+            abstractTableBuilder.connection.commit();
+            abstractTableBuilder.connection.close();
+            TableBuilderInvocationHandler invocationHandler = new TableBuilderInvocationHandler(abstractTableBuilder);
             TableBuilder tableBuilderProxy = (TableBuilder) Proxy.newProxyInstance(Thread.currentThread()
                     .getContextClassLoader(), new Class<?>[]{TableBuilder.class},invocationHandler);
+            quickDAOConfig.tableBuilder = tableBuilderProxy;
 
-            AbstractDAO dao = null;
-            if(quickDAOConfig.database instanceof SQLiteDatabase){
-                dao = new SQLiteDAO(tableBuilderProxy,quickDAOConfig);
-            }else{
-                dao = new AbstractDAO(tableBuilderProxy,quickDAOConfig);
-            }
-            return dao;
+            return new AbstractDAO(quickDAOConfig);
         }catch (SQLException e){
             throw new SQLRuntimeException(e);
         }

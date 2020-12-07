@@ -22,7 +22,7 @@ import java.util.List;
 
 public class AbstractResponse<T> implements Response<T>{
     private Logger logger = LoggerFactory.getLogger(AbstractResponse.class);
-    //查询对象参数
+    /**查询对象参数*/
     public Query query;
 
     public AbstractResponse(Query query) {

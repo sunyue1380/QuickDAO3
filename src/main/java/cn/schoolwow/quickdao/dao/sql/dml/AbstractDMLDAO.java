@@ -2,9 +2,9 @@ package cn.schoolwow.quickdao.dao.sql.dml;
 
 import cn.schoolwow.quickdao.annotation.IdStrategy;
 import cn.schoolwow.quickdao.builder.sql.dml.AbstractDMLSQLBuilder;
-import cn.schoolwow.quickdao.dao.AbstractDAO;
 import cn.schoolwow.quickdao.dao.sql.AbstractSQLDAO;
 import cn.schoolwow.quickdao.domain.Entity;
+import cn.schoolwow.quickdao.domain.QuickDAOConfig;
 import cn.schoolwow.quickdao.exception.SQLRuntimeException;
 import org.slf4j.MDC;
 
@@ -19,9 +19,9 @@ import java.util.List;
 public class AbstractDMLDAO extends AbstractSQLDAO implements DMLDAO{
     private AbstractDMLSQLBuilder dmlsqlBuilder;
 
-    public AbstractDMLDAO(AbstractDAO abstractDAO) {
-        super(abstractDAO);
-        super.sqlBuilder = new AbstractDMLSQLBuilder(abstractDAO.quickDAOConfig);
+    public AbstractDMLDAO(QuickDAOConfig quickDAOConfig) {
+        super(quickDAOConfig);
+        super.sqlBuilder = new AbstractDMLSQLBuilder(quickDAOConfig);
         this.dmlsqlBuilder = (AbstractDMLSQLBuilder) sqlBuilder;
     }
 

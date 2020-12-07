@@ -17,10 +17,10 @@ public abstract class AbstractTableBuilder implements TableBuilder{
     protected Logger logger = LoggerFactory.getLogger(TableBuilder.class);
     /**字段类型映射*/
     protected final Map<String, String> fieldMapping = new HashMap<String, String>();
-    /**数据库连接*/
-    public Connection connection;
     /**数据库配置项*/
     public QuickDAOConfig quickDAOConfig;
+    /**数据库连接*/
+    public Connection connection;
 
     public AbstractTableBuilder(QuickDAOConfig quickDAOConfig) {
         this.quickDAOConfig = quickDAOConfig;
