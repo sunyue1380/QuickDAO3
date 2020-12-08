@@ -26,6 +26,7 @@ public class DMLTest extends BaseDAOTest{
         update();
         save();
         delete();
+        dropColumn();
     }
 
     private void insert() {
@@ -220,5 +221,11 @@ public class DMLTest extends BaseDAOTest{
             Assert.assertEquals(5,effect);
             Assert.assertEquals(count-5,dao.query(Order.class).execute().count());
         }
+    }
+
+    private void dropColumn(){
+        dao.rebuild(Person.class);
+        dao.refreshDbEntityList();
+        dao.dropColumn("person","city");
     }
 }

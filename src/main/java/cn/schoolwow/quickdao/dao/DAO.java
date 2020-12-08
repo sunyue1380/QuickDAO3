@@ -47,6 +47,13 @@ public interface DAO extends DQLDAO,DMLDAO {
     void rebuild(Class clazz);
 
     /**
+     * 删除列
+     * @param tableName 表名
+     * @param column 列名
+     */
+    void dropColumn(String tableName, String column);
+
+    /**
      * 获取连接池
      */
     DataSource getDataSource();

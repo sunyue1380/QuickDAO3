@@ -42,6 +42,10 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         fieldMapping.put("timestamp", "timestamp");
     }
 
+    public String getDatabaseName() throws SQLException{
+        return null;
+    }
+
     public abstract List<Entity> getDatabaseEntity() throws SQLException;
 
     /**
@@ -138,10 +142,42 @@ public abstract class AbstractTableBuilder implements TableBuilder{
     }
 
     @Override
+    public void createProperty(Property property) throws SQLException{
+        StringBuilder builder = new StringBuilder("alter table " + quickDAOConfig.database.escape(property.entity.tableName) + " add " + quickDAOConfig.database.escape(property.column) + " " + property.columnType);
+        if (property.notNull) {
+            builder.append(" not null");
+        }
+        if (null!=property.defaultValue&&!property.defaultValue.isEmpty()) {
+            builder.append(" default " + property.defaultValue);
+        }
+        if (null!=property.check&&!property.check.isEmpty()) {
+            builder.append(" check " + property.check);
+        }
+        if (null != property.comment) {
+            builder.append(" "+quickDAOConfig.database.comment(property.comment));
+        }
+        builder.append(";");
+        logger.debug("[添加新列]表:{},列名:{},执行SQL:{}", property.entity.tableName, property.column + "(" + property.columnType + ")", builder.toString());
+        connection.prepareStatement(builder.toString()).executeUpdate();
+    }
+
+    @Override
     public void alterColumn(Property property) throws SQLException{
-        StringBuilder builder = new StringBuilder("alert table " + quickDAOConfig.database.escape(property.entity.tableName));
+        StringBuilder builder = new StringBuilder("alter table " + quickDAOConfig.database.escape(property.entity.tableName));
         builder.append(" alter column "+quickDAOConfig.database.escape(property.column)+" "+property.columnType);
-        logger.debug("[修改数据类型]:类名:{},表名:{},列名:{},执行SQL:{}", property.entity.className, property.entity.tableName, property.column, builder.toString());
+        logger.debug("[修改数据类型]表名:{},列名:{},执行SQL:{}", property.entity.tableName, property.column, builder.toString());
+        connection.prepareStatement(builder.toString()).executeUpdate();
+    }
+
+    @Override
+    public void deleteColumn(Property property) throws SQLException{
+        StringBuilder builder = new StringBuilder("alter table ");
+        if(null!=quickDAOConfig.databaseName){
+            builder.append(quickDAOConfig.database.escape(quickDAOConfig.databaseName)+".");
+        }
+        builder.append(quickDAOConfig.database.escape(property.entity.tableName));
+        builder.append(" drop column "+quickDAOConfig.database.escape(property.column)+";");
+        logger.debug("[删除列]表名:{},列名:{},执行SQL:{}", property.entity.tableName, property.column, builder.toString());
         connection.prepareStatement(builder.toString()).executeUpdate();
     }
 
@@ -220,10 +256,33 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         connection.prepareStatement(dropIndexSQL).executeUpdate();
     }
 
+    @Override
+    public void createForeignKey(Property property) throws SQLException{
+        String operation = property.foreignKey.foreignKeyOption().getOperation();
+        String reference = quickDAOConfig.database.escape(quickDAOConfig.entityMap.get(property.foreignKey.table().getName()).tableName) + "(" + quickDAOConfig.database.escape(property.foreignKey.field()) + ") ON DELETE " + operation + " ON UPDATE " + operation;
+        String foreignKeyName = "FK_" + property.entity.tableName + "_" + property.foreignKey.field() + "_" + quickDAOConfig.entityMap.get(property.foreignKey.table().getName()).tableName + "_" + property.name;
+        if (hasConstraintExists(property.entity.tableName,foreignKeyName)) {
+            return;
+        }
+        String foreignKeySQL = "alter table " + quickDAOConfig.database.escape(property.entity.tableName) + " add constraint " + quickDAOConfig.database.escape(foreignKeyName) + " foreign key(" + quickDAOConfig.database.escape(property.column) + ") references " + reference;
+        logger.info("[生成外键约束]约束名:{},执行SQL:{}", foreignKeyName, foreignKeySQL);
+        connection.prepareStatement(foreignKeySQL).executeUpdate();
+    }
+
     public void autoBuildDatabase() throws SQLException {
-        //对比实体类信息与数据库信息
+        //获取当前数据库名称
+        quickDAOConfig.databaseName = getDatabaseName();
         List<Entity> dbEntityList = getDatabaseEntity();
+        for (Entity dbEntity : dbEntityList) {
+            dbEntity.escapeTableName = quickDAOConfig.database.escape(dbEntity.tableName);
+            dbEntity.clazz = JSONObject.class;
+            for (Property property : dbEntity.properties) {
+                property.entity = dbEntity;
+            }
+        }
         logger.debug("[获取数据库信息]数据库表个数:{}", dbEntityList.size());
+        quickDAOConfig.dbEntityList = dbEntityList.toArray(new Entity[0]);
+
         //确定需要新增的表和更新的表
         Collection<Entity> entityList = quickDAOConfig.entityMap.values();
         List<Entity> newEntityList = new ArrayList<>();
@@ -240,7 +299,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                     }
                 }
             }
-            for (Entity dbEntity : dbEntityList) {
+            for (Entity dbEntity : quickDAOConfig.dbEntityList) {
                 if (entity.tableName.toLowerCase().equals(dbEntity.tableName.toLowerCase())) {
                     updateEntityList.add(entity);
                     break;
@@ -254,6 +313,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         for(Entity entity:newEntityList){
             changeNewEntityCreateOrder(entity,finalNewEntityList);
         }
+        //自动建表
         if (quickDAOConfig.autoCreateTable) {
             for(Entity entity: newEntityList){
                 createTable(entity);
@@ -261,10 +321,11 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                 createIndex(entity,IndexType.Unique);
             }
         }
+        //自动新增字段
         if(quickDAOConfig.autoCreateProperty){
             //更新表
             for(Entity entity : updateEntityList){
-                for (Entity dbEntity : dbEntityList) {
+                for (Entity dbEntity : quickDAOConfig.dbEntityList) {
                     if (entity.tableName.equals(dbEntity.tableName)) {
                         compareEntityDatabase(entity,dbEntity);
                         break;
@@ -272,11 +333,6 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                 }
             }
         }
-        for(Entity dbEntity:dbEntityList){
-            dbEntity.escapeTableName = quickDAOConfig.database.escape(dbEntity.tableName);
-            dbEntity.clazz = JSONObject.class;
-        }
-        quickDAOConfig.dbEntityList = dbEntityList.toArray(new Entity[0]);
         //添加虚拟表
         {
             Entity entity = new Entity();
@@ -316,7 +372,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                 }
             }
             if (!columnExist&&null!=entityProperty.columnType&&!entityProperty.columnType.isEmpty()) {
-                addProperty(entityProperty);
+                createProperty(entityProperty);
                 if(entityProperty.index){
                     hasIndexProperty = true;
                 }
@@ -344,50 +400,12 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         }
         //建立外键
         for(Property property:foreignKeyPropertyList){
-            addForeignKey(property);
+            createForeignKey(property);
         }
     }
 
     /**
-     * 表添加属性
-     */
-    private void addProperty(Property property) throws SQLException{
-        StringBuilder addColumnBuilder = new StringBuilder();
-        addColumnBuilder.append("alter table " + quickDAOConfig.database.escape(property.entity.tableName) + " add " + quickDAOConfig.database.escape(property.column) + " " + property.columnType);
-        if (property.notNull) {
-            addColumnBuilder.append(" not null");
-        }
-        if (null!=property.defaultValue&&!property.defaultValue.isEmpty()) {
-            addColumnBuilder.append(" default " + property.defaultValue);
-        }
-        if (null!=property.check&&!property.check.isEmpty()) {
-            addColumnBuilder.append(" check " + property.check);
-        }
-        if (null != property.comment) {
-            addColumnBuilder.append(" "+quickDAOConfig.database.comment(property.comment));
-        }
-        addColumnBuilder.append(";");
-        logger.debug("[添加新列]表:{},列名:{},执行SQL:{}", property.entity.tableName, property.column + "(" + property.columnType + ")", addColumnBuilder.toString());
-        connection.prepareStatement(addColumnBuilder.toString()).executeUpdate();
-    }
-
-    /**
-     * 表添加属性
-     */
-    private void addForeignKey(Property property) throws SQLException{
-        String operation = property.foreignKey.foreignKeyOption().getOperation();
-        String reference = quickDAOConfig.database.escape(quickDAOConfig.entityMap.get(property.foreignKey.table().getName()).tableName) + "(" + quickDAOConfig.database.escape(property.foreignKey.field()) + ") ON DELETE " + operation + " ON UPDATE " + operation;
-        String foreignKeyName = "FK_" + property.entity.tableName + "_" + property.foreignKey.field() + "_" + quickDAOConfig.entityMap.get(property.foreignKey.table().getName()).tableName + "_" + property.name;
-        if (hasConstraintExists(property.entity.tableName,foreignKeyName)) {
-            return;
-        }
-        String foreignKeySQL = "alter table " + quickDAOConfig.database.escape(property.entity.tableName) + " add constraint " + quickDAOConfig.database.escape(foreignKeyName) + " foreign key(" + quickDAOConfig.database.escape(property.column) + ") references " + reference;
-        logger.info("[生成外键约束]约束名:{},执行SQL:{}", foreignKeyName, foreignKeySQL);
-        connection.prepareStatement(foreignKeySQL).executeUpdate();
-    }
-
-    /**
-     * 根据外键依赖关系
+     * 根据外键依赖关系调整外键创建顺序
      * @param entity 当前要创建的实体类
      * @param finalNewEntityList 最终实体类顺序
      * */

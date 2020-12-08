@@ -21,6 +21,16 @@ public class MySQLTableBuilder extends AbstractTableBuilder {
         fieldMapping.put("double", "double(5,2)");
     }
 
+    public String getDatabaseName() throws SQLException{
+        ResultSet resultSet = connection.prepareStatement("select database();").executeQuery();
+        String databaseName = null;
+        if(resultSet.next()){
+            databaseName = resultSet.getString(1);
+        }
+        resultSet.close();
+        return databaseName;
+    }
+
     @Override
     public List<Entity> getDatabaseEntity() throws SQLException {
         PreparedStatement tablePs = connection.prepareStatement("select table_name,table_comment from information_schema.tables where table_schema = database()");

@@ -1,6 +1,8 @@
 package cn.schoolwow.quickdao.dao;
 
 import cn.schoolwow.quickdao.annotation.IdStrategy;
+import cn.schoolwow.quickdao.builder.table.AbstractTableBuilder;
+import cn.schoolwow.quickdao.builder.table.TableBuilderInvocationHandler;
 import cn.schoolwow.quickdao.dao.condition.Condition;
 import cn.schoolwow.quickdao.dao.sql.SQLDAOInvocationHandler;
 import cn.schoolwow.quickdao.dao.sql.dml.AbstractDMLDAO;
@@ -281,6 +283,26 @@ public class AbstractDAO implements DAO {
     }
 
     @Override
+    public void dropColumn(String tableName, String column) {
+        Entity[] dbEntityList = quickDAOConfig.dbEntityList;
+        for(Entity dbEntity:dbEntityList){
+            if(dbEntity.tableName.equals(tableName)){
+                for(Property property:dbEntity.properties){
+                    if(property.column.equals(column)){
+                        try {
+                            quickDAOConfig.tableBuilder.deleteColumn(property);
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+        logger.warn("[表名不存在或者该表不存在指定列!表名:{},列名:{}",tableName,column);
+    }
+
+    @Override
     public DataSource getDataSource() {
         return quickDAOConfig.dataSource;
     }
@@ -299,12 +321,15 @@ public class AbstractDAO implements DAO {
     public void refreshDbEntityList() {
         try {
             List<Entity> dbEntityList = quickDAOConfig.tableBuilder.getDatabaseEntity();
-            for(Entity dbEntity:dbEntityList){
+            for (Entity dbEntity : dbEntityList) {
                 dbEntity.escapeTableName = quickDAOConfig.database.escape(dbEntity.tableName);
                 dbEntity.clazz = JSONObject.class;
+                for (Property property : dbEntity.properties) {
+                    property.entity = dbEntity;
+                }
             }
+            logger.debug("[获取数据库信息]数据库表个数:{}", dbEntityList.size());
             quickDAOConfig.dbEntityList = dbEntityList.toArray(new Entity[0]);
-            logger.info("[刷新数据库表信息]数据库表个数:{}", dbEntityList.size());
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -63,6 +63,10 @@ public class QuickDAOConfig {
      */
     public IDGenerator idGenerator = new SnowflakeIdGenerator();
     /**
+     * 当前数据库名称
+     */
+    public String databaseName;
+    /**
      * 全局表编码格式
      * */
     public String charset;
