@@ -53,7 +53,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
      * @param executeSQL 待执行SQL语句
      * @param propertyList 字段列表
      * */
-    public void updateTableIndex(String executeSQL, List<Property> propertyList) throws SQLException{
+    protected void updateTableIndex(String executeSQL, List<Property> propertyList) throws SQLException{
         ResultSet resultSet = connection.prepareStatement(executeSQL).executeQuery();
         while (resultSet.next()) {
             //判断是普通索引还是唯一性约束
@@ -269,20 +269,8 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         connection.prepareStatement(foreignKeySQL).executeUpdate();
     }
 
-    public void autoBuildDatabase() throws SQLException {
-        //获取当前数据库名称
-        quickDAOConfig.databaseName = getDatabaseName();
-        List<Entity> dbEntityList = getDatabaseEntity();
-        for (Entity dbEntity : dbEntityList) {
-            dbEntity.escapeTableName = quickDAOConfig.database.escape(dbEntity.tableName);
-            dbEntity.clazz = JSONObject.class;
-            for (Property property : dbEntity.properties) {
-                property.entity = dbEntity;
-            }
-        }
-        logger.debug("[获取数据库信息]数据库表个数:{}", dbEntityList.size());
-        quickDAOConfig.dbEntityList = dbEntityList.toArray(new Entity[0]);
-
+    @Override
+    public void automaticCreateTableAndField() throws SQLException {
         //确定需要新增的表和更新的表
         Collection<Entity> entityList = quickDAOConfig.entityMap.values();
         List<Entity> newEntityList = new ArrayList<>();
@@ -333,6 +321,41 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                 }
             }
         }
+    }
+
+    @Override
+    public void refreshDbEntityList() {
+        try {
+            List<Entity> dbEntityList = getDatabaseEntity();
+            for (Entity dbEntity : dbEntityList) {
+                dbEntity.escapeTableName = quickDAOConfig.database.escape(dbEntity.tableName);
+                dbEntity.clazz = JSONObject.class;
+                for (Property property : dbEntity.properties) {
+                    property.entity = dbEntity;
+                }
+            }
+            logger.debug("[获取数据库信息]数据库表个数:{}", dbEntityList.size());
+            quickDAOConfig.dbEntityList = dbEntityList.toArray(new Entity[0]);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void autoBuildDatabase() throws SQLException {
+        //获取当前数据库名称
+        quickDAOConfig.databaseName = getDatabaseName();
+        //获取数据库表信息
+        List<Entity> dbEntityList = getDatabaseEntity();
+        for (Entity dbEntity : dbEntityList) {
+            dbEntity.escapeTableName = quickDAOConfig.database.escape(dbEntity.tableName);
+            dbEntity.clazz = JSONObject.class;
+            for (Property property : dbEntity.properties) {
+                property.entity = dbEntity;
+            }
+        }
+        logger.debug("[获取数据库信息]数据库表个数:{}", dbEntityList.size());
+        quickDAOConfig.dbEntityList = dbEntityList.toArray(new Entity[0]);
+
         //添加虚拟表
         {
             Entity entity = new Entity();
@@ -341,6 +364,9 @@ public abstract class AbstractTableBuilder implements TableBuilder{
             entity.properties = new Property[0];
             quickDAOConfig.visualTableList = new Entity[]{entity};
         }
+        //自动新增表和字段信息
+        automaticCreateTableAndField();
+        refreshDbEntityList();
     }
 
     /**

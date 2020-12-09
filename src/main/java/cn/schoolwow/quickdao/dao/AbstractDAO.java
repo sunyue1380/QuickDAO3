@@ -1,8 +1,6 @@
 package cn.schoolwow.quickdao.dao;
 
 import cn.schoolwow.quickdao.annotation.IdStrategy;
-import cn.schoolwow.quickdao.builder.table.AbstractTableBuilder;
-import cn.schoolwow.quickdao.builder.table.TableBuilderInvocationHandler;
 import cn.schoolwow.quickdao.dao.condition.Condition;
 import cn.schoolwow.quickdao.dao.sql.SQLDAOInvocationHandler;
 import cn.schoolwow.quickdao.dao.sql.dml.AbstractDMLDAO;
@@ -303,6 +301,50 @@ public class AbstractDAO implements DAO {
     }
 
     @Override
+    public void refreshDbEntityList() {
+        quickDAOConfig.tableBuilder.refreshDbEntityList();
+    }
+
+    @Override
+    public void syncEntityList() {
+        if(quickDAOConfig.packageNameMap.isEmpty()&&quickDAOConfig.entityClassMap.isEmpty()){
+            throw new IllegalArgumentException("请先指定要扫描的实体类包或者实体类!");
+        }
+        try {
+            quickDAOConfig.tableBuilder.automaticCreateTableAndField();
+            //删除数据库多余的表和字段
+            for(Entity dbEntity:quickDAOConfig.dbEntityList){
+                boolean findTable = false;
+                for(Entity entity:quickDAOConfig.entityMap.values()){
+                    if(dbEntity.tableName.equals(entity.tableName)){
+                        findTable = true;
+                        for(Property dbProperty:dbEntity.properties){
+                            boolean findProperty = false;
+                            for(Property property:entity.properties){
+                                if(dbProperty.column.equals(property.column)){
+                                    findProperty = true;
+                                    break;
+                                }
+                            }
+                            if(!findProperty){
+                                //删除多余的字段
+                                dropColumn(dbEntity.tableName,dbProperty.column);
+                            }
+                        }
+                        break;
+                    }
+                }
+                if(!findTable){
+                    //删除多余的表
+                    drop(dbEntity.tableName);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public DataSource getDataSource() {
         return quickDAOConfig.dataSource;
     }
@@ -315,24 +357,6 @@ public class AbstractDAO implements DAO {
     @Override
     public Entity[] getDbEntityList() {
         return quickDAOConfig.dbEntityList;
-    }
-
-    @Override
-    public void refreshDbEntityList() {
-        try {
-            List<Entity> dbEntityList = quickDAOConfig.tableBuilder.getDatabaseEntity();
-            for (Entity dbEntity : dbEntityList) {
-                dbEntity.escapeTableName = quickDAOConfig.database.escape(dbEntity.tableName);
-                dbEntity.clazz = JSONObject.class;
-                for (Property property : dbEntity.properties) {
-                    property.entity = dbEntity;
-                }
-            }
-            logger.debug("[获取数据库信息]数据库表个数:{}", dbEntityList.size());
-            quickDAOConfig.dbEntityList = dbEntityList.toArray(new Entity[0]);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override

@@ -70,20 +70,22 @@ public class AbstractSQLDAO implements SQLDAO {
 
     @Override
     public boolean existAny(Object... instances) {
-        boolean result = false;
         for(Object instance:instances){
-            result = result||exist(instance);
+            if(exist(instance)){
+                return true;
+            }
         }
-        return result;
+        return false;
     }
 
     @Override
     public boolean existAll(Object... instances) {
-        boolean result = true;
         for(Object instance:instances){
-            result = result&&exist(instance);
+            if(!exist(instance)){
+                return false;
+            }
         }
-        return result;
+        return true;
     }
 
     @Override

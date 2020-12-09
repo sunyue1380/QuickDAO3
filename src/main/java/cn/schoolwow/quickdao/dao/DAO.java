@@ -54,6 +54,16 @@ public interface DAO extends DQLDAO,DMLDAO {
     void dropColumn(String tableName, String column);
 
     /**
+     * 重新获取数据库信息
+     */
+    void refreshDbEntityList();
+
+    /**
+     * 双向同步扫描实体类信息和数据库表信息
+     */
+    void syncEntityList();
+
+    /**
      * 获取连接池
      */
     DataSource getDataSource();
@@ -67,11 +77,6 @@ public interface DAO extends DQLDAO,DMLDAO {
      * 获取数据库信息
      */
     Entity[] getDbEntityList();
-
-    /**
-     * 重新获取数据库信息
-     */
-    void refreshDbEntityList();
 
     /**
      * 生成entity的java文件

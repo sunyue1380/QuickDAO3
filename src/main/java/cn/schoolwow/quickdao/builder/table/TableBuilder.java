@@ -42,4 +42,8 @@ public interface TableBuilder{
     void dropIndex(Entity entity,IndexType indexType) throws SQLException;
     /**建立外键约束*/
     void createForeignKey(Property property) throws SQLException;
+    /**自动建表和新增字段*/
+    void automaticCreateTableAndField() throws SQLException;
+    /**刷新数据库字段信息*/
+    void refreshDbEntityList();
 }

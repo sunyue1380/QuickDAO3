@@ -3,6 +3,7 @@ package cn.schoolwow.quickdao.dao;
 import cn.schoolwow.quickdao.QuickDAO;
 import cn.schoolwow.quickdao.annotation.IdStrategy;
 import cn.schoolwow.quickdao.domain.Entity;
+import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
 import cn.schoolwow.quickdao.entity.DownloadTask;
 import cn.schoolwow.quickdao.entity.Order;
@@ -13,6 +14,8 @@ import org.junit.Test;
 
 import javax.sql.DataSource;
 import java.io.File;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**配置项测试*/
 public class ConfigTest{
@@ -22,6 +25,54 @@ public class ConfigTest{
         for(DataSource dataSource:dataSources){
             scan(dataSource);
             define(dataSource);
+            syncEntityList(dataSource);
+        }
+    }
+
+    private void syncEntityList(DataSource dataSource) {
+        DAO dao = QuickDAO.newInstance()
+                .dataSource(dataSource)
+                .entity(Person.class)
+                .build();
+        dao.rebuild(Person.class);
+        //缺少字段时同步
+        {
+            dao.dropColumn("person","city");
+            dao.syncEntityList();
+            Entity[] dbEntityList = dao.getDbEntityList();
+            for(Entity dbEntity:dbEntityList){
+                if(dbEntity.tableName.equals("person")){
+                    boolean findProperty = false;
+                    for(Property dbProperty:dbEntity.properties){
+                        if(dbProperty.column.equals("city")){
+                            findProperty = true;
+                            break;
+                        }
+                    }
+                    Assert.assertTrue("同步新增实体字段信息失败!",findProperty);
+                }
+            }
+        }
+        //多余字段时同步
+        try {
+            Connection connection = dao.getDataSource().getConnection();
+            connection.prepareStatement("alter table person add column phone_number varchar(16);").executeUpdate();
+            dao.syncEntityList();
+            Entity[] dbEntityList = dao.getDbEntityList();
+            for(Entity dbEntity:dbEntityList){
+                if(dbEntity.tableName.equals("person")){
+                    boolean findProperty = false;
+                    for(Property dbProperty:dbEntity.properties){
+                        if(dbProperty.column.equals("phone_number")){
+                            findProperty = true;
+                            break;
+                        }
+                    }
+                    Assert.assertFalse("同步删除实体字段信息失败!",findProperty);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
