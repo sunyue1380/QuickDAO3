@@ -143,7 +143,11 @@ public class AbstractSQLBuilder implements SQLBuilder{
             case "string": {
                 replaceFirst(sqlBuilder,"'"+parameter.toString()+"'");
             }break;
-            case "date": {}
+            case "date": {
+                java.util.Date date = (java.util.Date) parameter;
+                LocalDate localDate = LocalDate.of(date.getYear()+1900,date.getMonth(),date.getDay());
+                replaceFirst(sqlBuilder,"'"+dateFormatter.format(localDate)+"'");
+            }break;
             case "timestamp": {
                 java.util.Date date = (java.util.Date) parameter;
                 LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
