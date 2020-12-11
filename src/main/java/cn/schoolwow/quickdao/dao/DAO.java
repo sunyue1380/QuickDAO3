@@ -6,6 +6,7 @@ import cn.schoolwow.quickdao.dao.sql.transaction.Transaction;
 import cn.schoolwow.quickdao.domain.Entity;
 
 import javax.sql.DataSource;
+import java.util.List;
 import java.util.Map;
 
 /**数据库操作接口*/
@@ -76,7 +77,7 @@ public interface DAO extends DQLDAO,DMLDAO {
     /**
      * 获取数据库信息
      */
-    Entity[] getDbEntityList();
+    List<Entity> getDbEntityList();
 
     /**
      * 生成entity的java文件

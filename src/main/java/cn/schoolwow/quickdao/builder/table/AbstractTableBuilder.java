@@ -335,7 +335,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                 }
             }
             logger.debug("[获取数据库信息]数据库表个数:{}", dbEntityList.size());
-            quickDAOConfig.dbEntityList = dbEntityList.toArray(new Entity[0]);
+            quickDAOConfig.dbEntityList = dbEntityList;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -354,7 +354,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
             }
         }
         logger.debug("[获取数据库信息]数据库表个数:{}", dbEntityList.size());
-        quickDAOConfig.dbEntityList = dbEntityList.toArray(new Entity[0]);
+        quickDAOConfig.dbEntityList = dbEntityList;
 
         //添加虚拟表
         {

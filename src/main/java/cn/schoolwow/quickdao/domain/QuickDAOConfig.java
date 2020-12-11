@@ -85,7 +85,7 @@ public class QuickDAOConfig {
     /**
      * 数据库获取的表信息
      * */
-    public Entity[] dbEntityList;
+    public List<Entity> dbEntityList;
     /**
      * 虚拟表(dual等)
      * */

@@ -39,8 +39,7 @@ public class ConfigTest{
         {
             dao.dropColumn("person","city");
             dao.syncEntityList();
-            Entity[] dbEntityList = dao.getDbEntityList();
-            for(Entity dbEntity:dbEntityList){
+            for(Entity dbEntity:dao.getDbEntityList()){
                 if(dbEntity.tableName.equals("person")){
                     boolean findProperty = false;
                     for(Property dbProperty:dbEntity.properties){
@@ -58,8 +57,7 @@ public class ConfigTest{
             Connection connection = dao.getDataSource().getConnection();
             connection.prepareStatement("alter table person add column phone_number varchar(16);").executeUpdate();
             dao.syncEntityList();
-            Entity[] dbEntityList = dao.getDbEntityList();
-            for(Entity dbEntity:dbEntityList){
+            for(Entity dbEntity:dao.getDbEntityList()){
                 if(dbEntity.tableName.equals("person")){
                     boolean findProperty = false;
                     for(Property dbProperty:dbEntity.properties){

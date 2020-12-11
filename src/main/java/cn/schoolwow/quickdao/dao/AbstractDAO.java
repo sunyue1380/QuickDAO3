@@ -282,8 +282,7 @@ public class AbstractDAO implements DAO {
 
     @Override
     public void dropColumn(String tableName, String column) {
-        Entity[] dbEntityList = quickDAOConfig.dbEntityList;
-        for(Entity dbEntity:dbEntityList){
+        for(Entity dbEntity:quickDAOConfig.dbEntityList){
             if(dbEntity.tableName.equals(tableName)){
                 for(Property property:dbEntity.properties){
                     if(property.column.equals(column)){
@@ -355,7 +354,7 @@ public class AbstractDAO implements DAO {
     }
 
     @Override
-    public Entity[] getDbEntityList() {
+    public List<Entity> getDbEntityList() {
         return quickDAOConfig.dbEntityList;
     }
 
@@ -391,7 +390,7 @@ public class AbstractDAO implements DAO {
 
         List<Entity> dbEntityList;
         if(null==tableNames||tableNames.length==0){
-            dbEntityList = Arrays.asList(quickDAOConfig.dbEntityList);
+            dbEntityList = quickDAOConfig.dbEntityList;
         }else{
             dbEntityList = new ArrayList<>(tableNames.length);
             for(String tableName:tableNames){
