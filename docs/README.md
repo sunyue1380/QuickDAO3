@@ -18,6 +18,8 @@ QuickDAO是一个简单易用方便的Java ORM框架.具有以下优势:
 
 # 快速入门
 
+> 当前最新版本为3.6.6,更新时间为2020-12-7
+
 ## 1 导入QuickDAO
 QuickDAO基于JDBC,为提高效率,默认只支持数据库连接池.
 
@@ -32,7 +34,7 @@ QuickDAO基于JDBC,为提高效率,默认只支持数据库连接池.
 <dependency>
   <groupId>cn.schoolwow</groupId>
   <artifactId>QuickDAO</artifactId>
-  <version>3.6</version>
+  <version>3.6.6</version>
 </dependency>
 ```
 

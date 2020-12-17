@@ -35,6 +35,24 @@ int effect = dao.query("person")
     .insert();
 ```
 
+## 批量插入
+
+> 此功能从v3.6.6版本开始提供
+
+```java
+JSONArray array = new JSONArray(10);
+for(int i=0;i<10;i++){
+    JSONObject person = new JSONObject();
+    person.put("password","123456");
+    person.put("last_name","托尼"+i);
+    array.add(person);
+}
+int effect = dao.query("person")
+        .addInsert(array)
+        .execute()
+        .insert();
+```
+
 ## 更新
 ```java
 //update person set password = '654321' where username = 'tony'

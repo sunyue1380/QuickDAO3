@@ -159,6 +159,21 @@ private Date updatedAt;
 @TableField(function = "md5(concat('salt#',#{password}))")
 private String password;
 ```
+
+## @Table
+
+> 此注解从3.6.6版本开始提供
+
+作用于类,指定表相关信息,目前支持指定表编码格式和表引擎
+
+> 目前该功能只对mysql数据库起作用,其他数据库还未支持
+
+```java
+@Table(charset="utf-8",engine="innodb")
+public class Person {
+}
+```
+
 ## @Ignore
 
 忽略该类/忽略该字段,作用于类和类字段上
