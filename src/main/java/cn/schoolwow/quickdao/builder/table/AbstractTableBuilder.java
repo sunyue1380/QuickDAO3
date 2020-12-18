@@ -7,6 +7,7 @@ import cn.schoolwow.quickdao.domain.QuickDAOConfig;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -137,36 +138,42 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         if (null != entity.comment) {
             createTableBuilder.append(" "+quickDAOConfig.database.comment(entity.comment));
         }
-        logger.debug("[生成新表]类名:{},表名:{},执行SQL:{}", entity.className, entity.tableName, createTableBuilder.toString());
-        connection.prepareStatement(createTableBuilder.toString()).executeUpdate();
+
+        MDC.put("name","生成新表");
+        MDC.put("sql",createTableBuilder.toString());
+        connection.prepareStatement(MDC.get("sql")).executeUpdate();
     }
 
     @Override
     public void createProperty(Property property) throws SQLException{
-        StringBuilder builder = new StringBuilder("alter table " + quickDAOConfig.database.escape(property.entity.tableName) + " add " + quickDAOConfig.database.escape(property.column) + " " + property.columnType);
+        StringBuilder createPropertyBuilder = new StringBuilder("alter table " + quickDAOConfig.database.escape(property.entity.tableName) + " add " + quickDAOConfig.database.escape(property.column) + " " + property.columnType);
         if (property.notNull) {
-            builder.append(" not null");
+            createPropertyBuilder.append(" not null");
         }
         if (null!=property.defaultValue&&!property.defaultValue.isEmpty()) {
-            builder.append(" default " + property.defaultValue);
+            createPropertyBuilder.append(" default " + property.defaultValue);
         }
         if (null!=property.check&&!property.check.isEmpty()) {
-            builder.append(" check " + property.check);
+            createPropertyBuilder.append(" check " + property.check);
         }
         if (null != property.comment) {
-            builder.append(" "+quickDAOConfig.database.comment(property.comment));
+            createPropertyBuilder.append(" "+quickDAOConfig.database.comment(property.comment));
         }
-        builder.append(";");
-        logger.debug("[添加新列]表:{},列名:{},执行SQL:{}", property.entity.tableName, property.column + "(" + property.columnType + ")", builder.toString());
-        connection.prepareStatement(builder.toString()).executeUpdate();
+        createPropertyBuilder.append(";");
+
+        MDC.put("name","添加新列");
+        MDC.put("sql",createPropertyBuilder.toString());
+        connection.prepareStatement(MDC.get("sql")).executeUpdate();
     }
 
     @Override
     public void alterColumn(Property property) throws SQLException{
         StringBuilder builder = new StringBuilder("alter table " + quickDAOConfig.database.escape(property.entity.tableName));
         builder.append(" alter column "+quickDAOConfig.database.escape(property.column)+" "+property.columnType);
-        logger.debug("[修改数据类型]表名:{},列名:{},执行SQL:{}", property.entity.tableName, property.column, builder.toString());
-        connection.prepareStatement(builder.toString()).executeUpdate();
+
+        MDC.put("name","修改数据类型");
+        MDC.put("sql",builder.toString());
+        connection.prepareStatement(MDC.get("sql")).executeUpdate();
     }
 
     @Override
@@ -177,15 +184,18 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         }
         builder.append(quickDAOConfig.database.escape(property.entity.tableName));
         builder.append(" drop column "+quickDAOConfig.database.escape(property.column)+";");
-        logger.debug("[删除列]表名:{},列名:{},执行SQL:{}", property.entity.tableName, property.column, builder.toString());
-        connection.prepareStatement(builder.toString()).executeUpdate();
+
+        MDC.put("name","删除列");
+        MDC.put("sql",builder.toString());
+        connection.prepareStatement(MDC.get("sql")).executeUpdate();
     }
 
     @Override
     public void dropTable(String tableName) throws SQLException {
         String sql = "drop table "+quickDAOConfig.database.escape(tableName);
-        logger.debug("[删除表]表名:{},执行SQL:{}", tableName, sql);
-        connection.prepareStatement(sql).executeUpdate();
+        MDC.put("name","删除表");
+        MDC.put("sql",sql);
+        connection.prepareStatement(MDC.get("sql")).executeUpdate();
     }
 
     @Override
@@ -218,8 +228,10 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                 }
                 indexBuilder.deleteCharAt(indexBuilder.length() - 1);
                 indexBuilder.append(");");
-                logger.debug("[添加索引]表:{},执行SQL:{}", entity.tableName, indexBuilder.toString());
-                connection.prepareStatement(indexBuilder.toString()).executeUpdate();
+
+                MDC.put("name","添加索引");
+                MDC.put("sql",indexBuilder.toString());
+                connection.prepareStatement(MDC.get("sql")).executeUpdate();
             }break;
             case Unique:{
                 if (null == entity.uniqueKeyProperties || entity.uniqueKeyProperties.length == 0) {
@@ -231,8 +243,10 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                 }
                 indexUniqueBuilder.deleteCharAt(indexUniqueBuilder.length() - 1);
                 indexUniqueBuilder.append(");");
-                logger.debug("[添加唯一性约束]表:{},执行SQL:{}", entity.tableName, indexUniqueBuilder.toString());
-                connection.prepareStatement(indexUniqueBuilder.toString()).executeUpdate();
+
+                MDC.put("name","添加唯一性约束");
+                MDC.put("sql",indexUniqueBuilder.toString());
+                connection.prepareStatement(MDC.get("sql")).executeUpdate();
             }break;
         }
     }
@@ -252,8 +266,9 @@ public abstract class AbstractTableBuilder implements TableBuilder{
     public void dropIndex(Entity entity, IndexType indexType) throws SQLException{
         String indexName = entity.tableName+"_"+indexType.name();
         String dropIndexSQL = "drop index "+quickDAOConfig.database.escape(indexName);
-        logger.debug("[删除索引]表:{},执行SQL:{}", entity.tableName, dropIndexSQL);
-        connection.prepareStatement(dropIndexSQL).executeUpdate();
+        MDC.put("name","删除索引");
+        MDC.put("sql",dropIndexSQL);
+        connection.prepareStatement(MDC.get("sql")).executeUpdate();
     }
 
     @Override
@@ -265,8 +280,9 @@ public abstract class AbstractTableBuilder implements TableBuilder{
             return;
         }
         String foreignKeySQL = "alter table " + quickDAOConfig.database.escape(property.entity.tableName) + " add constraint " + quickDAOConfig.database.escape(foreignKeyName) + " foreign key(" + quickDAOConfig.database.escape(property.column) + ") references " + reference;
-        logger.info("[生成外键约束]约束名:{},执行SQL:{}", foreignKeyName, foreignKeySQL);
-        connection.prepareStatement(foreignKeySQL).executeUpdate();
+        MDC.put("name","生成外键约束");
+        MDC.put("sql",foreignKeySQL);
+        connection.prepareStatement(MDC.get("sql")).executeUpdate();
     }
 
     @Override
@@ -334,7 +350,6 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                     property.entity = dbEntity;
                 }
             }
-            logger.debug("[获取数据库信息]数据库表个数:{}", dbEntityList.size());
             quickDAOConfig.dbEntityList = dbEntityList;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -353,7 +368,6 @@ public abstract class AbstractTableBuilder implements TableBuilder{
                 property.entity = dbEntity;
             }
         }
-        logger.debug("[获取数据库信息]数据库表个数:{}", dbEntityList.size());
         quickDAOConfig.dbEntityList = dbEntityList;
 
         //添加虚拟表
@@ -367,6 +381,7 @@ public abstract class AbstractTableBuilder implements TableBuilder{
         //自动新增表和字段信息
         automaticCreateTableAndField();
         refreshDbEntityList();
+        logger.info("[初始化]扫描实体类个数:{},数据库表个数:{}",quickDAOConfig.entityMap.size(),quickDAOConfig.dbEntityList.size());
     }
 
     /**

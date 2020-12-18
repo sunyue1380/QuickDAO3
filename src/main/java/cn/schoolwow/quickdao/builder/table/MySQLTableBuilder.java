@@ -4,6 +4,7 @@ import cn.schoolwow.quickdao.annotation.IdStrategy;
 import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
+import org.slf4j.MDC;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -128,8 +129,9 @@ public class MySQLTableBuilder extends AbstractTableBuilder {
             }
             if(null!=engine&&!engine.isEmpty()){
                 String sql = "alter table "+quickDAOConfig.database.escape(entity.tableName)+" engine="+engine+";";
-                logger.debug("[修改表引擎]执行SQL:{}",sql);
-                connection.prepareStatement(sql).executeUpdate();
+                MDC.put("name","修改表引擎");
+                MDC.put("sql",sql);
+                connection.prepareStatement(MDC.get("sql")).executeUpdate();
             }
         }
         //修改表编码格式
@@ -140,8 +142,9 @@ public class MySQLTableBuilder extends AbstractTableBuilder {
             }
             if(null!=charset&&!charset.isEmpty()){
                 String sql = "alter table "+quickDAOConfig.database.escape(entity.tableName)+" convert to character set "+charset+";";
-                logger.debug("[修改表编码格式]执行SQL:{}",sql);
-                connection.prepareStatement(sql).executeUpdate();
+                MDC.put("name","修改表编码格式");
+                MDC.put("sql",sql);
+                connection.prepareStatement(MDC.get("sql")).executeUpdate();
             }
         }
     }
@@ -150,7 +153,9 @@ public class MySQLTableBuilder extends AbstractTableBuilder {
     public boolean hasIndexExists(Entity entity, IndexType indexType) throws SQLException {
         String indexName = entity.tableName+"_"+indexType.name();
         String sql = "show index from "+quickDAOConfig.database.escape(entity.tableName)+" where key_name = '"+indexName+"'";
-        logger.trace("[查看索引是否存在]表名:{},执行SQL:{}",entity.tableName,sql);
+
+        MDC.put("name","查看索引是否存在");
+        MDC.put("sql",sql);
         ResultSet resultSet = connection.prepareStatement(sql).executeQuery();
         boolean result = false;
         if (resultSet.next()) {
@@ -164,7 +169,8 @@ public class MySQLTableBuilder extends AbstractTableBuilder {
     public void dropIndex(Entity entity, IndexType indexType) throws SQLException{
         String indexName = entity.tableName+"_"+indexType.name();
         String dropIndexSQL = "drop index "+quickDAOConfig.database.escape(indexName)+" on "+quickDAOConfig.database.escape(entity.tableName);
-        logger.debug("[删除索引]表:{},执行SQL:{}", entity.tableName, dropIndexSQL);
-        connection.prepareStatement(dropIndexSQL).executeUpdate();
+        MDC.put("name","删除索引");
+        MDC.put("sql",dropIndexSQL);
+        connection.prepareStatement(MDC.get("sql")).executeUpdate();
     }
 }

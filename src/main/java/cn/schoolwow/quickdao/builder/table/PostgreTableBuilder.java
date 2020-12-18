@@ -3,6 +3,7 @@ package cn.schoolwow.quickdao.builder.table;
 import cn.schoolwow.quickdao.domain.Entity;
 import cn.schoolwow.quickdao.domain.Property;
 import cn.schoolwow.quickdao.domain.QuickDAOConfig;
+import org.slf4j.MDC;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -91,7 +92,8 @@ public class PostgreTableBuilder extends AbstractTableBuilder {
     public boolean hasIndexExists(Entity entity, IndexType indexType) throws SQLException {
         String indexName = entity.tableName+"_"+indexType.name();
         String sql = "select count(1) from pg_indexes where tablename = '"+entity.tableName+"' and indexname = '"+indexName+"'";
-        logger.trace("[查看索引是否存在]表名:{},执行SQL:{}",entity.tableName,sql);
+        MDC.put("name","查看索引是否存在");
+        MDC.put("sql",sql);
         ResultSet resultSet = connection.prepareStatement(sql).executeQuery();
         boolean result = false;
         if (resultSet.next()) {

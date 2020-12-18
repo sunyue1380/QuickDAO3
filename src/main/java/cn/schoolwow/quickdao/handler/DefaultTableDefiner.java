@@ -179,8 +179,6 @@ public class DefaultTableDefiner implements TableDefiner{
                 entity.compositFields = compositFieldList.toArray(new Field[0]);
             }
         }
-
-        logger.debug("[获取实体信息]实体类个数:{}", quickDAOConfig.entityMap.size());
     }
 
     /**处理实体类相关约束*/
