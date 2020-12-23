@@ -8,8 +8,8 @@ QuickDAO4和QuickDAO3的接口调整如下:
 
 |原接口|新接口|
 |---|---|
-|cn.schoolwow.quickdao.dao.condition.Condition|import cn.schoolwow.quickdao.query.condition.Condition;|
-|cn.schoolwow.quickdao.dao.condition.subCondition.SubCondition|cn.schoolwow.quickdao.query.subCondition|
+|cn.schoolwow.quickdao.dao.condition.Condition|cn.schoolwow.quickdao.query.condition.Condition;|
+|cn.schoolwow.quickdao.dao.condition.subCondition.SubCondition|cn.schoolwow.quickdao.query.subCondition.SubCondition|
 |cn.schoolwow.quickdao.dao.response.Response|cn.schoolwow.quickdao.query.response.Response|
 |cn.schoolwow.quickdao.dao.sql.transaction.Transaction|cn.schoolwow.quickdao.transaction.Transaction|
 
