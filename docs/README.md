@@ -1,4 +1,21 @@
+## QuickDAO3将不再维护,请移步至QuickDAO4官方仓库地址.
+
+[QuickDAO4](https://github.com/sunyue1380/QuickDAO4)
+
+## 迁移教程
+
+QuickDAO4和QuickDAO3的接口调整如下:
+
+|原接口|新接口|
+|---|---|
+|cn.schoolwow.quickdao.dao.condition.Condition|import cn.schoolwow.quickdao.query.condition.Condition;|
+|cn.schoolwow.quickdao.dao.condition.subCondition.SubCondition|cn.schoolwow.quickdao.query.subCondition|
+|cn.schoolwow.quickdao.dao.response.Response|cn.schoolwow.quickdao.query.response.Response|
+|cn.schoolwow.quickdao.dao.sql.transaction.Transaction|cn.schoolwow.quickdao.transaction.Transaction|
+
 # QuickDAO3
+
+> 最新版本:3.6.7 更新时间: 2020-12-23
 
 QuickDAO是一个简单易用方便的Java ORM框架.具有以下优势:
 
