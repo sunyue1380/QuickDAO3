@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter;
 public class AbstractSQLBuilder implements SQLBuilder{
     protected final static Logger logger = LoggerFactory.getLogger(AbstractSQLBuilder.class);
     /*格式化旧版本的Date类型**/
-    private final static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+    private final static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     /**格式化日期参数*/
     private final static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
     /**格式化日期参数*/
@@ -172,7 +172,21 @@ public class AbstractSQLBuilder implements SQLBuilder{
      * DML操作设置参数
      */
     protected static void setParameter(Object instance, Property property, PreparedStatement ps, int parameterIndex, StringBuilder sqlBuilder) throws Exception{
-        Field field = instance.getClass().getDeclaredField(property.name);
+        Class tempClass = instance.getClass();
+        Field field = null;
+        while(null==field&&null!=tempClass){
+            Field[] fields = tempClass.getDeclaredFields();
+            for(Field field1:fields){
+                if(field1.getName().equals(property.name)){
+                    field = field1;
+                    break;
+                }
+            }
+            tempClass = tempClass.getSuperclass();
+        }
+        if(null==field){
+            throw new IllegalArgumentException("字段不存在!字段名:"+property.name+",类名:"+instance.getClass().getName());
+        }
         field.setAccessible(true);
         String parameter = null;
         switch (property.simpleTypeName) {
@@ -224,7 +238,19 @@ public class AbstractSQLBuilder implements SQLBuilder{
                 ps.setString(parameterIndex, field.get(instance) == null ? null : field.get(instance).toString());
                 parameter = "'" + (field.get(instance) == null ? "" : field.get(instance).toString()) + "'";
             }break;
-            case "date": {};
+            case "date": {
+                Object o = field.get(instance);
+                if (null==o) {
+                    ps.setObject(parameterIndex, null);
+                    parameter = "null";
+                } else{
+                    java.util.Date date = (java.util.Date) o;
+                    ps.setTimestamp(parameterIndex, new Timestamp(date.getTime()));
+                    synchronized (simpleDateFormat){
+                        parameter = "'"+simpleDateFormat.format(date)+"'";
+                    }
+                }
+            };break;
             case "timestamp": {
                 Object o = field.get(instance);
                 if (null==o) {
